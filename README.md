@@ -3,4 +3,4 @@ reconstructmergetool
 
 Reconstruct Merge Tool
 
-A tool to merge forked-up Reconstruct projects
+A tool to merge forked-up Reconstruct projects.
