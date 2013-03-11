@@ -2,10 +2,16 @@ reconstructmergetool
 ====================
 
 Reconstruct Merge Tool
-
 A tool to merge forked-up Reconstruct projects.
 
-Driver:
-reconstructmergetool.py
 
-Classes stored in reconObjects.py
+reconstructmergetool.py/
+|_____ README.md
+|
+|_____ reconObjects.py
+|         |______ Transform
+|         |______ TransformList
+|         |______ Contour
+|         |______ ContourList
+|
+|_____ testing.xml
