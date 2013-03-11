@@ -6,92 +6,80 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 3/7/2013
+#  Date Last Modified: 3/11/2013
 
 import xml.etree.ElementTree as ET
 
-class CompXML:
-    '''Object containing a compressed version of xml data to be used /
-by other classes and functions. Gathers contour names, points and its /
-corresponding transform data (dim, xcoef, ycoef).'''
-    def __init_(self, xmlname, path=''): #-------------------------
-        self._name = str(xmlname) #name of object is xml file
-        self._transList = [] #list of all transform info in the xml
-        self._contList = [] #list of all contour info in the xml
-        
-    
-    
 class Transform:
-    '''Transform object containing dim, xcoef, and ycoef data.'''
+    '''Transform object containing the following data: \n   Dim \n   yCoef \n   xCoef'''
 
-    def __init__(self):
-        '''Creates empty transform object with default dim = 0 /
-        and empty xcoef/ycoef lists.'''
-        self._dim = 0
-        self._xcoef = []
+    def __init__(self, dim, ycoef, xcoef):
+        self._dim = int(dim)
         self._ycoef = []
-
-    def getAtttributes(self, xml):
-        '''Parses xml file dim, xcoef, and ycoef and subsequently /
-        adds them to the Transform object.'''
-        #create open file object for xml
-        #xml = home/michaelm/Documents/reconstructmergetool/testing.xml
-    
-class Contour:
-    def __init__(self):
-        self._name = ''
-        self._points = []
+        self._xcoef = []
         
+        #Add x and y coef attributes to a list
+        for char in ycoef:
+            if char.isdigit():
+                self._ycoef.append( int(char) )
+        for char in xcoef:
+            if char.isdigit():
+                self._xcoef.append( int(char) )        
+    def __str__(self):
+        return 'Transform object:\nDim: '+str(self.getDim())+'\nYcoef: ' \
+               +str(self.getycoef())+'\nXcoef: '+str(self.getxcoef())+'\n'
+    
+    def getDim(self):
+        return self._dim
+
+    def getycoef(self):
+        return self._ycoef
+    
+    def getxcoef(self):
+        return self._xcoef
+
+    def getAttribs(self):
+        return self.getDim(), self.getycoef(), self.getxcoef()
+    
+class TransformList:
+    '''A list object containing multiple Transform objects.'''
+    def __init__(self):
+        '''Creates empty TransformList.'''
+        self._tList = []
+        self._numT = 0
+
+    def __len__(self):
+        '''Returns the number of transform objects in the TransformList.'''
+        return self._numT
+
+    def __getitem__(self, x):
+        if x <= (len(self)-1):
+            return self._tList[x]
+        else:
+            print( 'Invalid argument.')
+    
+    def isEmpty(self):
+        '''Return true if TransformList is empty.'''
+        return self._numT == 0
+        
+    def addT(self, T):
+        '''Appends a transform object to the tList.'''
+        self._tList.append(T)
+        self._numT += 1
+
+    def addTfromFile(self, path):
+        '''Parses XML file (path), creates a Transform object, adds the objects to tList.'''
+        #parse xml
+        tree = ET.parse(path)
+        root = tree.getroot() #Section = root.tag, Transform = root, contour = root[x]
+
+        #list of all elements in XML doc
+        allList = list( tree.iter() )
 
 
+        #go through allList, make transform objects, add transform object to tList
+        for elem in allList:
+            if elem.tag == 'Transform':
+                T = Transform(elem.attrib['dim'], elem.attrib['ycoef'], elem.attrib['xcoef'])
+                self.addT(T)
 
-
-
-
-
-##path = "/home/michaelm/Documents/reconstructmergetool/testing.txt" #TEST---------------
-##
-##def readTrace(path):
-##    '''readTrace() will read from the file located in the path. From \
-##        this file, contour points, dim, xcoef, and ycoef will be returned \
-##        simultaneously in the form of an array, integer, list and list, \
-##        respectively.'''
-##    
-##    # Create a file object (in read mode)
-##    traceFile = open(path, "r")
-##    
-##    points = []
-##    dim = 0
-##    xcoef = []
-##    ycoef = []
-##    
-##    for line in traceFile:
-##        #Find dim integer
-##        if "<Transform dim=" in line:
-##            for char in line:
-##                if char.isdigit():
-##                    dim = int(char)
-##
-##        #Make xcoef list
-##        elif "xcoef=" in line:
-##            #Extract only the numbers from the line
-##            xcoefnums = line.partition('"')[2].replace('"','').replace('\n','').lstrip(' ')
-##            xcoef = xcoefnums.split(' ')
-##            print(xcoef)
-##
-##        #Make ycoef list
-##        elif "ycoef=" in line:
-##            #Extract only the numbers from the line
-##            ycoefnums = line.partition('"')[2].replace('"','').replace('>','').replace('\n','').lstrip(' ')
-##            ycoef = ycoefnums.split(' ')
-##            print(ycoef)
-##
-###====================================================================================================
-##
-##        #Make points array
-##        elif "points=" in line:
-##            print("points", points) #TEST-------------
-##    
-##    return points, dim, xcoef, ycoef
-##
-##readTrace(path) #TEST------------

@@ -13,8 +13,6 @@
 	4096 4096,
 	0 4096,
 	"/>
-	<test header>
-	</test header>
 </Transform>
 
 <Transform dim="0"
