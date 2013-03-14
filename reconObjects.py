@@ -10,6 +10,7 @@
 #  Date Last Modified: 3/14/2013
 #
 #  Currently implementing:
+    #===== printing extra NoneType from print( section._list )
     #===== Add imgpts and worldpts in Contour object
 
     
@@ -20,6 +21,7 @@ class ObjectList:
     # Python functions
     def __init__(self):
         '''Creates empty ObjectList.'''
+        self._tag = 'ObjectList'
         self._list = []
         self._len = 0
     def __len__(self):
@@ -29,11 +31,19 @@ Returns the number of objects in the ObjectList.'''
     def __getitem__(self, x):
         '''Allows the use of <ObjectList>[x] function. \
 Returns xth item from the ObjectList'''
-        if x <= (len(self)-1): #===================== need to double check
+        if x <= (len(self)-1):
             return self._list[x]
-        elif x > (len(self)-1):
-            print( 'Invalid argument. x is outside of list range.')
-
+    def __str__(self):
+        '''Allows use of print( <ObjectList> ) function.'''
+        taglist = []
+        for i in range(len(self)):
+            taglist.append( self._list[i].gettag() )
+        return str(taglist)
+    
+    # Accessors
+    def gettag(self):
+        return self._tag
+        
     # Mutators
     def addO(self, O):
         '''Appends an object to <ObjectList>.'''
@@ -43,6 +53,8 @@ Returns xth item from the ObjectList'''
         '''Removes an object from <ObjectList>.'''
         self._list.remove(O)
         self._len -= 1
+    def chgtag(self, x):
+        self._tag = str(x)
 
 
         
@@ -50,10 +62,13 @@ class xmlTree:
     '''ElementTree containing XML data from <path>'''
     # Python Functions 
     def __init__(self, path):
+        self._tag = 'xmltree'
         self._name = str( path.rpartition('/')[2] ) #name = name of xml file
         self._tree = ET.parse(path)
 
     # Accessors
+    def gettag(self):
+        return self._tag
     def getsection(self):
         '''Returns <section> attributes as a triple (index(int), \
 alignLocked(bool), thickness(float).'''
@@ -65,6 +80,8 @@ alignLocked(bool), thickness(float).'''
         return list( self._tree.iter() )
 
     # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
     def chgname(self, x):
         self._name = str(x)
     def chgtree(self, x):
@@ -80,21 +97,24 @@ as well as a list containing <image> and <contour> objects.'''
     def __init__(self, xmlTree):
         # Create <section>
         self._list = ObjectList()
+        self._tag = 'Section'
         # Create <section> attributes
         self._index = xmlTree.getsection()[0]
         self._thick = xmlTree.getsection()[1]
         self._alignLock = xmlTree.getsection()[2]
     def __len__(self):
-        '''Allows use of len(<section>) function. Returns length'''
+        '''Allows use of len(<Section>) function. Returns length'''
         return len(self._list)
     def __getitem__(self,x):
         return self._list[x]
     def __str__(self):
         '''Allows use of print(<section>) function.'''
         return 'Index: %d\nThickness: %f\nAlign Locked: %s'%(self._index, \
-                                                               self._thick, \
-                                                        self._alignLock)    
+                                                                 self._thick, \
+                                                                 self._alignLock)     
     # Accessors
+    def gettag(self):
+        return self._tag
     def getindex(self):
         return self._index
     def getthickness(self):
@@ -103,13 +123,17 @@ as well as a list containing <image> and <contour> objects.'''
         return self._alignLock
 
     # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
     def chgindex(self, x):
         self._index = int(x)
     def chgthickness(self, x):
         self._thick = float(x)
     def chgalignlock(self, x):
         self._alignLock = bool(x)
-
+    def chgtag(self, x):
+        self._tag = str(x)
+        
 
         
 class Image:
@@ -118,6 +142,7 @@ contrast (float), brightness (float), red (bool), green (bool), blue (bool), and
 transform (object)'''
     # Python functions
     def __init__(self, node, transform):
+        self._tag = 'Image'
         self._src = node.attrib['src']
         self._mag = float( node.attrib['mag'] )
         self._cntrst = float( node.attrib['contrast'] )
@@ -131,7 +156,10 @@ transform (object)'''
         return 'Image Object:\n-src: %s\n-mag: %f\n-contrast: %f\n-brightness: %f\n\
 -red: %s\n-green: %s\n-blue: %s\n-%s'%(self.getattribs())
 
-    # Accessors 
+    # Accessors
+    def gettag(self):
+        '''tag ---> string'''
+        return self._tag
     def getsrc(self):
         '''src ---> string'''
         return self._src
@@ -155,7 +183,7 @@ transform (object)'''
         return self._blue
     def gettransform(self):
         '''transform ---> object'''
-        return self._trnsfrm #====
+        return self._trnsfrm
     def getattribs(self):
         '''Returns all attributes for <image>'''
         return self.getsrc(), self.getmag(), self.getcontrast(), \
@@ -163,6 +191,8 @@ transform (object)'''
                self.getblue(), self.gettransform()
 
     # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
     def chgsrc(self, x):
         self._src = str(x)  
     def chgmag(self, x):
@@ -189,6 +219,7 @@ class Transform:
     # Python functions
     def __init__(self, node):
         '''Initializes the Transform object'''
+        self._tag = 'Transform'
         self._dim = node.attrib['dim']
         self._ycoef = []
         self._xcoef = []
@@ -201,10 +232,13 @@ class Transform:
                 self._xcoef.append( int(char) )
     def __str__(self):
         '''Allows user to use print( <Transformobject> ) function'''
-        return 'Transform object:\nDim: '+str(self.getDim())+'\nYcoef: ' \
-               +str(self.getycoef())+'\nXcoef: '+str(self.getxcoef())+'\n'
+        return 'Transform object:\n-dim: '+str(self.getdim())+'\n-ycoef: ' \
+               +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())+'\n'
 
-    # Accessors 
+    # Accessors
+    def gettag(self):
+        '''Returns tag (string)'''
+        return self._tag
     def getdim(self):
         '''Returns Dim (int)'''
         return self._dim
@@ -219,6 +253,8 @@ class Transform:
         return self.getDim(), self.getycoef(), self.getxcoef()
 
     # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
     def chgdim(self, x):
         self._dim = int(x)
     def chgycoef(self, x):
@@ -235,6 +271,7 @@ class Contour:
     # Python Functions
     def __init__(self, node, transform):
         '''Initializes the Contour object'''
+        self._tag = 'Contour'
         self._name = str( node.attrib['name'] )
         self._hidden = bool( node.attrib['hidden'].capitalize() )
         self._closed = bool( node.attrib['closed'].capitalize() )
@@ -264,13 +301,16 @@ class Contour:
         self._points = ptList
     def __str__(self):
         '''Allows user to use print( <Contourobject> ) function'''
-        return 'Contour object:\nName: '+str(self.getname())+'\nHidden: ' \
-               +str(self.gethidden())+'\nClosed: '+str(self.getclosed()) \
-               +'\nSimplified: '+str(self.getsimp())+'\nMode: '+str(self.getmode()) \
-               +'\nBorder: '+str(self.getbord())+'\nFill: '+str(self.getfill()) \
-               +'\nPoints: '+str(self.getpoints())+'\n'
+        return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \
+               +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
+               +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
+               +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
+               +'\n-points: '+str(self.getpoints())+'\n'
 
-    # Accessors 
+    # Accessors
+    def gettag(self):
+        '''Returns Tag (str)'''
+        return self._tag
     def getname(self):
         '''Returns Name attribute (str)'''
         return self._name
@@ -302,6 +342,8 @@ separated by a single space)'''
                self.getmode(), self.getbord(), self.getfill(), self.getpoints
 
     # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
     def chgname(self, x):
         self._name = str(x)
     def chghidden(self, x):

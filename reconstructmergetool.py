@@ -41,7 +41,7 @@ for node in tree.gettreelist():
 
 print( section )
 print( len(section) )
-
+print( section._list )
 
 
 ##    # Create list of Transform objects
