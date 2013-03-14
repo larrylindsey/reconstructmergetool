@@ -6,7 +6,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 3/13/2013
+#  Date Last Modified: 3/14/2013
 
 from reconObjects import *
 
@@ -38,6 +38,10 @@ for node in tree.gettreelist():
         #create contour
         C = Contour(node, currentT)
         section._list.addO(C)
+
+print( section )
+print( len(section) )
+
 
 
 ##    # Create list of Transform objects
