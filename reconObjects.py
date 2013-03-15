@@ -7,15 +7,16 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 3/14/2013
+#  Date Last Modified: 3/15/2013
 #
 #  Currently implementing:
-    #===== printing extra NoneType from print( section._list )
     #===== Add imgpts and worldpts in Contour object
-
+    #===== Check comments on classes
+    #===== Series object
     
 import xml.etree.ElementTree as ET
-               
+
+#############################################################################               
 class ObjectList:
     '''A list object containing multiple objects.'''
     # Python functions
@@ -57,7 +58,7 @@ Returns xth item from the ObjectList'''
         self._tag = str(x)
 
 
-        
+#############################################################################         
 class xmlTree:
     '''ElementTree containing XML data from <path>'''
     # Python Functions 
@@ -89,10 +90,131 @@ alignLocked(bool), thickness(float).'''
         self._tree = x
 
 
-    
+#############################################################################
+class Series:
+    '''<Series> is an object with attributes: name \
+as well as a list containing all of the <Sections> objects associated with
+it'''
+    #Python functions
+    def __init__(self, path_to_sections):
+        '''Receives an xml file that is a list of sections in the form \
+of an xml file'''
+        self._name = str(path_to_sections)
+        self._tag = 'Series'
+        self._list = ObjectList()
+        index = int()
+        viewport = []
+	units = str()
+	autoSaveSeries = bool()
+	autoSaveSection = bool()
+	warnSaveSection = bool()
+	beepDeleting = bool()
+	beepPaging = bool()
+	hideTraces = bool()
+	unhideTraces = bool()
+	hideDomains = bool()
+	unhideDomains = bool()
+	useAbsolutePaths = bool()
+	defaultThickness = float()
+	zMidSection = bool()
+	thumbWidth = int()
+	thumbHeight = int()
+	fitThumbSections = bool()
+	firstThumbSection = int()
+	lastThumbSection = int()
+	skipSections = int()
+	displayThumbContours = bool()
+	useFlipbookStyle = bool()
+	flipRate = int()
+	useProxies = bool()
+	widthUseProxies = int()
+	heightUseProxies = int()
+	scaleProxies = float()
+	significantDigits = int()
+	defaultBorder = []
+	defaultFill = []
+	defaultMode = int()
+	defaultName = str()
+	defaultComment = str()
+	listSectionThickness = bool()
+	listDomainSource = bool()
+	listDomainPixelsize = bool()
+	listDomainLength = bool()
+	listDomainArea = bool()
+	listDomainMidpoint = bool()
+	listTraceComment = bool()
+	listTraceLength = bool()
+	listTraceArea = bool()
+	listTraceCentroid = bool()
+	listTraceExtent = bool()
+	listTraceZ = bool()
+	listTraceThickness = bool()
+	listObjectRange = bool()
+	listObjectCount = bool()
+	listObjectSurfarea = bool()
+	listObjectFlatarea = bool()
+	listObjectVolume = bool()
+	listZTraceNote = bool()
+	listZTraceRange = bool()
+	listZTraceLength = bool()
+	borderColors = []
+	fillColors = []
+	offset3D = []
+	type3Dobject = int()
+	first3Dsection = int()
+	last3Dsection = int()
+	max3Dconnection = int()
+	upper3Dfaces = bool()
+	lower3Dfaces = bool()
+	faceNormals = bool()
+	vertexNormals = bool()
+	facets3D = int()
+	dim3D = []
+	gridType = int()
+	gridSize = []
+	gridDistance = []
+	gridNumber = []
+	hueStopWhen = int()
+	hueStopValue = int()
+	satStopWhen = int()
+	satStopValue = int()
+	brightStopWhen = int()
+	brightStopValue = int()
+	tracesStopWhen = bool()
+	areaStopPercent = int()
+	areaStopSize = int()
+	ContourMaskWidth = int()
+	smoothingLength = int()
+	mvmtIncrement = []
+	ctrlIncrement = []
+	shiftIncrement = []
+    def __getitem__(self,x):
+        '''Allows use of <Section>[x] to return xth elements in list'''
+        return self._list[x]
+    def __str__(self):
+        '''Allows use of print(<Series>) function.'''
+        return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
+
+    # Accessors
+    def getname(self):
+        return self._name
+    def gettag(self):
+        return self._tag
+
+    # Mutators
+    def chgname(self, x):
+        self._name = str(x)
+    def chgtag(self, x):
+        self._tag = str(x)
+
+
+
+
+#############################################################################    
 class Section:
     '''<Section> is an object with attributes: index, thickness, alignLocked \
-as well as a list containing <image> and <contour> objects.'''
+as well as a list containing <image> and <contour> objects. \
+Attributes printed with print(<section>) objects in list printed with print(<section>._list)'''
     # Python Functions
     def __init__(self, xmlTree):
         # Create <section>
@@ -102,10 +224,22 @@ as well as a list containing <image> and <contour> objects.'''
         self._index = xmlTree.getsection()[0]
         self._thick = xmlTree.getsection()[1]
         self._alignLock = xmlTree.getsection()[2]
+        # Populate section with image, contour and transforms
+        tmpT = '' #current transform
+        for node in xmlTree.gettreelist():
+            if node.tag == 'Transform':
+                tmpT = Transform(node)
+            elif node.tag == 'Image':
+                I = Image(node, tmpT)
+                self._list.addO(I)
+            elif node.tag == 'Contour':
+                C = Contour(node, tmpT)
+                self._list.addO(C)
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length'''
         return len(self._list)
     def __getitem__(self,x):
+        '''Allows use of <Section>[x] to return xth elements in list'''
         return self._list[x]
     def __str__(self):
         '''Allows use of print(<section>) function.'''
@@ -114,12 +248,16 @@ as well as a list containing <image> and <contour> objects.'''
                                                                  self._alignLock)     
     # Accessors
     def gettag(self):
+        '''--> (str)'''
         return self._tag
     def getindex(self):
+        '''--> (int)'''
         return self._index
     def getthickness(self):
+        '''--> (float)'''
         return self._thick
     def getalignlock(self):
+        '''--> (bool)''' 
         return self._alignLock
 
     # Mutators
@@ -135,7 +273,7 @@ as well as a list containing <image> and <contour> objects.'''
         self._tag = str(x)
         
 
-        
+#############################################################################        
 class Image:
     '''Image object containing the following attributes: src (string), mag (float), \
 contrast (float), brightness (float), red (bool), green (bool), blue (bool), and \
@@ -211,11 +349,10 @@ transform (object)'''
         self._trnsfrm = x
 
 
-    
+#############################################################################     
 class Transform:
     '''Transform object containing the following data: \n   Dim \n \
   yCoef \n   xCoef'''
-
     # Python functions
     def __init__(self, node):
         '''Initializes the Transform object'''
@@ -263,9 +400,9 @@ class Transform:
         self._xcoef = list(x)
 
 
-
+############################################################################# 
 class Contour:
-    '''Contour object containing the following data: \n   Name \n \
+    '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
   Mode \n   Points'''
     # Python Functions
