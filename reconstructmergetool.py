@@ -10,17 +10,20 @@
 
 from reconObjects import *
 # 1) Create a series object
+path = '/home/michaelm/Documents/reconstructmergetool/sertesting.ser'
+tree = xmlTree(path)
+series = Series(tree)
 #sectionList = ''
 #series = Series(sectionList)
 
-# 2) Populate <series> with sections
-path = '/home/michaelm/Documents/reconstructmergetool/testing.xml' #=========
-tree = xmlTree(path)
-section = Section(tree)
-
-# Test kosher section creation =======================
-print( section ) # prints info about the section
-print( section._list ) # prints list of items in the section
+### 2) Populate <series> with sections
+##path = '/home/michaelm/Documents/reconstructmergetool/testing.xml' #=========
+##tree = xmlTree(path)
+##section = Section(tree)
+##
+### Test kosher section creation =======================
+##print( section ) # prints info about the section
+##print( section._list ) # prints list of items in the section
 
 
     
