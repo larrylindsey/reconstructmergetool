@@ -7,12 +7,13 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 3/15/2013
+#  Date Last Modified: 3/25/2013
 #
 #  Currently implementing:
     #===== Add imgpts and worldpts in Contour object
     #===== Check comments on classes
-    #===== Series object, ZContour
+    #===== ZContour class, node & transform?#===== series has own, different contours
+
     
 import xml.etree.ElementTree as ET
 
@@ -102,94 +103,95 @@ of an xml file'''
 ##        self._name = str(path_to_sections)
         self._tag = 'Series'
         self._list = ObjectList()
-	# Variables extracted from file (list types formed below for indicated variables)
-	self._index = int(xmlTree._tree.getroot().attrib['index'])
-	self._viewport = xmlTree._tree.getroot().attrib['viewport'] #str --modified--> list
-	self._units = str(xmlTree._tree.getroot().attrib['units'])
-	self._autoSaveSeries = bool(xmlTree._tree.getroot().attrib['autoSaveSeries'].capitalize())
-	self._autoSaveSection = bool(xmlTree._tree.getroot().attrib['autoSaveSection'].capitalize())
-	self._warnSaveSection = bool(xmlTree._tree.getroot().attrib['warnSaveSection'].capitalize())
-	self._beepDeleting = bool(xmlTree._tree.getroot().attrib['beepDeleting'].capitalize())
-	self._beepPaging = bool(xmlTree._tree.getroot().attrib['beepPaging'].capitalize())
-	self._hideTraces = bool(xmlTree._tree.getroot().attrib['hideTraces'].capitalize())
-	self._unhideTraces = bool(xmlTree._tree.getroot().attrib['unhideTraces'].capitalize())
-	self._hideDomains = bool(xmlTree._tree.getroot().attrib['hideDomains'].capitalize())
-	self._unhideDomains = bool(xmlTree._tree.getroot().attrib['unhideDomains'].capitalize())
-	self._useAbsolutePaths = bool(xmlTree._tree.getroot().attrib['useAbsolutePaths'].capitalize())
-	self._defaultThickness = float(xmlTree._tree.getroot().attrib['defaultThickness'])
-	self._zMidSection = bool(xmlTree._tree.getroot().attrib['zMidSection'].capitalize())
-	self._thumbWidth = int(xmlTree._tree.getroot().attrib['thumbWidth'])
-	self._thumbHeight = int(xmlTree._tree.getroot().attrib['thumbHeight'])
-	self._fitThumbSections = bool(xmlTree._tree.getroot().attrib['fitThumbSections'].capitalize())
-	self._firstThumbSection = int(xmlTree._tree.getroot().attrib['firstThumbSection'])
-	self._lastThumbSection = int(xmlTree._tree.getroot().attrib['lastThumbSection'])
-	self._skipSections = int(xmlTree._tree.getroot().attrib['skipSections'])
-	self._displayThumbContours = bool(xmlTree._tree.getroot().attrib['displayThumbContours'].capitalize())
-	self._useFlipbookStyle = bool(xmlTree._tree.getroot().attrib['useFlipbookStyle'].capitalize())
-	self._flipRate = int(xmlTree._tree.getroot().attrib['flipRate'])
-	self._useProxies = bool(xmlTree._tree.getroot().attrib['useProxies'].capitalize())
-	self._widthUseProxies = int(xmlTree._tree.getroot().attrib['widthUseProxies'])
-	self._heightUseProxies = int(xmlTree._tree.getroot().attrib['heightUseProxies'])
-	self._scaleProxies = float(xmlTree._tree.getroot().attrib['scaleProxies'])
-	self._significantDigits = int(xmlTree._tree.getroot().attrib['significantDigits'])
-	self._defaultBorder = xmlTree._tree.getroot().attrib['defaultBorder'] #str --modified--> list
-	self._defaultFill = xmlTree._tree.getroot().attrib['defaultFill'] #str --modified--> list
-	self._defaultMode = int(xmlTree._tree.getroot().attrib['defaultMode'])
-	self._defaultName = str(xmlTree._tree.getroot().attrib['defaultName'])
-	self._defaultComment = str(xmlTree._tree.getroot().attrib['defaultComment'])
-	self._listSectionThickness = bool(xmlTree._tree.getroot().attrib['listSectionThickness'].capitalize())
-	self._listDomainSource = bool(xmlTree._tree.getroot().attrib['listDomainSource'].capitalize())
-	self._listDomainPixelsize = bool(xmlTree._tree.getroot().attrib['listDomainPixelsize'].capitalize())
-	self._listDomainLength = bool(xmlTree._tree.getroot().attrib['listDomainLength'].capitalize())
-	self._listDomainArea = bool(xmlTree._tree.getroot().attrib['listDomainArea'].capitalize())
-	self._listDomainMidpoint = bool(xmlTree._tree.getroot().attrib['listDomainMidpoint'].capitalize())
-	self._listTraceComment = bool(xmlTree._tree.getroot().attrib['listTraceComment'].capitalize())
-	self._listTraceLength = bool(xmlTree._tree.getroot().attrib['listTraceLength'].capitalize())
-	self._listTraceArea = bool(xmlTree._tree.getroot().attrib['listTraceArea'].capitalize())
-	self._listTraceCentroid = bool(xmlTree._tree.getroot().attrib['listTraceCentroid'].capitalize())
-	self._listTraceExtent = bool(xmlTree._tree.getroot().attrib['listTraceExtent'].capitalize())
-	self._listTraceZ = bool(xmlTree._tree.getroot().attrib['listTraceZ'].capitalize())
-	self._listTraceThickness = bool(xmlTree._tree.getroot().attrib['listTraceThickness'].capitalize())
-	self._listObjectRange = bool(xmlTree._tree.getroot().attrib['listObjectRange'].capitalize())
-	self._listObjectCount = bool(xmlTree._tree.getroot().attrib['listObjectCount'].capitalize())
-	self._listObjectSurfarea = bool(xmlTree._tree.getroot().attrib['listObjectSurfarea'].capitalize())
-	self._listObjectFlatarea = bool(xmlTree._tree.getroot().attrib['listObjectFlatarea'].capitalize())
-	self._listObjectVolume = bool(xmlTree._tree.getroot().attrib['listObjectVolume'].capitalize())
-	self._listZTraceNote = bool(xmlTree._tree.getroot().attrib['listZTraceNote'].capitalize())
-	self._listZTraceRange = bool(xmlTree._tree.getroot().attrib['listZTraceRange'].capitalize())
-	self._listZTraceLength = bool(xmlTree._tree.getroot().attrib['listZTraceLength'].capitalize())
-	self._borderColors = xmlTree._tree.getroot().attrib['borderColors'] #str --modified--> list
-	self._fillColors = xmlTree._tree.getroot().attrib['fillColors'] #str --modified--> list
-	self._offset3D = xmlTree._tree.getroot().attrib['offset3D'] #str --modified--> list
-	self._type3Dobject = int(xmlTree._tree.getroot().attrib['type3Dobject'])
-	self._first3Dsection = int(xmlTree._tree.getroot().attrib['first3Dsection'])
-	self._last3Dsection = int(xmlTree._tree.getroot().attrib['last3Dsection'])
-	self._max3Dconnection = int(xmlTree._tree.getroot().attrib['max3Dconnection'])
-	self._upper3Dfaces = bool(xmlTree._tree.getroot().attrib['upper3Dfaces'].capitalize())
-	self._lower3Dfaces = bool(xmlTree._tree.getroot().attrib['lower3Dfaces'].capitalize())
-	self._faceNormals = bool(xmlTree._tree.getroot().attrib['faceNormals'].capitalize())
-	self._vertexNormals = bool(xmlTree._tree.getroot().attrib['vertexNormals'].capitalize())
-	self._facets3D = int(xmlTree._tree.getroot().attrib['facets3D'])
-	self._dim3D = xmlTree._tree.getroot().attrib['dim3D'] #str --modified--> list
-	self._gridType = int(xmlTree._tree.getroot().attrib['gridType'])
-	self._gridSize = xmlTree._tree.getroot().attrib['gridSize'] #str --modified--> list
-	self._gridDistance = xmlTree._tree.getroot().attrib['gridDistance'] #str --modified--> list
-	self._gridNumber = xmlTree._tree.getroot().attrib['gridNumber'] #str --modified--> list
-	self._hueStopWhen = int(xmlTree._tree.getroot().attrib['hueStopWhen'])
-	self._hueStopValue = int(xmlTree._tree.getroot().attrib['hueStopValue'])
-	self._satStopWhen = int(xmlTree._tree.getroot().attrib['satStopWhen'])
-	self._satStopValue = int(xmlTree._tree.getroot().attrib['satStopValue'])
-	self._brightStopWhen = int(xmlTree._tree.getroot().attrib['brightStopWhen'])
-	self._brightStopValue = int(xmlTree._tree.getroot().attrib['brightStopValue'])
-	self._tracesStopWhen = bool(xmlTree._tree.getroot().attrib['tracesStopWhen'].capitalize())
-	self._areaStopPercent = int(xmlTree._tree.getroot().attrib['areaStopPercent'])
-	self._areaStopSize = int(xmlTree._tree.getroot().attrib['areaStopSize'])
-	self._ContourMaskWidth = int(xmlTree._tree.getroot().attrib['ContourMaskWidth'])
-	self._smoothingLength = int(xmlTree._tree.getroot().attrib['smoothingLength'])
-	self._mvmtIncrement = xmlTree._tree.getroot().attrib['mvmtIncrement'] #str --modified--> list
-	self._ctrlIncrement = xmlTree._tree.getroot().attrib['ctrlIncrement'] #str --modified--> list
-	self._shiftIncrement = xmlTree._tree.getroot().attrib['shiftIncrement'] #str --modified--> list
-######### Variable modifications
+	# Variables extracted from file
+        # Those that need to be in list type are done so below
+        self._index = int(xmlTree._tree.getroot().attrib['index'])
+        self._viewport = xmlTree._tree.getroot().attrib['viewport'] #str --modified--> list
+        self._units = str(xmlTree._tree.getroot().attrib['units'])
+        self._autoSaveSeries = bool(xmlTree._tree.getroot().attrib['autoSaveSeries'].capitalize())
+        self._autoSaveSection = bool(xmlTree._tree.getroot().attrib['autoSaveSection'].capitalize())
+        self._warnSaveSection = bool(xmlTree._tree.getroot().attrib['warnSaveSection'].capitalize())
+        self._beepDeleting = bool(xmlTree._tree.getroot().attrib['beepDeleting'].capitalize())
+        self._beepPaging = bool(xmlTree._tree.getroot().attrib['beepPaging'].capitalize())
+        self._hideTraces = bool(xmlTree._tree.getroot().attrib['hideTraces'].capitalize())
+        self._unhideTraces = bool(xmlTree._tree.getroot().attrib['unhideTraces'].capitalize())
+        self._hideDomains = bool(xmlTree._tree.getroot().attrib['hideDomains'].capitalize())
+        self._unhideDomains = bool(xmlTree._tree.getroot().attrib['unhideDomains'].capitalize())
+        self._useAbsolutePaths = bool(xmlTree._tree.getroot().attrib['useAbsolutePaths'].capitalize())
+        self._defaultThickness = float(xmlTree._tree.getroot().attrib['defaultThickness'])
+        self._zMidSection = bool(xmlTree._tree.getroot().attrib['zMidSection'].capitalize())
+        self._thumbWidth = int(xmlTree._tree.getroot().attrib['thumbWidth'])
+        self._thumbHeight = int(xmlTree._tree.getroot().attrib['thumbHeight'])
+        self._fitThumbSections = bool(xmlTree._tree.getroot().attrib['fitThumbSections'].capitalize())
+        self._firstThumbSection = int(xmlTree._tree.getroot().attrib['firstThumbSection'])
+        self._lastThumbSection = int(xmlTree._tree.getroot().attrib['lastThumbSection'])
+        self._skipSections = int(xmlTree._tree.getroot().attrib['skipSections'])
+        self._displayThumbContours = bool(xmlTree._tree.getroot().attrib['displayThumbContours'].capitalize())
+        self._useFlipbookStyle = bool(xmlTree._tree.getroot().attrib['useFlipbookStyle'].capitalize())
+        self._flipRate = int(xmlTree._tree.getroot().attrib['flipRate'])
+        self._useProxies = bool(xmlTree._tree.getroot().attrib['useProxies'].capitalize())
+        self._widthUseProxies = int(xmlTree._tree.getroot().attrib['widthUseProxies'])
+        self._heightUseProxies = int(xmlTree._tree.getroot().attrib['heightUseProxies'])
+        self._scaleProxies = float(xmlTree._tree.getroot().attrib['scaleProxies'])
+        self._significantDigits = int(xmlTree._tree.getroot().attrib['significantDigits'])
+        self._defaultBorder = xmlTree._tree.getroot().attrib['defaultBorder'] #str --modified--> list
+        self._defaultFill = xmlTree._tree.getroot().attrib['defaultFill'] #str --modified--> list
+        self._defaultMode = int(xmlTree._tree.getroot().attrib['defaultMode'])
+        self._defaultName = str(xmlTree._tree.getroot().attrib['defaultName'])
+        self._defaultComment = str(xmlTree._tree.getroot().attrib['defaultComment'])
+        self._listSectionThickness = bool(xmlTree._tree.getroot().attrib['listSectionThickness'].capitalize())
+        self._listDomainSource = bool(xmlTree._tree.getroot().attrib['listDomainSource'].capitalize())
+        self._listDomainPixelsize = bool(xmlTree._tree.getroot().attrib['listDomainPixelsize'].capitalize())
+        self._listDomainLength = bool(xmlTree._tree.getroot().attrib['listDomainLength'].capitalize())
+        self._listDomainArea = bool(xmlTree._tree.getroot().attrib['listDomainArea'].capitalize())
+        self._listDomainMidpoint = bool(xmlTree._tree.getroot().attrib['listDomainMidpoint'].capitalize())
+        self._listTraceComment = bool(xmlTree._tree.getroot().attrib['listTraceComment'].capitalize())
+        self._listTraceLength = bool(xmlTree._tree.getroot().attrib['listTraceLength'].capitalize())
+        self._listTraceArea = bool(xmlTree._tree.getroot().attrib['listTraceArea'].capitalize())
+        self._listTraceCentroid = bool(xmlTree._tree.getroot().attrib['listTraceCentroid'].capitalize())
+        self._listTraceExtent = bool(xmlTree._tree.getroot().attrib['listTraceExtent'].capitalize())
+        self._listTraceZ = bool(xmlTree._tree.getroot().attrib['listTraceZ'].capitalize())
+        self._listTraceThickness = bool(xmlTree._tree.getroot().attrib['listTraceThickness'].capitalize())
+        self._listObjectRange = bool(xmlTree._tree.getroot().attrib['listObjectRange'].capitalize())
+        self._listObjectCount = bool(xmlTree._tree.getroot().attrib['listObjectCount'].capitalize())
+        self._listObjectSurfarea = bool(xmlTree._tree.getroot().attrib['listObjectSurfarea'].capitalize())
+        self._listObjectFlatarea = bool(xmlTree._tree.getroot().attrib['listObjectFlatarea'].capitalize())
+        self._listObjectVolume = bool(xmlTree._tree.getroot().attrib['listObjectVolume'].capitalize())
+        self._listZTraceNote = bool(xmlTree._tree.getroot().attrib['listZTraceNote'].capitalize())
+        self._listZTraceRange = bool(xmlTree._tree.getroot().attrib['listZTraceRange'].capitalize())
+        self._listZTraceLength = bool(xmlTree._tree.getroot().attrib['listZTraceLength'].capitalize())
+        self._borderColors = xmlTree._tree.getroot().attrib['borderColors'] #str --modified--> list
+        self._fillColors = xmlTree._tree.getroot().attrib['fillColors'] #str --modified--> list
+        self._offset3D = xmlTree._tree.getroot().attrib['offset3D'] #str --modified--> list
+        self._type3Dobject = int(xmlTree._tree.getroot().attrib['type3Dobject'])
+        self._first3Dsection = int(xmlTree._tree.getroot().attrib['first3Dsection'])
+        self._last3Dsection = int(xmlTree._tree.getroot().attrib['last3Dsection'])
+        self._max3Dconnection = int(xmlTree._tree.getroot().attrib['max3Dconnection'])
+        self._upper3Dfaces = bool(xmlTree._tree.getroot().attrib['upper3Dfaces'].capitalize())
+        self._lower3Dfaces = bool(xmlTree._tree.getroot().attrib['lower3Dfaces'].capitalize())
+        self._faceNormals = bool(xmlTree._tree.getroot().attrib['faceNormals'].capitalize())
+        self._vertexNormals = bool(xmlTree._tree.getroot().attrib['vertexNormals'].capitalize())
+        self._facets3D = int(xmlTree._tree.getroot().attrib['facets3D'])
+        self._dim3D = xmlTree._tree.getroot().attrib['dim3D'] #str --modified--> list
+        self._gridType = int(xmlTree._tree.getroot().attrib['gridType'])
+        self._gridSize = xmlTree._tree.getroot().attrib['gridSize'] #str --modified--> list
+        self._gridDistance = xmlTree._tree.getroot().attrib['gridDistance'] #str --modified--> list
+        self._gridNumber = xmlTree._tree.getroot().attrib['gridNumber'] #str --modified--> list
+        self._hueStopWhen = int(xmlTree._tree.getroot().attrib['hueStopWhen'])
+        self._hueStopValue = int(xmlTree._tree.getroot().attrib['hueStopValue'])
+        self._satStopWhen = int(xmlTree._tree.getroot().attrib['satStopWhen'])
+        self._satStopValue = int(xmlTree._tree.getroot().attrib['satStopValue'])
+        self._brightStopWhen = int(xmlTree._tree.getroot().attrib['brightStopWhen'])
+        self._brightStopValue = int(xmlTree._tree.getroot().attrib['brightStopValue'])
+        self._tracesStopWhen = bool(xmlTree._tree.getroot().attrib['tracesStopWhen'].capitalize())
+        self._areaStopPercent = int(xmlTree._tree.getroot().attrib['areaStopPercent'])
+        self._areaStopSize = int(xmlTree._tree.getroot().attrib['areaStopSize'])
+        self._ContourMaskWidth = int(xmlTree._tree.getroot().attrib['ContourMaskWidth'])
+        self._smoothingLength = int(xmlTree._tree.getroot().attrib['smoothingLength'])
+        self._mvmtIncrement = xmlTree._tree.getroot().attrib['mvmtIncrement'] #str --modified--> list
+        self._ctrlIncrement = xmlTree._tree.getroot().attrib['ctrlIncrement'] #str --modified--> list
+        self._shiftIncrement = xmlTree._tree.getroot().attrib['shiftIncrement'] #str --modified--> list
+        ######### Variable modifications =========================================
 	# viewport
         rawList = list(self._viewport.split(' '))
         tmpList = []
@@ -208,10 +210,38 @@ of an xml file'''
         for elem in rawList:
             tmpList.append( float(elem) )
         self._defaultFill = tmpList
-	#borderColors ==============================================
-
-	#fillColors =================================================
-
+        #borderColors (Floating points are reduced to 0.0 if no other digits)
+        #May need to output as 0.000 later =====================
+            #Split up string into a list of strings containing 3 float points 
+        splitList = self._borderColors.replace(',','').split('   ')
+            #Make a list of lists containing floating points
+        refinedList = []
+        for elem in splitList:
+            if elem != '':
+                strfloats = elem.split(' ')
+                intfloats = []
+                #Turn strings into floats
+                for num in strfloats:
+                    num = float(num)
+                    intfloats.append(num)
+                refinedList.append(intfloats)
+        self._borderColors = refinedList  
+        #fillColors (Floating points are reduced to 0.0 if no other digits)
+        #May need to output as 0.000 later =====================
+            #Split up string into a list of strings containing 3 float points 
+        splitList = self._fillColors.replace(',','').split('   ')
+            #Make a list of lists containing floating points
+        refinedList = []
+        for elem in splitList:
+            if elem != '':
+                strfloats = elem.split(' ')
+                intfloats = []
+                #Turn strings into floats
+                for num in strfloats:
+                    num = float(num)
+                    intfloats.append(num)
+                refinedList.append(intfloats)
+        self._fillColors = refinedList
 	#offset3D
         rawList = list(self._offset3D.split(' '))
         tmpList = []
@@ -273,15 +303,19 @@ of an xml file'''
         return self._name
     def gettag(self):
         return self._tag
+    def printsections(self):
+        '''Prints the name of all the sections in a series'''
+        for elem in self._list._list:
+            print(elem._name)
 
     # Mutators
     def chgname(self, x):
         self._name = str(x)
     def chgtag(self, x):
         self._tag = str(x)
-
-
-
+    def addsection(self, section):
+        '''Adds a <Section> object to <Series> object'''
+        self._list._list.append(section)
 
 #############################################################################    
 class Section:
@@ -291,6 +325,7 @@ Attributes printed with print(<section>) objects in list printed with print(<sec
     # Python Functions
     def __init__(self, xmlTree):
         # Create <section>
+        self._name = xmlTree._name
         self._list = ObjectList()
         self._tag = 'Section'
         # Create <section> attributes
@@ -308,6 +343,9 @@ Attributes printed with print(<section>) objects in list printed with print(<sec
             elif node.tag == 'Contour':
                 C = Contour(node, tmpT)
                 self._list.addO(C)
+            elif node.tag == 'ZContour': #=========
+                Z = ZContour(node, tmpT)
+                self._list.addO(Z)
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length'''
         return len(self._list)
@@ -573,3 +611,101 @@ separated by a single space)'''
     def chgpoints(self, x):
         '''List of strings'''
         self._points = list(x)
+
+#############################################################################
+class serContour():
+    '''ZContour object.'''
+    # Python Functions
+    def __init__(self, node, transform): #========
+        
+        self._tag = 'ZContour'
+        self._name = str( node.attrib['name'] )
+        self._closed = bool( node.attrib['closed'].capitalize() ))
+        self._mode = int( node.attrib['mode'] )
+        self._transform = transform
+        self._border = []
+        self._fill = []
+        self._points = []
+        # Populate border, fill, points
+        for char in node.attrib['border']:
+            if char.isdigit():
+                self._border.append( int(char) )
+        for char in node.attrib['fill']:
+            if char.isdigit():
+                self._fill.append( int(char) )
+            #partition points into a list of messy crap
+        partPoints = list(node.attrib['points'].lstrip(' ').split(','))
+            #make a new list of clean points, to be added to object
+        ptList = []
+        for i in range( len(partPoints) ):
+            ptList.append( partPoints[i].strip() )
+            #remove empty points
+        for i in range( len(ptList) ):
+            if ptList[i] == '':
+                ptList.remove('')
+        self._points = ptList
+    def __str__(self):
+        '''Allows user to use print( <Contourobject> ) function'''
+        return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \
+               +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
+               +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
+               +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
+               +'\n-points: '+str(self.getpoints())+'\n'
+
+    # Accessors
+    def gettag(self):
+        '''Returns Tag (str)'''
+        return self._tag
+    def getname(self):
+        '''Returns Name attribute (str)'''
+        return self._name
+    def gethidden(self):
+        '''Returns Hidden attribute (bool)'''
+        return self._hidden
+    def getclosed(self):
+        '''Returns Closed attribute (bool)'''
+        return self._closed
+    def getsimp(self):
+        '''Returns Simplified attribute (bool)'''
+        return self._simplified
+    def getmode(self):
+        '''Returns Mode attribute (int)'''
+        return self._mode
+    def getbord(self):
+        '''Returns Border attribute (list of ints)'''
+        return self._border
+    def getfill(self):
+        '''Returns Fill attribute (list of ints)'''
+        return self._fill
+    def getpoints(self):
+        '''Returns Points attribute (list of strings, each consisting of two numbers \
+separated by a single space)'''
+        return self._points
+    def getattribs(self):
+        '''Returns all contour attributes'''
+        return self.getname(), self.gethidden(), self.getclosed(), self.getsimp(), \
+               self.getmode(), self.getbord(), self.getfill(), self.getpoints
+
+    # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
+    def chgname(self, x):
+        self._name = str(x)
+    def chghidden(self, x):
+        self._hidden = bool(x)
+    def chgclosed(self, x):
+        self._closed = bool(x)
+    def chgsimp(self, x):
+        self._simplified = bool(x)
+    def chgmode(self, x):
+        self._mode = int(x)
+    def chgbord(self, x):
+        '''List of ints'''
+        self._border = list(x)
+    def chgfill(self, x):
+        '''List of ints'''
+        self._fill = list(x)
+    def chgpoints(self, x):
+        '''List of strings'''
+        self._points = list(x)        
+        self._tag = 'ZContour'
