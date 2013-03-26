@@ -7,12 +7,11 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 3/25/2013
+#  Date Last Modified: 3/26/2013
 #
-#  Currently implementing:
+#  Currently working on: **Search for '===' to find important/unstable code
     #===== Add imgpts and worldpts in Contour object
     #===== Check comments on classes
-    #===== ZContour class, node & transform?#===== series has own, different contours
 
     
 import xml.etree.ElementTree as ET
@@ -99,7 +98,7 @@ it'''
     #Python functions
     def __init__(self, xmlTree):
         '''Receives an xml file that is a list of sections in the form \
-of an xml file'''
+of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
 ##        self._name = str(path_to_sections)
         self._tag = 'Series'
         self._list = ObjectList()
@@ -191,7 +190,16 @@ of an xml file'''
         self._mvmtIncrement = xmlTree._tree.getroot().attrib['mvmtIncrement'] #str --modified--> list
         self._ctrlIncrement = xmlTree._tree.getroot().attrib['ctrlIncrement'] #str --modified--> list
         self._shiftIncrement = xmlTree._tree.getroot().attrib['shiftIncrement'] #str --modified--> list
-        ######### Variable modifications =========================================
+        self._contours = ObjectList() #List of <Contour> and <ZContour> objects
+        ######### Variable modifications ================
+        #self._contours
+        for node in xmlTree.gettreelist():
+            if node.tag == 'Contour':
+                C = Contour(node)
+                self._contours.addO(C)
+            elif node.tag == 'ZContour': #=========
+                Z = ZContour(node)
+                self._contours.addO(Z)
 	# viewport
         rawList = list(self._viewport.split(' '))
         tmpList = []
@@ -290,6 +298,8 @@ of an xml file'''
         for elem in rawList:
             tmpList.append( float(elem) )
         self._shiftIncrement = tmpList
+        
+        
 	
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
@@ -517,18 +527,27 @@ class Contour:
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
   Mode \n   Points'''
     # Python Functions
-    def __init__(self, node, transform):
+    def __init__(self, node, transform=None): #=====
         '''Initializes the Contour object'''
-        self._tag = 'Contour'
-        self._name = str( node.attrib['name'] )
-        self._hidden = bool( node.attrib['hidden'].capitalize() )
-        self._closed = bool( node.attrib['closed'].capitalize() )
-        self._simplified = bool( node.attrib['closed'].capitalize() )
-        self._mode = int( node.attrib['mode'] )
-        self._transform = transform
-        self._border = []
-        self._fill = []
-        self._points = []
+        if transform == None: #=====
+            self._tag = 'Contour'
+            self._name = str( node.attrib['name'] )
+            self._closed = bool( node.attrib['closed'].capitalize() )
+            self._mode = int( node.attrib['mode'] )
+            self._border = []
+            self._fill = []
+            self._points = []
+        else:
+            self._tag = 'Contour'
+            self._name = str( node.attrib['name'] )
+            self._hidden = bool( node.attrib['hidden'].capitalize() )
+            self._closed = bool( node.attrib['closed'].capitalize() )
+            self._simplified = bool( node.attrib['closed'].capitalize() )
+            self._mode = int( node.attrib['mode'] )
+            self._transform = transform
+            self._border = []
+            self._fill = []
+            self._points = [] #List of strings. In each string are two values separate by space
         # Populate border, fill, points
         for char in node.attrib['border']:
             if char.isdigit():
@@ -613,42 +632,49 @@ separated by a single space)'''
         self._points = list(x)
 
 #############################################################################
-class serContour():
-    '''ZContour object.'''
+class ZContour:
+    '''Creates a <serContour> object which represents Contours and ZCountours in /
+a .ser file. Contour and ZContour can be distinguished by tags.'''
     # Python Functions
-    def __init__(self, node, transform): #========
-        
+    def __init__(self, node):
         self._tag = 'ZContour'
         self._name = str( node.attrib['name'] )
-        self._closed = bool( node.attrib['closed'].capitalize() ))
+        self._closed = bool( node.attrib['closed'].capitalize() )
         self._mode = int( node.attrib['mode'] )
-        self._transform = transform
         self._border = []
         self._fill = []
-        self._points = []
+        self._points = [] #List of strings. Each string contains 3 numbers: 'float, float, section'
         # Populate border, fill, points
         for char in node.attrib['border']:
             if char.isdigit():
-                self._border.append( int(char) )
+                self._border.append( float(char) )
         for char in node.attrib['fill']:
             if char.isdigit():
-                self._fill.append( int(char) )
+                self._fill.append( float(char) )
+
             #partition points into a list of messy crap
         partPoints = list(node.attrib['points'].lstrip(' ').split(','))
+            #example: ['5.93694 3.75884 156', '  5.46795 4.10569 144',
+            #'  4.82797 4.41347 139', '  4.77912 4.64308 124', '  4.63744 4.97528 99', '  ']
+
             #make a new list of clean points, to be added to object
         ptList = []
         for i in range( len(partPoints) ):
             ptList.append( partPoints[i].strip() )
+                #example: ['5.93694 3.75884 156', '5.46795 4.10569 144', '4.82797 4.41347 139',
+                #'4.77912 4.64308 124', '4.63744 4.97528 99', '']
+
             #remove empty points
         for i in range( len(ptList) ):
             if ptList[i] == '':
                 ptList.remove('')
+                #example: ['5.93694 3.75884 156', '5.46795 4.10569 144', '4.82797 4.41347 139',
+                #'4.77912 4.64308 124', '4.63744 4.97528 99']
         self._points = ptList
     def __str__(self):
-        '''Allows user to use print( <Contourobject> ) function'''
-        return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \
-               +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
-               +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
+        '''Allows user to use print( <ZContour> ) function'''
+        return 'Contour object:\n-name: '+str(self.getname())+'\n-closed: ' \
+               +str(self.getclosed())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
                +'\n-points: '+str(self.getpoints())+'\n'
 
@@ -659,15 +685,9 @@ class serContour():
     def getname(self):
         '''Returns Name attribute (str)'''
         return self._name
-    def gethidden(self):
-        '''Returns Hidden attribute (bool)'''
-        return self._hidden
     def getclosed(self):
         '''Returns Closed attribute (bool)'''
         return self._closed
-    def getsimp(self):
-        '''Returns Simplified attribute (bool)'''
-        return self._simplified
     def getmode(self):
         '''Returns Mode attribute (int)'''
         return self._mode
@@ -683,20 +703,16 @@ separated by a single space)'''
         return self._points
     def getattribs(self):
         '''Returns all contour attributes'''
-        return self.getname(), self.gethidden(), self.getclosed(), self.getsimp(), \
-               self.getmode(), self.getbord(), self.getfill(), self.getpoints
+        return self.getname(), self.getclosed(), self.getmode(), self.getbord(), \
+               self.getfill(), self.getpoints
 
     # Mutators
     def chgtag(self, x):
         self._tag = str(x)
     def chgname(self, x):
         self._name = str(x)
-    def chghidden(self, x):
-        self._hidden = bool(x)
     def chgclosed(self, x):
         self._closed = bool(x)
-    def chgsimp(self, x):
-        self._simplified = bool(x)
     def chgmode(self, x):
         self._mode = int(x)
     def chgbord(self, x):
