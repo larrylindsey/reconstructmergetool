@@ -1,4 +1,4 @@
-#  Files: reconObjects.py, reconstructmergetool.py
+#  Files: reconObjects.py, reconstructmergetool.py, transform.py
 #
 #  Description: Contains the classes used for reconstructmergetool.py
 #               Section, Image, Contour, Transform, ObjectList
@@ -10,11 +10,12 @@
 #  Date Last Modified: 3/26/2013
 #
 #  Currently working on: **Search for '===' to find important/unstable code
-    #===== Add imgpts and worldpts in Contour object
+    #===== Add imgpts and worldpts in Contour object (scimage.transform)
     #===== Check comments on classes
 
     
 import xml.etree.ElementTree as ET
+from scimage import transfrom as TF
 
 #############################################################################               
 class ObjectList:
@@ -489,7 +490,7 @@ class Transform:
             if char.isdigit():
                 self._xcoef.append( int(char) )
     def __str__(self):
-        '''Allows user to use print( <Transformobject> ) function'''
+        '''Allows user to use print( <Transform> ) function'''
         return 'Transform object:\n-dim: '+str(self.getdim())+'\n-ycoef: ' \
                +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())+'\n'
 
@@ -518,7 +519,7 @@ class Transform:
     def chgycoef(self, x):
         self._ycoef = list(x)
     def chgxcoef(self, x):
-        self._xcoef = list(x)
+        self._xcoef = list(x) 
 
 
 ############################################################################# 
@@ -529,7 +530,7 @@ class Contour:
     # Python Functions
     def __init__(self, node, transform=None): #=====
         '''Initializes the Contour object'''
-        if transform == None: #=====
+        if transform == None: #Contours in .ser files
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._closed = bool( node.attrib['closed'].capitalize() )
@@ -537,7 +538,7 @@ class Contour:
             self._border = []
             self._fill = []
             self._points = []
-        else:
+        else: #Contours in .xml files
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._hidden = bool( node.attrib['hidden'].capitalize() )
