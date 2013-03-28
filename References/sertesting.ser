@@ -1,0 +1,391 @@
+<?xml version="1.0"?>
+<!DOCTYPE Series SYSTEM "series.dtd">
+
+<Series index="100" viewport="-1.10021 0.801555 0.00685281"
+	units="microns"
+	autoSaveSeries="true"
+	autoSaveSection="true"
+	warnSaveSection="true"
+	beepDeleting="true"
+	beepPaging="true"
+	hideTraces="false"
+	unhideTraces="true"
+	hideDomains="false"
+	unhideDomains="true"
+	useAbsolutePaths="false"
+	defaultThickness="0.05"
+	zMidSection="false"
+	thumbWidth="128"
+	thumbHeight="96"
+	fitThumbSections="false"
+	firstThumbSection="1"
+	lastThumbSection="9999"
+	skipSections="1"
+	displayThumbContours="true"
+	useFlipbookStyle="false"
+	flipRate="5"
+	useProxies="true"
+	widthUseProxies="2048"
+	heightUseProxies="1536"
+	scaleProxies="0.25"
+	significantDigits="6"
+	defaultBorder="1.000 0.000 0.000"
+	defaultFill="1.000 0.000 0.000"
+	defaultMode="15"
+	defaultName="d001c114"
+	defaultComment=""
+	listSectionThickness="true"
+	listDomainSource="true"
+	listDomainPixelsize="true"
+	listDomainLength="false"
+	listDomainArea="false"
+	listDomainMidpoint="false"
+	listTraceComment="true"
+	listTraceLength="true"
+	listTraceArea="true"
+	listTraceCentroid="false"
+	listTraceExtent="true"
+	listTraceZ="false"
+	listTraceThickness="false"
+	listObjectRange="true"
+	listObjectCount="false"
+	listObjectSurfarea="false"
+	listObjectFlatarea="true"
+	listObjectVolume="false"
+	listZTraceNote="true"
+	listZTraceRange="true"
+	listZTraceLength="true"
+	borderColors="0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		"
+	fillColors="0.514 0.973 0.761,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		0.000 0.000 0.000,
+		"
+	offset3D="0 0 0"
+	type3Dobject="1"
+	first3Dsection="57"
+	last3Dsection="165"
+	max3Dconnection="-1"
+	upper3Dfaces="true"
+	lower3Dfaces="true"
+	faceNormals="false"
+	vertexNormals="true"
+	facets3D="32"
+	dim3D="-1 -1 -1"
+	gridType="4"
+	gridSize="6 6"
+	gridDistance="1 1"
+	gridNumber="1 1"
+	hueStopWhen="3"
+	hueStopValue="50"
+	satStopWhen="3"
+	satStopValue="50"
+	brightStopWhen="0"
+	brightStopValue="100"
+	tracesStopWhen="false"
+	areaStopPercent="999"
+	areaStopSize="0"
+	ContourMaskWidth="-1983244099"
+	smoothingLength="5"
+	mvmtIncrement="0.022 1 1 1.01 1.01 0.02 0.02 0.001 0.001"
+	ctrlIncrement="0.00439999 0.01 0.01 1.002 1.002 0.004 0.004 0.0002 0.0002"
+	shiftIncrement="0.11 100 100 1.05 1.05 0.1 0.1 0.005 0.005"
+	>
+<Contour name="d005c344" closed="true" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="15"
+ points="-3 1,
+	-3 -1,
+	-1 -3,
+	1 -3,
+	3 -1,
+	3 1,
+	1 3,
+	-1 3,
+	"/>
+<Contour name="d000Avftz003" closed="true" border="1.000 0.000 0.500" fill="1.000 0.000 0.500" mode="-13"
+ points="-3 1,
+	-3 -1,
+	-1 -3,
+	1 -3,
+	3 -1,
+	3 1,
+	1 3,
+	-1 3,
+	"/>
+<Contour name="pink$+" closed="true" border="1.000 0.000 0.500" fill="1.000 0.000 0.500" mode="-13"
+ points="-6 -6,
+	6 -6,
+	0 5,
+	"/>
+<Contour name="X$+" closed="true" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="-13"
+ points="-7 7,
+	-2 0,
+	-7 -7,
+	-4 -7,
+	0 -1,
+	4 -7,
+	7 -7,
+	2 0,
+	7 7,
+	4 7,
+	0 1,
+	-4 7,
+	"/>
+<Contour name="yellow$+" closed="true" border="1.000 1.000 0.000" fill="1.000 1.000 0.682" mode="-13"
+ points="8 8,
+	8 -8,
+	-8 -8,
+	-8 6,
+	-10 8,
+	-10 -10,
+	10 -10,
+	10 10,
+	-10 10,
+	-8 8,
+	"/>
+<Contour name="blue$+" closed="true" border="0.000 0.000 1.000" fill="0.000 0.000 1.000" mode="9"
+ points="0 7,
+	-7 0,
+	0 -7,
+	7 0,
+	"/>
+<Contour name="sp+" closed="true" border="1.000 0.000 1.000" fill="1.000 0.000 1.000" mode="9"
+ points="-6 2,
+	-6 -2,
+	-2 -6,
+	2 -6,
+	6 -2,
+	6 2,
+	2 6,
+	-2 6,
+	"/>
+<Contour name="red$+" closed="true" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="6 -6,
+	0 -6,
+	0 -3,
+	3 0,
+	12 3,
+	6 6,
+	3 12,
+	-3 6,
+	-6 0,
+	-6 -6,
+	-12 -6,
+	-3 -12,
+	"/>
+<Contour name="yellow$+" closed="true" border="1.000 1.000 0.000" fill="1.000 1.000 0.000" mode="-13"
+ points="-3 1,
+	-3 -1,
+	-1 -3,
+	1 -3,
+	3 -1,
+	3 1,
+	1 3,
+	-1 3,
+	"/>
+<Contour name="a41" closed="true" border="0.000 1.000 1.000" fill="0.000 1.000 1.000" mode="9"
+ points="0 12,
+	4 8,
+	-12 -8,
+	-8 -12,
+	8 4,
+	12 0,
+	12 12,
+	"/>
+<Contour name="a$+" closed="true" border="1.000 0.500 0.000" fill="1.000 0.500 0.000" mode="13"
+ points="-3 1,
+	-3 -1,
+	-1 -3,
+	1 -3,
+	3 -1,
+	3 1,
+	1 3,
+	-1 3,
+	"/>
+<Contour name="b$+" closed="true" border="0.500 0.000 1.000" fill="0.500 0.000 1.000" mode="13"
+ points="-2 1,
+	-5 0,
+	-2 -1,
+	-4 -4,
+	-1 -2,
+	0 -5,
+	1 -2,
+	4 -4,
+	2 -1,
+	5 0,
+	2 1,
+	4 4,
+	1 2,
+	0 5,
+	-1 2,
+	-4 4,
+	"/>
+<Contour name="pink$+" closed="true" border="1.000 0.000 0.500" fill="1.000 0.000 0.500" mode="-13"
+ points="-6 -6,
+	6 -6,
+	0 5,
+	"/>
+<Contour name="X$+" closed="true" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="-13"
+ points="-7 7,
+	-2 0,
+	-7 -7,
+	-4 -7,
+	0 -1,
+	4 -7,
+	7 -7,
+	2 0,
+	7 7,
+	4 7,
+	0 1,
+	-4 7,
+	"/>
+<Contour name="yellow$+" closed="true" border="1.000 1.000 0.000" fill="1.000 1.000 0.000" mode="-13"
+ points="8 8,
+	8 -8,
+	-8 -8,
+	-8 6,
+	-10 8,
+	-10 -10,
+	10 -10,
+	10 10,
+	-10 10,
+	-8 8,
+	"/>
+<Contour name="blue$+" closed="true" border="0.000 0.000 1.000" fill="0.000 0.000 1.000" mode="9"
+ points="0 7,
+	-7 0,
+	0 -7,
+	7 0,
+	"/>
+<Contour name="magenta$+" closed="true" border="1.000 0.000 1.000" fill="1.000 0.000 1.000" mode="9"
+ points="-6 2,
+	-6 -2,
+	-2 -6,
+	2 -6,
+	6 -2,
+	6 2,
+	2 6,
+	-2 6,
+	"/>
+<Contour name="red$+" closed="true" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="6 -6,
+	0 -6,
+	0 -3,
+	3 0,
+	12 3,
+	6 6,
+	3 12,
+	-3 6,
+	-6 0,
+	-6 -6,
+	-12 -6,
+	-3 -12,
+	"/>
+<Contour name="green$+" closed="true" border="0.000 1.000 0.000" fill="0.000 1.000 0.000" mode="9"
+ points="-12 4,
+	-12 -4,
+	-4 -4,
+	-4 -12,
+	4 -12,
+	4 -4,
+	12 -4,
+	12 4,
+	4 4,
+	4 12,
+	-4 12,
+	-4 4,
+	"/>
+<Contour name="cyan$+" closed="true" border="0.000 1.000 1.000" fill="0.000 1.000 1.000" mode="9"
+ points="0 12,
+	4 8,
+	-12 -8,
+	-8 -12,
+	8 4,
+	12 0,
+	12 12,
+	"/>
+<ZContour name="t" closed="false" border="1.000 0.502 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="2.34338 6.56894 126,
+	2.39102 6.58935 126,
+	2.45567 6.58255 126,
+	2.50671 6.62338 125,
+	2.49991 6.68463 125,
+	2.42505 6.72206 125,
+	2.34338 6.68803 125,
+	"/>
+<ZContour name="t" closed="false" border="1.000 0.502 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="2.43526 6.59956 124,
+	2.43526 6.69143 125,
+	"/>
+<ZContour name="t" closed="false" border="1.000 0.502 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="2.6156 5.95985 121,
+	2.56116 6.04152 122,
+	2.63942 6.06534 123,
+	2.6156 6.15721 124,
+	"/>
+<ZContour name="t" closed="false" border="1.000 0.502 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="2.65303 5.69784 122,
+	2.69726 5.70805 122,
+	2.72448 5.7659 122,
+	2.71768 5.81354 122,
+	2.58157 5.84756 123,
+	2.57477 5.88159 123,
+	2.6122 5.87819 123,
+	2.65983 5.87478 123,
+	2.68365 5.88159 124,
+	2.73469 5.92583 124,
+	2.65983 5.97346 124,
+	2.70067 6.00749 124,
+	2.68706 6.09936 124,
+	2.6156 6.10957 124,
+	2.57477 5.99728 124,
+	"/>
+<ZContour name="d000p#sy489" closed="false" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="4.80366 6.56993 114,
+	4.83509 6.23466 114,
+	4.82461 5.70033 114,
+	4.69889 4.91456 100,
+	"/>
+<ZContour name="d000p#sy489" closed="false" border="1.000 0.000 0.000" fill="1.000 0.000 0.000" mode="9"
+ points="4.81414 6.59088 117,
+	4.81414 6.47564 116,
+	4.81414 6.47564 115,
+	4.81414 6.43373 114,
+	4.84557 6.0356 114,
+	4.7827 5.40698 114,
+	"/>
+<ZContour name="pink1" closed="false" border="1.000 0.000 0.500" fill="1.000 0.000 0.500" mode="-13"
+ points="5.93694 3.75884 156,
+	5.46795 4.10569 144,
+	4.82797 4.41347 139,
+	4.77912 4.64308 124,
+	4.63744 4.97528 99,
+	"/>
+</Series>

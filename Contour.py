@@ -2,28 +2,31 @@ class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
   Mode \n   Points'''
-    # Python Functions
+# Python Functions
+    # INITIALIZE
     def __init__(self, node, transform=None): #=====
-        '''Initializes the Contour object'''
-        if transform == None: #Contours in .ser files
+        '''Initializes the Contour object. Attributes vary depending on file type.'''
+        # Contours in .ser files
+        if transform == None:
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._closed = bool( node.attrib['closed'].capitalize() )
             self._mode = int( node.attrib['mode'] )
             self._border = []
             self._fill = []
-            self._points = []
-        else: #Contours in .xml files
+            self._points = [] # Points in form: (int, int)
+        # Contours in .xml files
+        else:
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._hidden = bool( node.attrib['hidden'].capitalize() )
             self._closed = bool( node.attrib['closed'].capitalize() )
             self._simplified = bool( node.attrib['closed'].capitalize() )
             self._mode = int( node.attrib['mode'] )
-            self._transform = transform
+            self._transform = transform # Transform object
             self._border = []
             self._fill = []
-            self._points = [] #List of strings. In each string are two values separate by space
+            self._points = [] # Points in form: (float, float)
         # Populate border, fill, points
         for char in node.attrib['border']:
             if char.isdigit():
@@ -40,8 +43,26 @@ class Contour:
             #remove empty points
         for i in range( len(ptList) ):
             if ptList[i] == '':
-                ptList.remove('')
-        self._points = ptList
+                ptList.remove('') 
+
+            #convert strings into tuples
+        strTupList = []
+        for elem in ptList:
+            strTupList.append(tuple(elem.split(' ')))
+        tupList = []
+        for elem in strTupList:
+            if '.' in elem[0]: #for floats
+                a=float(elem[0])
+                b=float(elem[1])
+                tup = (a,b)
+                tupList.append(tup)
+            else: #for ints
+                a=int(elem[0])
+                b=int(elem[1])
+                tup = (a,b)
+                tupList.append(tup)
+        self._points = tupList
+    # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <Contourobject> ) function'''
         return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \

@@ -1,0 +1,28 @@
+import scipy as sp
+import numpy as np
+import matplotlib
+
+
+## Invert the transformation
+
+def readTrace(path):
+	'''readTrace() will read the contour points, dim, xcoef, ycoef, from a series or \
+	trace file and return an array, integer, list and list of them, \ 
+	respectively.'''
+	
+	# Create a file object
+	traceFile = open(path) #TEST path = "/home/michaelm/Documents/reconstructmergetool/testing.txt"
+	
+	points = []
+	dim = 0
+	xcoef = []
+	ycoef = []
+	
+	for line in traceFile:
+		if "<Transform dim=" in line:
+			print(True)
+	
+	
+	
+	return points, dim, xcoef, ycoef
+

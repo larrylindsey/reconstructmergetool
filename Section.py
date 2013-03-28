@@ -4,9 +4,10 @@ from Image import *
 from Contour import *
 class Section:
     '''<Section> is an object with attributes: index, thickness, alignLocked \
-as well as a list containing <image> and <contour> objects. \
-Attributes printed with print(<section>) objects in list printed with print(<section>._list)'''
-    # Python Functions
+as well as a list containing <Image> and <Contour> objects. \
+Attributes printed with print(<Section>) objects in list printed with print(<Section>._list)'''
+# Python Functions
+    # INITIALIZE
     def __init__(self, xmlTree):
         # Create <section>
         self._name = xmlTree._name
@@ -27,21 +28,24 @@ Attributes printed with print(<section>) objects in list printed with print(<sec
             elif node.tag == 'Contour':
                 C = Contour(node, tmpT)
                 self._list.addO(C)
-            elif node.tag == 'ZContour': #=========
+            elif node.tag == 'ZContour':
                 Z = ZContour(node, tmpT)
                 self._list.addO(Z)
+    # LENGTH
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length'''
         return len(self._list)
+    # INDEX REPRESENTATION
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
         return self._list[x]
+    # STRING REPRESENTATION
     def __str__(self):
         '''Allows use of print(<section>) function.'''
         return 'Index: %d\nThickness: %f\nAlign Locked: %s'%(self._index, \
                                                                  self._thick, \
                                                                  self._alignLock)     
-    # Accessors
+# Accessors
     def gettag(self):
         '''--> (str)'''
         return self._tag
@@ -55,7 +59,7 @@ Attributes printed with print(<section>) objects in list printed with print(<sec
         '''--> (bool)''' 
         return self._alignLock
 
-    # Mutators
+# Mutators
     def chgtag(self, x):
         self._tag = str(x)
     def chgindex(self, x):

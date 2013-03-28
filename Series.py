@@ -6,7 +6,8 @@ class Series:
     '''<Series> is an object with attributes: name \
 as well as a list containing all of the <Sections> objects associated with
 it'''
-    #Python functions
+# Python functions
+    # INITIALIZE
     def __init__(self, xmlTree):
         '''Receives an xml file that is a list of sections in the form \
 of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
@@ -111,7 +112,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
             elif node.tag == 'ZContour': #=========
                 Z = ZContour(node)
                 self._contours.addO(Z)
-    # viewport
+        # viewport
         rawList = list(self._viewport.split(' '))
         tmpList = []
         for elem in rawList:
@@ -123,7 +124,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         for elem in rawList:
             tmpList.append( float(elem) )
         self._defaultBorder = tmpList
-    #defaultFill
+        #defaultFill
         rawList = list(self._defaultFill.split(' '))
         tmpList = []
         for elem in rawList:
@@ -161,7 +162,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
                     intfloats.append(num)
                 refinedList.append(intfloats)
         self._fillColors = refinedList
-    #offset3D
+        #offset3D
         rawList = list(self._offset3D.split(' '))
         tmpList = []
         for elem in rawList:
@@ -179,31 +180,31 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         for elem in rawList:
             tmpList.append( float(elem) )
         self._gridSize = tmpList
-    #gridDistance
+        #gridDistance
         rawList = list(self._gridDistance.split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         self._gridDistance = tmpList
-    #gridNumber
+        #gridNumber
         rawList = list(self._gridNumber.split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         self._gridNumber = tmpList
-    #mvmtIncrement
+        #mvmtIncrement
         rawList = list(self._mvmtIncrement.split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         self._mvmtIncrement = tmpList
-    #ctrlIncrement
+        #ctrlIncrement
         rawList = list(self._ctrlIncrement.split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         self._ctrlIncrement = tmpList
-    #shiftIncrement
+        #shiftIncrement
         rawList = list(self._shiftIncrement.split(' '))
         tmpList = []
         for elem in rawList:
@@ -211,15 +212,16 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._shiftIncrement = tmpList
         
         
-    
+    # INDEX REPRESENTATION
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
         return self._list[x]
+    # STRING REPRESENTATION
     def __str__(self):
         '''Allows use of print(<Series>) function.'''
         return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
 
-    # Accessors
+# Accessors
     def getname(self):
         return self._name
     def gettag(self):
@@ -229,7 +231,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         for elem in self._list._list:
             print(elem._name)
 
-    # Mutators
+# Mutators
     def chgname(self, x):
         self._name = str(x)
     def chgtag(self, x):

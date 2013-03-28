@@ -1,13 +1,15 @@
 import xml.etree.ElementTree as ET
 class xmlTree:
     '''ElementTree containing XML data from <path>'''
-    # Python Functions 
+# Python Functions
+    # INITIALIZE
     def __init__(self, path):
         self._tag = 'xmltree'
         self._name = str( path.rpartition('/')[2] ) #name = name of xml file
         self._tree = ET.parse(path) #object containing data
         self._treelist = self.gettreelist() #data in _tree stored as a list
-    # Accessors
+
+# Accessors
     def gettag(self):
         return self._tag
     def getsection(self):
@@ -20,7 +22,7 @@ alignLocked(bool), thickness(float).'''
         '''Returns xmlTree as a list object'''
         return list( self._tree.iter() )
 
-    # Mutators
+# Mutators
     def chgtag(self, x):
         self._tag = str(x)
     def chgname(self, x):

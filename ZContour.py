@@ -1,7 +1,8 @@
 class ZContour:
     '''Creates a <serContour> object which represents Contours and ZCountours in /
 a .ser file. Contour and ZContour can be distinguished by tags.'''
-    # Python Functions
+# Python Functions
+    # INITIALIZE
     def __init__(self, node):
         self._tag = 'ZContour'
         self._name = str( node.attrib['name'] )
@@ -37,6 +38,7 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
                 #example: ['5.93694 3.75884 156', '5.46795 4.10569 144', '4.82797 4.41347 139',
                 #'4.77912 4.64308 124', '4.63744 4.97528 99']
         self._points = ptList
+    # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <ZContour> ) function'''
         return 'Contour object:\n-name: '+str(self.getname())+'\n-closed: ' \
@@ -44,7 +46,7 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
                +'\n-points: '+str(self.getpoints())+'\n'
 
-    # Accessors
+# Accessors
     def gettag(self):
         '''Returns Tag (str)'''
         return self._tag
@@ -72,7 +74,7 @@ separated by a single space)'''
         return self.getname(), self.getclosed(), self.getmode(), self.getbord(), \
                self.getfill(), self.getpoints
 
-    # Mutators
+# Mutators
     def chgtag(self, x):
         self._tag = str(x)
     def chgname(self, x):
