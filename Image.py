@@ -5,6 +5,7 @@ transform (object)'''
     # Python functions
     def __init__(self, node, transform):
         self._tag = 'Image'
+        self._name = node.attrib['src']
         self._src = node.attrib['src']
         self._mag = float( node.attrib['mag'] )
         self._cntrst = float( node.attrib['contrast'] )
@@ -12,7 +13,7 @@ transform (object)'''
         self._red = bool( node.attrib['red'].capitalize() )
         self._green = bool( node.attrib['green'].capitalize() )
         self._blue = bool( node.attrib['blue'].capitalize() )
-        self._trnsfrm = transform
+        self._transform = transform
     def __str__(self):
         '''Allows print( <image> ) function. Returns attributes as string.'''
         return 'Image Object:\n-src: %s\n-mag: %f\n-contrast: %f\n-brightness: %f\n\
@@ -45,7 +46,7 @@ transform (object)'''
         return self._blue
     def gettransform(self):
         '''transform ---> object'''
-        return self._trnsfrm
+        return self._transform
     def getattribs(self):
         '''Returns all attributes for <image>'''
         return self.getsrc(), self.getmag(), self.getcontrast(), \
@@ -70,4 +71,4 @@ transform (object)'''
     def chgblue(self, x):
         self._blue = bool(x)
     def chgtransform(self, x):
-        self._trnsfrm = x
+        self._transform = x

@@ -1,4 +1,4 @@
-from ObjectList import *
+# from ObjectList import *
 from Transform import *
 from Image import *
 from Contour import *
@@ -11,7 +11,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
     def __init__(self, xmlTree):
         # Create <section>
         self._name = xmlTree._name
-        self._list = ObjectList()
+        self._list = []
         self._tag = 'Section'
         # Create <section> attributes
         self._index = xmlTree.getsection()[0]
@@ -24,13 +24,13 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
                 tmpT = Transform(node)
             elif node.tag == 'Image':
                 I = Image(node, tmpT)
-                self._list.addO(I)
+                self._list.append(I)
             elif node.tag == 'Contour':
                 C = Contour(node, tmpT)
-                self._list.addO(C)
+                self._list.append(C)
             elif node.tag == 'ZContour':
                 Z = ZContour(node, tmpT)
-                self._list.addO(Z)
+                self._list.append(Z)
     # LENGTH
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length'''

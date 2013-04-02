@@ -1,4 +1,3 @@
-from ObjectList import *
 from Contour import *
 from ZContour import *
 from xmlTree import *
@@ -13,7 +12,8 @@ it'''
 of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
 ##        self._name = str(path_to_sections)
         self._tag = 'Series'
-        self._list = ObjectList()
+        self._list = []
+
     # Variables extracted from file
         # Those that need to be in list type are done so below
         self._index = int(xmlTree._tree.getroot().attrib['index'])
@@ -102,16 +102,16 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._mvmtIncrement = xmlTree._tree.getroot().attrib['mvmtIncrement'] #str --modified--> list
         self._ctrlIncrement = xmlTree._tree.getroot().attrib['ctrlIncrement'] #str --modified--> list
         self._shiftIncrement = xmlTree._tree.getroot().attrib['shiftIncrement'] #str --modified--> list
-        self._contours = ObjectList() #List of <Contour> and <ZContour> objects
+        self._contours = []
         ######### Variable modifications ================
         #self._contours
         for node in xmlTree.gettreelist():
             if node.tag == 'Contour':
                 C = Contour(node)
-                self._contours.addO(C)
+                self._contours.append(C)
             elif node.tag == 'ZContour': #=========
                 Z = ZContour(node)
-                self._contours.addO(Z)
+                self._contours.append(Z)
         # viewport
         rawList = list(self._viewport.split(' '))
         tmpList = []
@@ -238,4 +238,4 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._tag = str(x)
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
-        self._list._list.append(section)
+        self._list.append(section)
