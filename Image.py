@@ -49,9 +49,9 @@ transform (object)'''
         return self._transform
     def getattribs(self):
         '''Returns all attributes for <image>'''
-        return self.getsrc(), self.getmag(), self.getcontrast(), \
-               self.getbrightness(), self.getred(), self.getgreen(), \
-               self.getblue(), self.gettransform()
+        return self._mag, self._cntrst, self._bright, \
+            self._red, self._green, self._blue, self._src
+
 
     # Mutators
     def chgtag(self, x):

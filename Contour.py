@@ -11,6 +11,7 @@ class Contour:
             self._name = str( node.attrib['name'] )
             self._closed = bool( node.attrib['closed'].capitalize() )
             self._mode = int( node.attrib['mode'] )
+            self._transform = None
             self._border = []
             self._fill = []
             self._points = [] # Points in form: (int, int)
@@ -32,7 +33,7 @@ class Contour:
                +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
-               +'\n-points: '+str(self.getpoints())+'\n-transform: '+str(self._transform)+'\n'
+               +'\n-points: '+str(self.getpoints())+'\n'+str(self._transform)+'\n'
 
 # Accessors
     def gettracepts(self):
@@ -75,7 +76,7 @@ separated by a single space)'''
     def getattribs(self):
         '''Returns all contour attributes'''
         return self.getname(), self.gethidden(), self.getclosed(), self.getsimp(), \
-               self.getmode(), self.getbord(), self.getfill(), self.getpoints
+               self.getbord(), self.getfill(), self.getmode(), self.getpoints()
 
 # Mutators
     def popborder(self, node):

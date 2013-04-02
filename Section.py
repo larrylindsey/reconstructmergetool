@@ -48,16 +48,19 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
 # Accessors
     def gettag(self):
         '''--> (str)'''
-        return self._tag
+        return str(self._tag)
     def getindex(self):
         '''--> (int)'''
-        return self._index
+        return int(self._index)
     def getthickness(self):
         '''--> (float)'''
-        return self._thick
+        return float(self._thick)
     def getalignlock(self):
         '''--> (bool)''' 
-        return self._alignLock
+        return bool(self._alignLock)
+    def getattribs(self):
+        '''Return main attributes as tuple'''
+        return self.getindex(), self.getthickness(), self.getalignlock()
 
 # Mutators
     def chgtag(self, x):

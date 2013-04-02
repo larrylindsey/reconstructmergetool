@@ -10,14 +10,13 @@
 #  Date Last Modified: 4/2/2013
 #
 # Currently working on:
-    #===== Replace objectlist() class with regular lists
-    #===== XML file creation
+    #===== XML file creation (testingstuff.py)
+        # Problem: Outputting transform for every object rather than mult. objects within a single transform
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
         # 3) check if read similarly in reconstruct
     #===== ZContour: turn points into list of ints/floats/tuples rather than strings
     #===== Check comments/docstrings
-from xmlOut import *
 from xmlTree import *
 from Series import *
 from Section import *
@@ -56,12 +55,5 @@ series.addsection(section)
 # print(contour.gettracepts())
 # print(contour.getworldpts())
 
-# 5) Write section to XML
-x = xmlOut(section)
-print(x)
-print( len(section._list) )
-print( section._list[13]._name)
-for elem in section._list:
-    print(elem)
 
     
