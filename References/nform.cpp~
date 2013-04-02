@@ -47,7 +47,7 @@ void Nform::Clear()
    dim = 0;				// the identity Nform requires no computations
 }
 
-double Nform::X( double x, double y ) //Xcoefs
+double Nform::X( double x, double y ) // Xcoefs ========================
 {
 	double result;
 	switch (dim) {
@@ -75,7 +75,7 @@ double Nform::X( double x, double y ) //Xcoefs
 	return result;
 }
 
-double Nform::Y( double x, double y ) //Ycoefs
+double Nform::Y( double x, double y ) // Ycoefs ========================
 {
 	double result;
 	switch (dim) {

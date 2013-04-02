@@ -61,13 +61,13 @@ double Nform::X( double x, double y ) // Xcoefs ========================
 		result = a[0] + a[1]*x + a[2]*y;
 		break;
 	case 4:
-		result = a[0] + (a[1] + a[3]*y)*x + a[2]*y;
+		result = a[0] + (a[1] + a[3]*y)*x + a[2]*y; // a[0] + a[1]x +a[2]y + a[3]xy
 		break;
 	case 5:
-		result = a[0] + (a[1] + a[3]*y + a[4]*x)*x + a[2]*y;
+		result = a[0] + (a[1] + a[3]*y + a[4]*x)*x + a[2]*y; // a[0] + a[1]x + a[2]y + a[3]xy + a[4]xx
 		break;
 	case 6:
-		result = a[0] + (a[1] + a[3]*y + a[4]*x)*x + (a[2] + a[5]*y)*y;
+		result = a[0] + (a[1] + a[3]*y + a[4]*x)*x + (a[2] + a[5]*y)*y; // a[0] + a[1]x + a[2]y + a[3]xy + a[4]xx + a[5]yy
 		break;
 	default:
 		result = x;						 // identity
@@ -89,13 +89,13 @@ double Nform::Y( double x, double y ) // Ycoefs ========================
 		result = b[0] + b[1]*x + b[2]*y;
 		break;
 	case 4:
-		result = b[0] + (b[1] + b[3]*y)*x + b[2]*y;
+		result = b[0] + (b[1] + b[3]*y)*x + b[2]*y; // b[0] + b[1]x + b[2]y + b[3]xy
 		break;
 	case 5:
-		result = b[0] + (b[1] + b[3]*y + b[4]*x)*x + b[2]*y;
+		result = b[0] + (b[1] + b[3]*y + b[4]*x)*x + b[2]*y; // b[0] + b[1]x + b[2]y + b[3]xy + b[4]xx
 		break;
 	case 6:
-		result = b[0] + (b[1] + b[3]*y + b[4]*x)*x + (b[2] + b[5]*y)*y;
+		result = b[0] + (b[1] + b[3]*y + b[4]*x)*x + (b[2] + b[5]*y)*y; // b[0] + b[1]x + b[2]y + b[3]xy + b[4]xx + b[5]yy
 		break;
 	default:
 		result = y;						 // identity

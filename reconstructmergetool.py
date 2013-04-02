@@ -7,11 +7,12 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 3/27/2013
+#  Date Last Modified: 4/1/2013
 #
 # Currently working on:
-    #===== turn points into list of ints/floats/tuples rather than strings (ZContour)
-    #===== transform functions in <Transform>
+    #===== write out xml ( ET.write() in all objects? def writeout() ) with dim = '0' & new pts
+    #===== ZContour: turn points into list of ints/floats/tuples rather than strings
+    #===== transform functions in <Contour> Dim = 2 condition and Dim 4-6
     #===== Use _tmatrix in <Transform> to change points in Contour object (scimage.transform)
     #===== Check comments/docstrings
 
@@ -38,10 +39,17 @@ series.addsection(section)
 
 # ====================================== Test code ======================================
 #Currently testing transform stuff on contour/transform objects
-print(section._list[1]._transform._dim)
-print(section._list[1]._transform._tmatrix)
+tree3 = xmlTree(path3)
+section = Section(tree3)
+print(section._list)
+for i in range(len(section)):
+    print section[i]
 
+contour = section[1]
+print(contour.gettracepts())
 
+contour = section[2]
+print(contour.gettracepts())
 
 
 
