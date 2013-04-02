@@ -1,6 +1,3 @@
-import numpy as np
-from skimage import transform as tf
-
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
@@ -8,9 +5,8 @@ class Contour:
 # Python Functions
     # INITIALIZE
     def __init__(self, node, transform=None):
-        '''Initializes the Contour object. Attributes vary depending on file type.'''
-        # Contours in .ser files
-        if transform == None:
+        '''Initializes the Contour object. Attributes vary depending on file type (.ser vs .xml).'''
+        if transform == None: # Contours in .ser files
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._closed = bool( node.attrib['closed'].capitalize() )
@@ -18,8 +14,7 @@ class Contour:
             self._border = []
             self._fill = []
             self._points = [] # Points in form: (int, int)
-        # Contours in .xml files
-        else:
+        else: # Contours in .xml files
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._hidden = bool( node.attrib['hidden'].capitalize() )
@@ -27,14 +22,9 @@ class Contour:
             self._simplified = bool( node.attrib['closed'].capitalize() )
             self._mode = int( node.attrib['mode'] )
             self._transform = transform # Transform object
-            self._border = []
-            self._fill = []
-            self._points = [] # Points in form: (float, float)
-        # Populate list attributes
-        self.popborder(node)
-        self.popfill(node)
-        self.poppoints(node)
-
+            self._border = self.popborder(node)
+            self._fill = self.popfill(node)
+            self._points = self.poppoints(node) # Points in form: (float, float)
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <Contourobject> ) function'''
@@ -44,24 +34,16 @@ class Contour:
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
                +'\n-points: '+str(self.getpoints())+'\n-transform: '+str(self._transform)+'\n'
 
-    # Accessors
+# Accessors
     def gettracepts(self):
-        '''Returns points associated with world space coordinates as a list of tuples'''
+        '''Returns points associated with trace space coordinates as a list of tuples (x,y)'''
         return self._points
     def getworldpts(self):
-        '''Returns points associated with trace space coordinates as a list of tuples'''
-        # Perform transform ===========
-        if self._transform._dim in range(0,4): #Dim <= 3; Affine
-            newpts = []
-            for ptset in self._points:
-                tform = tf.AffineTransform(self._transform._tmatrix)
-                newpts.append( tuple(tform(list(ptset))[0]) )
-            return newpts
-        else: #Dim 4-6; Polynomial
-            return
+        '''Returns points associated with world space coordinates as a list of tuples (x,y)'''
+        return self._transform.worldpts(self._points)
     def getiamgepts(self): 
-        '''Returns points associated with pixel space coordinates as a list of tuples'''
-        return #=================
+        '''Returns points associated with pixel space coordinates as a list of tuples (x,y)'''
+        return self._transform.imgpts() 
     def gettag(self):
         '''Returns Tag (str)'''
         return self._tag
@@ -95,17 +77,21 @@ separated by a single space)'''
         return self.getname(), self.gethidden(), self.getclosed(), self.getsimp(), \
                self.getmode(), self.getbord(), self.getfill(), self.getpoints
 
-    # Mutators
+# Mutators
     def popborder(self, node):
         '''Populates self._border'''
+        bord = []
         for char in node.attrib['border']:
             if char.isdigit():
-                self._border.append( int(char) )
+                bord.append( int(char) )
+        return bord
     def popfill(self, node):
         '''Populates self._fill'''
+        fill = []
         for char in node.attrib['fill']:
             if char.isdigit():
-                self._fill.append( int(char) )
+                fill.append( int(char) )
+        return fill
     def poppoints(self, node):
         '''Populates self._points'''
         partPoints = list(node.attrib['points'].lstrip(' ').split(','))
@@ -133,7 +119,7 @@ separated by a single space)'''
                 b=int(elem[1])
                 tup = (a,b)
                 tupList.append(tup)
-        self._points = tupList
+        return tupList
     def chgtag(self, x):
         self._tag = str(x)
     def chgname(self, x):

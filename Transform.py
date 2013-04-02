@@ -1,4 +1,5 @@
 import numpy as np
+from skimage import transform as tf
 
 class Transform:
     '''Transform object containing the following data: \nTag \nDim \nyCoef \nxCoef \ntmatrix'''
@@ -9,18 +10,14 @@ class Transform:
         # Attributes
         self._tag = 'Transform'
         self._dim = int(node.attrib['dim'])
-        self._ycoef = []
-        self._xcoef = []
-        self._tmatrix = []
-        # Populate list attributes
-        self.popyxcoef(node)
-        self.poptmat()
+        self._ycoef = self.popyxcoef(node)[0]
+        self._xcoef = self.popyxcoef(node)[1]
+        self._tform = self.poptform()
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <Transform> ) function'''
         return 'Transform object:\n-dim: '+str(self.getdim())+'\n-ycoef: ' \
-               +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef()) \
-               +'\n-tmatrix: '+str(self._tmatrix)
+               +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())
 
 # Accessors
     def gettag(self):
@@ -39,28 +36,50 @@ class Transform:
         '''Returns Dim, ycoefs, and xcoefs'''
         return self.getDim(), self.getycoef(), self.getxcoef()
 
-# Mutators
+# Mutators                
+    def poptform(self):
+        '''Creates self._tform variable which represents the transform'''
+        a = self._xcoef
+        b = self._ycoef
+        # Affine transform
+        if self._dim == 0:
+            tmatrix = np.array([1, 0, 0, 0, 1, 0, 0, 0, 1]).reshape((3,3))
+        elif self._dim == 1:
+            tmatrix = np.array([1, 0, a[0], 0, 1, b[0], 0, 0, 1]).reshape((3,3))
+        elif self._dim == 2: # Special case, swap b[1] and b[2]
+            tmatrix = np.array([a[1], 0, a[0], 0, b[1], b[0], 0, 0, 1]).reshape((3,3))
+        elif self._dim == 3:
+            tmatrix = np.array([a[1], a[2], a[0], b[1], b[2], b[0], 0, 0, 1]).reshape((3,3))
+        # Polynomial transform
+#         elif self._dim == 4:
+#         elif self._dim == 5:
+#         elif self._dim == 6:
+        return tf.AffineTransform(tmatrix)
+    def worldpts(self, points):
+        '''Returns worldpts'''
+        newpts = []
+        for ptset in points:
+            newpts.append( tuple(self._tform(list(ptset))[0]) )
+        return newpts
+    def imgpts(self, points):
+        '''Returns imgpts'''
+        return
     def popyxcoef(self, node):
         '''Populates self._ycoef and self._xcoef'''
         # digits added as int, everything else float
+        y = []
         for elem in node.attrib['ycoef'].split(' '):
             if elem.isdigit():
-                self._ycoef.append( int(elem) )
+                y.append( int(elem) )
             elif elem != '':
-                self._ycoef.append( float(elem) )
+                y.append( float(elem) )
+        x = []
         for elem in node.attrib['xcoef'].split(' '):
             if elem.isdigit(): 
-                self._xcoef.append( int(elem) )
+                x.append( int(elem) )
             elif elem != '':
-                self._xcoef.append( float(elem) )
-    def poptmat(self):
-        '''Populates self._tmatrix'''
-        a = self._xcoef
-        b = self._ycoef
-        if self._dim in range(0,4): # Dim: 0-3; Affine ============
-            self._tmatrix = np.array([a[1], a[2], a[0], b[1], b[2], b[0], 0, 0, 1]).reshape((3,3))
-        #elif self._dim in range(4,7): # Dim: 4-6; Polynomial ============
-         #   self._tmatrix = np.[]
+                x.append( float(elem) )
+        return y,x
     def chgtag(self, x):
         self._tag = str(x)
     def chgdim(self, x):

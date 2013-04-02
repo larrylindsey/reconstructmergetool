@@ -83,7 +83,7 @@ double Nform::Y( double x, double y ) // Ycoefs ========================
 		result = b[0] + y;
 		break;
 	case 2:
-		result = b[0] + b[1]*y;
+		result = b[0] + b[1]*y; // **SPECIAL CASE: b[1] multiplied by y instead of x**
 		break;
 	case 3:								 // affine transformation
 		result = b[0] + b[1]*x + b[2]*y;
