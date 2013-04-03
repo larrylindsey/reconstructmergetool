@@ -13,7 +13,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
 ##        self._name = str(path_to_sections)
         self._tag = 'Series'
         self._list = []
-        self._attribs = 'index', 'viewport', 'units', 'autoSaveSeries', \
+        self._attribs = ['index', 'viewport', 'units', 'autoSaveSeries', \
         'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \
         'hideTraces', 'unhideTraces', 'hideDomains', 'unhideDomains', 'useAbsolutePaths', \
         'defaultThickness', 'zMidSection', 'thumbWidth', 'thumbHeight', 'fitThumbSections', \

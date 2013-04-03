@@ -46,8 +46,8 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         '''--> (bool)''' 
         return bool(self._alignLock)
     def getattribs(self):
-        '''Return main attributes as tuple'''
-        return self.getindex(), self.getthickness(), self.getalignlock()
+        '''Return main attributes as strings'''
+        return str(self.getindex()), str(self.getthickness()), str(self.getalignlock())
 
 # Mutators       
     def chgtag(self, x):
