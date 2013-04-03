@@ -13,11 +13,27 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
 ##        self._name = str(path_to_sections)
         self._tag = 'Series'
         self._list = []
-
-    # Variables extracted from file
-        # Those that need to be in list type are done so below
+        self._attribs = 'index', 'viewport', 'units', 'autoSaveSeries', \
+        'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \
+        'hideTraces', 'unhideTraces', 'hideDomains', 'unhideDomains', 'useAbsolutePaths', \
+        'defaultThickness', 'zMidSection', 'thumbWidth', 'thumbHeight', 'fitThumbSections', \
+        'firstThumbSection', 'lastThumbSection', 'skipSections', 'displayThumbContours', \
+        'useFlipbookStyle', 'flipRate', 'useProxies', 'widthUseProxies', 'heightUseProxies', \
+        'scaleProxies', 'significantDigits', 'defaultBorder', 'defaultFill', 'defaultMode', \
+        'defaultName', 'defaultComment', 'listSectionThickness', 'listDomainSource', \
+        'listDomainPixelsize', 'listDomainLength', 'listDomainArea', 'listDomainMidpoint', \
+        'listTraceComment', 'listTraceLength', 'listTraceArea', 'listTraceCentroid', \
+        'listTraceExtent', 'listTraceZ', 'listTraceThickness', 'listObjectRange', \
+        'listObjectCount', 'listObjectSurfarea', 'listObjectFlatarea', 'listObjectVolume', \
+        'listZTraceNote', 'listZTraceRange', 'listZTraceLength', 'borderColors', 'fillColors', \
+        'offset3D', 'type3Dobject', 'first3Dsection', 'last3Dsection', 'max3Dconnection', \
+        'upper3Dfaces', 'lower3Dfaces', 'faceNormals', 'vertexNormals', 'facets3D', 'dim3D', \
+        'gridType', 'gridSize', 'gridDistance', 'gridNumber', 'hueStopWhen', 'hueStopValue', \
+        'satStopWhen', 'satStopValue', 'brightStopWhen', 'brightStopValue', 'tracesStopWhen', \
+        'areaStopPercent', 'areaStopSize', 'ContourMaskWidth', 'smoothingLength', \
+        'mvmtIncrement', 'ctrlIncrement', 'shiftIncrement']
         self._index = int(xmlTree._tree.getroot().attrib['index'])
-        self._viewport = xmlTree._tree.getroot().attrib['viewport'] #str --modified--> list
+        self._viewport = self.popviewport(xmlTree)
         self._units = str(xmlTree._tree.getroot().attrib['units'])
         self._autoSaveSeries = bool(xmlTree._tree.getroot().attrib['autoSaveSeries'].capitalize())
         self._autoSaveSection = bool(xmlTree._tree.getroot().attrib['autoSaveSection'].capitalize())
@@ -45,8 +61,8 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._heightUseProxies = int(xmlTree._tree.getroot().attrib['heightUseProxies'])
         self._scaleProxies = float(xmlTree._tree.getroot().attrib['scaleProxies'])
         self._significantDigits = int(xmlTree._tree.getroot().attrib['significantDigits'])
-        self._defaultBorder = xmlTree._tree.getroot().attrib['defaultBorder'] #str --modified--> list
-        self._defaultFill = xmlTree._tree.getroot().attrib['defaultFill'] #str --modified--> list
+        self._defaultBorder = self.popdefborder(xmlTree)
+        self._defaultFill = self.popdeffill(xmlTree)
         self._defaultMode = int(xmlTree._tree.getroot().attrib['defaultMode'])
         self._defaultName = str(xmlTree._tree.getroot().attrib['defaultName'])
         self._defaultComment = str(xmlTree._tree.getroot().attrib['defaultComment'])
@@ -71,9 +87,9 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._listZTraceNote = bool(xmlTree._tree.getroot().attrib['listZTraceNote'].capitalize())
         self._listZTraceRange = bool(xmlTree._tree.getroot().attrib['listZTraceRange'].capitalize())
         self._listZTraceLength = bool(xmlTree._tree.getroot().attrib['listZTraceLength'].capitalize())
-        self._borderColors = xmlTree._tree.getroot().attrib['borderColors'] #str --modified--> list
-        self._fillColors = xmlTree._tree.getroot().attrib['fillColors'] #str --modified--> list
-        self._offset3D = xmlTree._tree.getroot().attrib['offset3D'] #str --modified--> list
+        self._borderColors = self.popbordcolors(xmlTree)
+        self._fillColors = self.popfillcolors(xmlTree)
+        self._offset3D = self.popoffset3D(xmlTree)
         self._type3Dobject = int(xmlTree._tree.getroot().attrib['type3Dobject'])
         self._first3Dsection = int(xmlTree._tree.getroot().attrib['first3Dsection'])
         self._last3Dsection = int(xmlTree._tree.getroot().attrib['last3Dsection'])
@@ -83,11 +99,11 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._faceNormals = bool(xmlTree._tree.getroot().attrib['faceNormals'].capitalize())
         self._vertexNormals = bool(xmlTree._tree.getroot().attrib['vertexNormals'].capitalize())
         self._facets3D = int(xmlTree._tree.getroot().attrib['facets3D'])
-        self._dim3D = xmlTree._tree.getroot().attrib['dim3D'] #str --modified--> list
+        self._dim3D = self.popdim3D(xmlTree)
         self._gridType = int(xmlTree._tree.getroot().attrib['gridType'])
-        self._gridSize = xmlTree._tree.getroot().attrib['gridSize'] #str --modified--> list
-        self._gridDistance = xmlTree._tree.getroot().attrib['gridDistance'] #str --modified--> list
-        self._gridNumber = xmlTree._tree.getroot().attrib['gridNumber'] #str --modified--> list
+        self._gridSize = self.popgridsize(xmlTree)
+        self._gridDistance = self.popgriddistance(xmlTree)
+        self._gridNumber = self.popgridnumber(xmlTree)
         self._hueStopWhen = int(xmlTree._tree.getroot().attrib['hueStopWhen'])
         self._hueStopValue = int(xmlTree._tree.getroot().attrib['hueStopValue'])
         self._satStopWhen = int(xmlTree._tree.getroot().attrib['satStopWhen'])
@@ -99,119 +115,10 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._areaStopSize = int(xmlTree._tree.getroot().attrib['areaStopSize'])
         self._ContourMaskWidth = int(xmlTree._tree.getroot().attrib['ContourMaskWidth'])
         self._smoothingLength = int(xmlTree._tree.getroot().attrib['smoothingLength'])
-        self._mvmtIncrement = xmlTree._tree.getroot().attrib['mvmtIncrement'] #str --modified--> list
-        self._ctrlIncrement = xmlTree._tree.getroot().attrib['ctrlIncrement'] #str --modified--> list
-        self._shiftIncrement = xmlTree._tree.getroot().attrib['shiftIncrement'] #str --modified--> list
-        self._contours = []
-        ######### Variable modifications ================
-        #self._contours
-        for node in xmlTree.gettreelist():
-            if node.tag == 'Contour':
-                C = Contour(node)
-                self._contours.append(C)
-            elif node.tag == 'ZContour': #=========
-                Z = ZContour(node)
-                self._contours.append(Z)
-        # viewport
-        rawList = list(self._viewport.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._viewport = tmpList
-        #defaultBorder
-        rawList = list(self._defaultBorder.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._defaultBorder = tmpList
-        #defaultFill
-        rawList = list(self._defaultFill.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._defaultFill = tmpList
-        #borderColors (Floating points are reduced to 0.0 if no other digits)
-        #May need to output as 0.000 later =====================
-            #Split up string into a list of strings containing 3 float points 
-        splitList = self._borderColors.replace(',','').split('   ')
-            #Make a list of lists containing floating points
-        refinedList = []
-        for elem in splitList:
-            if elem != '':
-                strfloats = elem.split(' ')
-                intfloats = []
-                #Turn strings into floats
-                for num in strfloats:
-                    num = float(num)
-                    intfloats.append(num)
-                refinedList.append(intfloats)
-        self._borderColors = refinedList  
-        #fillColors (Floating points are reduced to 0.0 if no other digits)
-        #May need to output as 0.000 later =====================
-            #Split up string into a list of strings containing 3 float points 
-        splitList = self._fillColors.replace(',','').split('   ')
-            #Make a list of lists containing floating points
-        refinedList = []
-        for elem in splitList:
-            if elem != '':
-                strfloats = elem.split(' ')
-                intfloats = []
-                #Turn strings into floats
-                for num in strfloats:
-                    num = float(num)
-                    intfloats.append(num)
-                refinedList.append(intfloats)
-        self._fillColors = refinedList
-        #offset3D
-        rawList = list(self._offset3D.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._offset3D = tmpList
-        #dim3D
-        rawList = list(self._dim3D.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._dim3D = tmpList
-        #gridSize
-        rawList = list(self._gridSize.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._gridSize = tmpList
-        #gridDistance
-        rawList = list(self._gridDistance.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._gridDistance = tmpList
-        #gridNumber
-        rawList = list(self._gridNumber.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._gridNumber = tmpList
-        #mvmtIncrement
-        rawList = list(self._mvmtIncrement.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._mvmtIncrement = tmpList
-        #ctrlIncrement
-        rawList = list(self._ctrlIncrement.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._ctrlIncrement = tmpList
-        #shiftIncrement
-        rawList = list(self._shiftIncrement.split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
-        self._shiftIncrement = tmpList
-        
-        
+        self._mvmtIncrement = self.popmvmtincrement(xmlTree)
+        self._ctrlIncrement = self.popctrlincrement(xmlTree)
+        self._shiftIncrement = self.popshiftincrement(xmlTree)
+        self._contours = self.popcontours(xmlTree)   
     # INDEX REPRESENTATION
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
@@ -239,3 +146,125 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
         self._list.append(section)
+    def popcontours(self, xmlTree):
+        #self._contours
+        ret = []
+        for node in xmlTree.gettreelist():
+            if node.tag == 'Contour':
+                C = Contour(node)
+                ret.append(C)
+            elif node.tag == 'ZContour': #=========
+                Z = ZContour(node)
+                ret.append(Z)
+        return ret
+    def popviewport(self, xmlTree):
+        # viewport
+        rawList = list(xmlTree._tree.getroot().attrib['viewport'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popdefborder(self, xmlTree):
+        #defaultBorder
+        rawList = list(xmlTree._tree.getroot().attrib['defaultBorder'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popdeffill(self, xmlTree):
+        #defaultFill
+        rawList = list(xmlTree._tree.getroot().attrib['defaultFill'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popbordcolors(self, xmlTree):
+        #borderColors (Floating points are reduced to 0.0 if no other digits)
+        #May need to output as 0.000 later =====================
+            #Split up string into a list of strings containing 3 float points 
+        splitList = xmlTree._tree.getroot().attrib['borderColors'].replace(',','').split('   ')
+            #Make a list of lists containing floating points
+        refinedList = []
+        for elem in splitList:
+            if elem != '':
+                strfloats = elem.split(' ')
+                intfloats = []
+                #Turn strings into floats
+                for num in strfloats:
+                    num = float(num)
+                    intfloats.append(num)
+                refinedList.append(intfloats)
+        return refinedList
+    def popfillcolors(self, xmlTree): 
+        #fillColors (Floating points are reduced to 0.0 if no other digits)
+        #May need to output as 0.000 later =====================
+            #Split up string into a list of strings containing 3 float points 
+        splitList = xmlTree._tree.getroot().attrib['fillColors'].replace(',','').split('   ')
+            #Make a list of lists containing floating points
+        refinedList = []
+        for elem in splitList:
+            if elem != '':
+                strfloats = elem.split(' ')
+                intfloats = []
+                #Turn strings into floats
+                for num in strfloats:
+                    num = float(num)
+                    intfloats.append(num)
+                refinedList.append(intfloats)
+        return refinedList
+    def popoffset3D(self, xmlTree):
+        #offset3D
+        rawList = list(xmlTree._tree.getroot().attrib['offset3D'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popdim3D(self, xmlTree):
+        #dim3D
+        rawList = list(xmlTree._tree.getroot().attrib['dim3D'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popgridsize(self, xmlTree):
+        #gridSize
+        rawList = list(xmlTree._tree.getroot().attrib['gridSize'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popgriddistance(self, xmlTree):
+        #gridDistance
+        rawList = list(xmlTree._tree.getroot().attrib['gridDistance'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popgridnumber(self, xmlTree):
+        #gridNumber
+        rawList = list(xmlTree._tree.getroot().attrib['gridNumber'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popmvmtincrement(self, xmlTree):
+        #mvmtIncrement
+        rawList = list(xmlTree._tree.getroot().attrib['mvmtIncrement'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popctrlincrement(self, xmlTree):
+        #ctrlIncrement
+        rawList = list(xmlTree._tree.getroot().attrib['ctrlIncrement'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList
+    def popshiftincrement(self, xmlTree):
+        #shiftIncrement
+        rawList = list(xmlTree._tree.getroot().attrib['shiftIncrement'].split(' '))
+        tmpList = []
+        for elem in rawList:
+            tmpList.append( float(elem) )
+        return tmpList

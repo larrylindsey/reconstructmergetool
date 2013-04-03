@@ -11,26 +11,13 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
     def __init__(self, xmlTree):
         # Create <section>
         self._name = xmlTree._name
-        self._list = []
+        self._list = self.popseclist(xmlTree)
         self._tag = 'Section'
         # Create <section> attributes
         self._index = xmlTree.getsection()[0]
         self._thick = xmlTree.getsection()[1]
         self._alignLock = xmlTree.getsection()[2]
-        # Populate section with image, contour and transforms
-        tmpT = '' #current transform
-        for node in xmlTree.gettreelist():
-            if node.tag == 'Transform':
-                tmpT = Transform(node)
-            elif node.tag == 'Image':
-                I = Image(node, tmpT)
-                self._list.append(I)
-            elif node.tag == 'Contour':
-                C = Contour(node, tmpT)
-                self._list.append(C)
-            elif node.tag == 'ZContour':
-                Z = ZContour(node, tmpT)
-                self._list.append(Z)
+        self._attribs = ['index','thickness','alignLocked'] # List of attributes for xml output
     # LENGTH
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length'''
@@ -62,7 +49,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         '''Return main attributes as tuple'''
         return self.getindex(), self.getthickness(), self.getalignlock()
 
-# Mutators
+# Mutators       
     def chgtag(self, x):
         self._tag = str(x)
     def chgindex(self, x):
@@ -73,3 +60,20 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         self._alignLock = bool(x)
     def chgtag(self, x):
         self._tag = str(x)
+    def popseclist(self,xmlTree):
+        '''Populates section with Contours/Images/etc.'''
+        tmpT = '' #current transform
+        ret = []
+        for node in xmlTree.gettreelist():
+            if node.tag == 'Transform':
+                tmpT = Transform(node)
+            elif node.tag == 'Image':
+                I = Image(node, tmpT)
+                ret.append(I)
+            elif node.tag == 'Contour':
+                C = Contour(node, tmpT)
+                ret.append(C)
+            elif node.tag == 'ZContour':
+                Z = ZContour(node, tmpT)
+                ret.append(Z)
+        return ret 

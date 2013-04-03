@@ -15,6 +15,7 @@ class Contour:
             self._border = []
             self._fill = []
             self._points = [] # Points in form: (int, int)
+            self._attribs = ['name','closed','border','fill','mode','points'] # =======
         else: # Contours in .xml files
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
@@ -26,6 +27,7 @@ class Contour:
             self._border = self.popborder(node)
             self._fill = self.popfill(node)
             self._points = self.poppoints(node) # Points in form: (float, float)
+            self._attribs = ['name','hidden','closed','simplified','border','fill','mode','points']
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <Contourobject> ) function'''
@@ -74,11 +76,32 @@ class Contour:
 separated by a single space)'''
         return self._points
     def getattribs(self):
-        '''Returns all contour attributes'''
-        return self.getname(), self.gethidden(), self.getclosed(), self.getsimp(), \
-               self.getbord(), self.getfill(), self.getmode(), self.getpoints()
+        '''Returns all contour attributes (as string)'''
+        return str(self.getname()), str(self.gethidden()), str(self.getclosed()), str(self.getsimp()), \
+               str(self.getbord()), str(self.getfill()), str(self.getmode()), str(self.getpoints())
 
 # Mutators
+    def chgtag(self, x):
+        self._tag = str(x)
+    def chgname(self, x):
+        self._name = str(x)
+    def chghidden(self, x):
+        self._hidden = bool(x)
+    def chgclosed(self, x):
+        self._closed = bool(x)
+    def chgsimp(self, x):
+        self._simplified = bool(x)
+    def chgmode(self, x):
+        self._mode = int(x)
+    def chgbord(self, x):
+        '''List of ints'''
+        self._border = list(x)
+    def chgfill(self, x):
+        '''List of ints'''
+        self._fill = list(x)
+    def chgpoints(self, x):
+        '''List of strings'''
+        self._points = list(x)
     def popborder(self, node):
         '''Populates self._border'''
         bord = []
@@ -121,24 +144,3 @@ separated by a single space)'''
                 tup = (a,b)
                 tupList.append(tup)
         return tupList
-    def chgtag(self, x):
-        self._tag = str(x)
-    def chgname(self, x):
-        self._name = str(x)
-    def chghidden(self, x):
-        self._hidden = bool(x)
-    def chgclosed(self, x):
-        self._closed = bool(x)
-    def chgsimp(self, x):
-        self._simplified = bool(x)
-    def chgmode(self, x):
-        self._mode = int(x)
-    def chgbord(self, x):
-        '''List of ints'''
-        self._border = list(x)
-    def chgfill(self, x):
-        '''List of ints'''
-        self._fill = list(x)
-    def chgpoints(self, x):
-        '''List of strings'''
-        self._points = list(x)

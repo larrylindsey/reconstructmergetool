@@ -47,13 +47,13 @@ series.addsection(section)
 # for i in range(len(section)):
 #     print section[i]
 # 
-# contour = section[1]
-# print(contour.gettracepts())
-# print(contour.getworldpts())
+contour = section[1]
+print(contour.gettracepts())
+print(contour.getworldpts())
 # 
-# contour = section[2]
-# print(contour.gettracepts())
-# print(contour.getworldpts())
+contour = section[2]
+print(contour.gettracepts())
+print(contour.getworldpts())
 
 
     
