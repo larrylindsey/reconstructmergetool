@@ -11,7 +11,8 @@
 #
 # Currently working on:
     #===== XML file creation (testingstuff.py)
-        # Problem: Outputting transform for every object rather than mult. objects within a single transform
+        # Problems: Outputting transform for every object rather than mult. objects within a single transform
+        #           Output lists, tuples in correct format (e.g. points, etc.)
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
         # 3) check if read similarly in reconstruct
@@ -55,5 +56,5 @@ contour = section[2]
 print(contour.gettracepts())
 print(contour.getworldpts())
 
-
+print(series.getattribs())
     

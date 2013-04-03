@@ -137,6 +137,27 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         '''Prints the name of all the sections in a series'''
         for elem in self._list._list:
             print(elem._name)
+    def getattribs(self):
+        return (self._index, self._viewport, self._units, self._autoSaveSeries, \
+        self._autoSaveSection, self._warnSaveSection, self._beepDeleting, self._beepPaging, \
+        self._hideTraces, self._unhideTraces, self._hideDomains, self._unhideDomains, self._useAbsolutePaths, \
+        self._defaultThickness, self._zMidSection, self._thumbWidth, self._thumbHeight, self._fitThumbSections, \
+        self._firstThumbSection, self._lastThumbSection, self._skipSections, self._displayThumbContours, \
+        self._useFlipbookStyle, self._flipRate, self._useProxies, self._widthUseProxies, self._heightUseProxies, \
+        self._scaleProxies, self._significantDigits, self._defaultBorder, self._defaultFill, self._defaultMode, \
+        self._defaultName, self._defaultComment, self._listSectionThickness, self._listDomainSource, \
+        self._listDomainPixelsize, self._listDomainLength, self._listDomainArea, self._listDomainMidpoint, \
+        self._listTraceComment, self._listTraceLength, self._listTraceArea, self._listTraceCentroid, \
+        self._listTraceExtent, self._listTraceZ, self._listTraceThickness, self._listObjectRange, \
+        self._listObjectCount, self._listObjectSurfarea, self._listObjectFlatarea, self._listObjectVolume, \
+        self._listZTraceNote, self._listZTraceRange, self._listZTraceLength, self._borderColors, self._fillColors, \
+        self._offset3D, self._type3Dobject, self._first3Dsection, self._last3Dsection, self._max3Dconnection, \
+        self._upper3Dfaces, self._lower3Dfaces, self._faceNormals, self._vertexNormals, self._facets3D, self._dim3D, \
+        self._gridType, self._gridSize, self._gridDistance, self._gridNumber, self._hueStopWhen, self._hueStopValue, \
+        self._satStopWhen, self._satStopValue, self._brightStopWhen, self._brightStopValue, self._tracesStopWhen, \
+        self._areaStopPercent, self._areaStopSize, self._ContourMaskWidth, self._smoothingLength, \
+        self._mvmtIncrement, self._ctrlIncrement, self._shiftIncrement)
+        
 
 # Mutators
     def chgname(self, x):
