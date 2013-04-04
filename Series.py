@@ -138,6 +138,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         for elem in self._list._list:
             print(elem._name)
     def getattribs(self):
+        '''Attributes as strings for XML OUTPUT FORMATTING'''
         return (self._index, self._viewport, self._units, self._autoSaveSeries, \
         self._autoSaveSection, self._warnSaveSection, self._beepDeleting, self._beepPaging, \
         self._hideTraces, self._unhideTraces, self._hideDomains, self._unhideDomains, self._useAbsolutePaths, \

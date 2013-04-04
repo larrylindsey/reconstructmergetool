@@ -38,13 +38,19 @@ class Transform:
         return self._dim
     def getycoef(self):
         '''Returns ycoefs'''
-        return self._ycoef
+        ret = ''
+        for int in self._ycoef:
+            ret += ' '+str(int)
+        return ret
     def getxcoef(self):
         '''Returns xcoefs'''
-        return self._xcoef
+        ret = ''
+        for int in self._xcoef:
+            ret += ' '+str(int)
+        return ret
     def getattribs(self):
-        '''Returns Dim, ycoefs, and xcoefs (as string)'''
-        return str(self.getdim()), str(self.getycoef()), str(self.getxcoef())
+        '''Returns Dim, ycoefs, and xcoefs (as string) XML OUTPUT FORMATTING'''
+        return str(self.getdim()), str(self.getxcoef()), str(self.getycoef())
 
 # Mutators                
     def chgtag(self, x):

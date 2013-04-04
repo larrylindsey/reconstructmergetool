@@ -66,18 +66,23 @@ class Contour:
         '''Returns Mode attribute (int)'''
         return self._mode
     def getbord(self):
-        '''Returns Border attribute [ int, ... ]'''
-        return self._border
+        '''Returns Border attribute'''
+        ret = str(self._border[0])+' '+str(self._border[1])+' '+str(self._border[2])
+        return ret
     def getfill(self):
-        '''Returns Fill attribute [ int, ... ]'''
-        return self._fill
+        '''Returns Fill attribute'''
+        ret = str(self._fill[0])+' '+str(self._fill[1])+' '+str(self._fill[2])
+        return ret
     def getpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
-        return self._points
+        ret = ''
+        for tup in self._points:
+            ret += str(tup[0])+' '+str(tup[1])+', '
+        return ret
     def getattribs(self):
-        '''Returns all contour attributes (as string)'''
-        return str(self.getname()), str(self.gethidden()), str(self.getclosed()), str(self.getsimp()), \
+        '''Returns all contour attributes (as string) XML OUTPUT FORMATTING'''
+        return str(self.getname()), str(self.gethidden()).lower(), str(self.getclosed()).lower(), str(self.getsimp()).lower(), \
                str(self.getbord()), str(self.getfill()), str(self.getmode()), str(self.getpoints())
 
 # Mutators

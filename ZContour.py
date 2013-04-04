@@ -44,7 +44,7 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
 separated by a single space)'''
         return self._points
     def getattribs(self):
-        '''Returns all contour attributes as strings'''
+        '''Returns all contour attributes as strings XML OUTPUT FORMATTING'''
         return str(self.getname()), str(self.getclosed()), str(self.getmode()), str(self.getbord()), \
                str(self.getfill()), str(self.getpoints)
 

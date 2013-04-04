@@ -10,8 +10,8 @@
 #  Date Last Modified: 4/3/2013
 #
 # Currently working on:
-    #===== XML file creation (testingstuff.py)
-        # Problems: Outputting transform for every object rather than mult. objects within a single transform
+    #===== XML file creation (xmlOut)
+        # Problems: Attribs out of order (use ordereddictionary), Outputting transform for every object rather than mult. objects within a single transform
         #           Output lists, tuples in correct format (e.g. points, etc.)
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
@@ -41,17 +41,11 @@ section = Section(tree2)
 # 3) Populate <series> with sections
 series.addsection(section)
 
-# 4) Test transforms
-# tree3 = xmlTree(path3)
-# section = Section(tree3)
-# print(section._list)
-# for i in range(len(section)):
-#     print section[i]
-# 
+# ==========================
 contour = section[1]
 print(contour.gettracepts())
 print(contour.getworldpts())
-# 
+
 contour = section[2]
 print(contour.gettracepts())
 print(contour.getworldpts())

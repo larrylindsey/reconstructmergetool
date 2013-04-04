@@ -53,7 +53,7 @@ transform (object)'''
     def getattribs(self):
         '''Returns all attributes for <image> (as strings)'''
         return str(self._mag), str(self._cntrst), str(self._bright), \
-            str(self._red), str(self._green), str(self._blue), str(self._src)
+            str(self._red).lower(), str(self._green).lower(), str(self._blue).lower(), str(self._src)
 
 
 # Mutators
