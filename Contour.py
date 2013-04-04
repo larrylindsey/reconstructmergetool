@@ -6,7 +6,7 @@ class Contour:
     # INITIALIZE
     def __init__(self, node, transform=None):
         '''Initializes the Contour object. Attributes vary depending on file type (.ser vs .xml).'''
-        if transform == None: # Contours in .ser files
+        if transform == None: # Contours in .ser files dont have transform objects
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
             self._closed = bool( node.attrib['closed'].capitalize() )
@@ -14,8 +14,8 @@ class Contour:
             self._transform = None
             self._border = []
             self._fill = []
-            self._points = [] # Points in form: (int, int)
-            self._attribs = ['name','closed','border','fill','mode','points'] # =======
+            self._points = [] # [(int, int), ...]
+            self._attribs = ['name','closed','border','fill','mode','points']
         else: # Contours in .xml files
             self._tag = 'Contour'
             self._name = str( node.attrib['name'] )
@@ -26,11 +26,11 @@ class Contour:
             self._transform = transform # Transform object
             self._border = self.popborder(node)
             self._fill = self.popfill(node)
-            self._points = self.poppoints(node) # Points in form: (float, float)
+            self._points = self.poppoints(node) # [(float, float), ...]
             self._attribs = ['name','hidden','closed','simplified','border','fill','mode','points']
     # STRING REPRESENTATION
     def __str__(self):
-        '''Allows user to use print( <Contourobject> ) function'''
+        '''Allows user to use print(<Contour>) function'''
         return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \
                +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
@@ -39,13 +39,13 @@ class Contour:
 
 # Accessors
     def gettracepts(self):
-        '''Returns points associated with trace space coordinates as a list of tuples (x,y)'''
+        '''Returns trace space coordinates as [ (x,y), ... ]'''
         return self._points
     def getworldpts(self):
-        '''Returns points associated with world space coordinates as a list of tuples (x,y)'''
+        '''Returns world space coordinates as [ (x,y), ... ]'''
         return self._transform.worldpts(self._points)
     def getiamgepts(self): 
-        '''Returns points associated with pixel space coordinates as a list of tuples (x,y)'''
+        '''Returns pixel space coordinates as [ (x,y), ... ]'''
         return self._transform.imgpts() 
     def gettag(self):
         '''Returns Tag (str)'''
@@ -66,10 +66,10 @@ class Contour:
         '''Returns Mode attribute (int)'''
         return self._mode
     def getbord(self):
-        '''Returns Border attribute (list of ints)'''
+        '''Returns Border attribute [ int, ... ]'''
         return self._border
     def getfill(self):
-        '''Returns Fill attribute (list of ints)'''
+        '''Returns Fill attribute [ int, ... ]'''
         return self._fill
     def getpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \
