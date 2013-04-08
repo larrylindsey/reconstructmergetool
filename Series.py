@@ -10,8 +10,8 @@ it'''
     def __init__(self, xmlTree):
         '''Receives an xml file that is a list of sections in the form \
 of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
-##        self._name = str(path_to_sections)
         self._tag = 'Series'
+        self._name = xmlTree._name
         self._list = []
         self._attribs = ['index', 'viewport', 'units', 'autoSaveSeries', \
         'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \

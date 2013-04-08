@@ -12,9 +12,9 @@ class Contour:
             self._closed = bool( node.attrib['closed'].capitalize() )
             self._mode = int( node.attrib['mode'] )
             self._transform = None
-            self._border = []
-            self._fill = []
-            self._points = [] # [(int, int), ...]
+            self._border = [] #===
+            self._fill = [] #===
+            self._points = [] # ?[(int, int), ...] ===
             self._attribs = ['name','closed','border','fill','mode','points']
         else: # Contours in .xml files
             self._tag = 'Contour'
@@ -110,14 +110,14 @@ separated by a single space)'''
     def popborder(self, node):
         '''Populates self._border'''
         bord = []
-        for char in node.attrib['border']:
+        for char in node.attrib['border']: #===
             if char.isdigit():
                 bord.append( int(char) )
         return bord
     def popfill(self, node):
         '''Populates self._fill'''
         fill = []
-        for char in node.attrib['fill']:
+        for char in node.attrib['fill']: #===
             if char.isdigit():
                 fill.append( int(char) )
         return fill
@@ -137,15 +137,14 @@ separated by a single space)'''
         for elem in ptList:
             strTupList.append(tuple(elem.split(' ')))
         tupList = []
-        for elem in strTupList:
-            if '.' in elem[0]: #for floats
+        for elem in strTupList: # ===
+            if '.' in elem[0]:
                 a=float(elem[0])
+            if '.' in elem[1]:
                 b=float(elem[1])
-                tup = (a,b)
-                tupList.append(tup)
-            else: #for ints
+            if '.' not in elem[0] and '.' not in elem[1]:    
                 a=int(elem[0])
                 b=int(elem[1])
-                tup = (a,b)
-                tupList.append(tup)
+            tup = (a,b)
+            tupList.append(tup)
         return tupList

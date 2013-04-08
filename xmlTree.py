@@ -5,7 +5,7 @@ class xmlTree:
     # INITIALIZE
     def __init__(self, path):
         self._tag = 'xmltree'
-        self._name = str( path.rpartition('/')[2] ) #name = name of xml file
+        self._name = str( path.rpartition('/')[-1] ) #name = name of xml file
         self._tree = ET.parse(path) #object containing data
         self._treelist = self.gettreelist() #data in _tree stored as a list
 

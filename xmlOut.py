@@ -1,24 +1,40 @@
+import os
 import xml.etree.ElementTree as ET
 from xmlTree import *
 from Series import *
 from Section import *
 
-def main():
-    path = '/home/michaelm/Documents/reconstructmergetool/References/testing.xml'
-    tree = xmlTree(path)
-    section = Section(tree)
-    strlist = outsection(section)
-    output(strlist)
 
-def output(strlist):
-     for elem in strlist:
-         if '>' not in elem:
-             print(elem),
-         else:
-             print(elem+'\n')
-             if '/Transform' in elem:
-                 print('\n')
-                 
+#     tree = xmlTree(inpath)
+#     section = Section(tree)
+#     strlist = outsection(section)
+#     output(strlist, outpath, 'xml')
+      
+def output(strlist, outpath, type='xml', mode='w'):
+     #for file in os.listdir(inpath):
+     
+     if type == 'xml': #Write to xml file
+         f = open(outpath,mode)
+         f.write('<?xml version="1.0"?>\n')
+         f.write('<!DOCTYPE Section SYSTEM "section.dtd">\n\n')
+         for elem in strlist:
+             if '>' not in elem:
+                 f.write(elem),
+             else:
+                 elem = elem+'\n'
+                 f.write(elem)
+                 if '/Transform' in elem:
+                     f.write('\n')
+     
+     else: #Print to console
+         for elem in strlist:
+             if '>' not in elem:
+                 print(elem),
+             else:
+                 print(elem+'\n')
+                 if '/Transform' in elem:
+                     print('\n')
+                     
 def outsection(section):
     '''Returns a list of strings for xml output of a section'''
     attrib = getattribs(section)

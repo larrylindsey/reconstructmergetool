@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!DOCTYPE Section SYSTEM "section.dtd">
+
+<Section alignLocked="True" index="0" thickness="0.05">
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Image blue="true" brightness="-0.345" contrast="1.4" green="true" mag="0.0022159" red="true" src="R34CA1-B_S12.0.jpg" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 0 1" closed="true" fill="1 0 1" hidden="true" mode="11" name="domain1" points="0 0, 4096 0, 4096 4096, 0 4096, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 0 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="x" points="3.04479 3.59835, 8.40361 3.61195, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 0 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="x" points="3.09239 7.29104, 8.45122 7.30465, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 0 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="x" points="3.03799 5.3937, 8.39681 5.35289, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 0 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="x" points="3.58203 5.06047, 8.92045 5.06727, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="0 0 1" closed="true" fill="1 0 1" hidden="true" mode="9" name="y" points="5.19462 2.04568, 5.20385 7.25389, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="0 0 1" closed="true" fill="1 0 1" hidden="true" mode="9" name="y" points="5.73021 1.48239, 5.72098 6.72753, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="0 0 1" closed="true" fill="1 0 1" hidden="true" mode="9" name="y" points="6.25658 2.02722, 6.28428 7.26313, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="0 0 1" closed="true" fill="1 0 1" hidden="true" mode="9" name="y" points="7.35547 6.81064, 7.337 1.51009, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="0 0 1" closed="true" fill="1 0 1" hidden="true" mode="9" name="y" points="9.43321 1.48239, 9.46092 6.81064, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 0 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="x" points="3.07199 6.99182, 8.41041 7.01222, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 1 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="Xaftercalib" points="0.771098 1.77168, 5.46096 1.78157, " simplified="true" />
+</Transform>
+
+<Transform dim="0" xcoef=" 0 1 0 0 0 0" ycoef=" 0 0 1 0 0 0">
+<Contour border="1 1 0" closed="true" fill="1 0 1" hidden="true" mode="9" name="Yaftercalib" points="1.76052 6.80784, 1.72094 2.20702, " simplified="true" />
+</Transform>
+
+</Section>

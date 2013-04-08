@@ -74,6 +74,8 @@ class Transform:
             tmatrix = np.array([a[1], 0, a[0], 0, b[1], b[0], 0, 0, 1]).reshape((3,3))
         elif self._dim == 3:
             tmatrix = np.array([a[1], a[2], a[0], b[1], b[2], b[0], 0, 0, 1]).reshape((3,3))
+        else: # === PLACE HOLDER
+            tmatrix = np.array([1,0,0,0,1,0,0,0,1]).reshape((3,3))
         # Polynomial transform
 #         elif self._dim == 4:
 #         elif self._dim == 5:
