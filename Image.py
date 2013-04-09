@@ -11,9 +11,9 @@ transform (object)'''
         self._mag = float( node.attrib['mag'] )
         self._cntrst = float( node.attrib['contrast'] )
         self._bright = float( node.attrib['brightness'] )
-        self._red = bool( node.attrib['red'].capitalize() )
-        self._green = bool( node.attrib['green'].capitalize() )
-        self._blue = bool( node.attrib['blue'].capitalize() )
+        self._red = self.popred(node)
+        self._green = self.popgreen(node)
+        self._blue = self.popblue(node)
         self._transform = transform
         self._attribs = ['mag','contrast','brightness','red','green','blue','src']
     # STRING REPRESENTATION
@@ -57,6 +57,27 @@ transform (object)'''
 
 
 # Mutators
+    def popred(self, node):
+        if node.get('red', None) == None:
+            return None
+        elif node.attrib['red'].capitalize() == 'True':
+            return True
+        else:
+            return False
+    def popgreen(self, node):
+        if node.get('green', None) == None:
+            return None
+        elif node.attrib['green'].capitalize() == 'True':
+            return True
+        else:
+            return False
+    def popblue(self, node):
+        if node.get('blue', None) == None:
+            return None
+        elif node.attrib['blue'].capitalize() == 'True':
+            return True
+        else:
+            return False    
     def chgtag(self, x):
         self._tag = str(x)
     def chgsrc(self, x):

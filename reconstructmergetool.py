@@ -13,14 +13,14 @@
     #===== XML file creation (xmlOut)
         # Problems: Attribs out of order (use ordereddictionary),
         #           Outputting transform for every object rather than mult.
-        #           objects within a single transform
-        #           border,fill can be floats (Contour)
+        #           outputting None (e.g. .ser Contour hidden/simplified attributes)
+        #            ^ attribs list in all objects? xmlOut.getattribs()
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
         # 3) check if read similarly in reconstruct
     #===== ZContour: turn points into list of ints/floats/tuples rather than strings
     #===== Check comments/docstrings
-import os, magic
+import os, magic, xmlOut
 from xmlTree import *
 from Series import *
 from Section import *
@@ -32,19 +32,32 @@ def main():
 #SERIES
     #Make series object
     series = getser(inpath)
-
     
 #SECTIONS
     #Make list of all section files in inpath
     secList = getsec(inpath)
     #Add all section objects to series object
     for sec in secList:
-        print(sec)
         section = Section( xmlTree(inpath+sec) )
         series.addsection( section )
-    print('Sections appended to series')
+    print('Sections appended to Series: %s'%series._name)
 
+#WRITE OUT
+    #Series
+    print('Writing series file...'),
+    rawlist = xmlOut.outseries(series)
+    xmlOut.output(rawlist, outpath+series._name, 'ser')
+    print('DONE')
+    
+    #Sections
+    print('Writing section files...'),
+    for sec in series._list:   
+        rawlist = xmlOut.outsection(sec)
+        xmlOut.output(rawlist, outpath+sec._name, 'xml')
+    print('DONE')
+    print('\tFiles placed in: %s'%outpath)
 
+# HELPER FUNCTIONS
 def getser(inpath):
     '''Searches <inpath> for a .ser file and returns a <series> object for that file'''
     print('Creating series...'),
@@ -70,16 +83,3 @@ def getsec(inpath):
     return secList
 
 main()
-
-# ==========================
-# contour = section[1]
-# print(contour.gettracepts())
-# print(contour.getworldpts())
-# 
-# contour = section[2]
-# print(contour.gettracepts())
-# print(contour.getworldpts())
-# 
-# print(series.getattribs())
-# 
-
