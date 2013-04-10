@@ -41,7 +41,7 @@ def output(strlist, outpath, type='xml', mode='w'):
 def outseries(series):
     attrib = getattribs(series)
     a = ET.Element('Series', attrib)
-    for i in range(len(series._contours)): #Contour/ZContour
+    for i in range(len(series._contours)): #Contours/ZContours
         attdict = getattribs(series._contours[i])
         b = ET.SubElement(a, series._contours[i]._tag, attdict)
     return ET.tostringlist(a)
