@@ -60,7 +60,7 @@ class Contour:
         else:
             return int( node.attrib['mode'] )
     def poptransform(self, transform):
-        if transform == None:
+        if transform == None: #=== flag for img contours
             return None
         else:
             return transform

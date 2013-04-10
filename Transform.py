@@ -9,6 +9,7 @@ class Transform:
         '''Initializes the Transform object'''
         # Attributes
         self._tag = 'Transform'
+        self._name = 'Transform'
         self._dim = int(node.attrib['dim'])
         self._ycoef = self.popyxcoef(node)[0]
         self._xcoef = self.popyxcoef(node)[1]

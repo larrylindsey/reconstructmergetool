@@ -59,21 +59,21 @@ transform (object)'''
 # Mutators
     def popred(self, node):
         if node.get('red', None) == None:
-            return None
+            return True
         elif node.attrib['red'].capitalize() == 'True':
             return True
         else:
             return False
     def popgreen(self, node):
         if node.get('green', None) == None:
-            return None
+            return True
         elif node.attrib['green'].capitalize() == 'True':
             return True
         else:
             return False
     def popblue(self, node):
         if node.get('blue', None) == None:
-            return None
+            return True
         elif node.attrib['blue'].capitalize() == 'True':
             return True
         else:

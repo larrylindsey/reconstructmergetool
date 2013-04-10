@@ -47,7 +47,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         return bool(self._alignLock)
     def getattribs(self):
         '''Return main attributes as strings'''
-        return str(self.getindex()), str(self.getthickness()), str(self.getalignlock())
+        return str(self.getindex()), str(self.getthickness()), str(self.getalignlock()).lower()
 
 # Mutators       
     def chgtag(self, x):
@@ -73,7 +73,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
             elif node.tag == 'Contour':
                 C = Contour(node, tmpT)
                 ret.append(C)
-            elif node.tag == 'ZContour':
+            elif node.tag == 'ZContour': #=== can image have ZContour?
                 Z = ZContour(node, tmpT)
                 ret.append(Z)
         return ret 
