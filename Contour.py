@@ -1,3 +1,4 @@
+import xml.etree.ElementTree as ET
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
@@ -157,11 +158,28 @@ separated by a single space)'''
         for tup in self._points:
             ret += str(tup[0])+' '+str(tup[1])+', '
         return ret
-    def getattribs(self):
+    def getxattribs(self):
         '''Returns all contour attributes (as string) XML OUTPUT FORMATTING'''
         return str(self.getname()), str(self._comment), str(self.gethidden()).lower(), str(self.getclosed()).lower(), str(self.getsimp()).lower(), \
                str(self.getbord()), str(self.getfill()), str(self.getmode()), str(self.getpoints())
-
+    def getattribs(self): #===
+        '''Returns all attributes'''
+        return self._tag, \
+        self._name, \
+        self._comment, \
+        self._hidden, \
+        self._closed, \
+        self._simplified, \
+        self._mode, \
+        self._transform, \
+        self._border, \
+        self._fill, \
+        self._points, \
+        self._attribs
+    def retNode(self): #===
+        '''Returns an element node consisting of all necessary attributes'''
+        return
+        
 # Mutators
     def chgtag(self, x):
         self._tag = str(x)
