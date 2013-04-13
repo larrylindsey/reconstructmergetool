@@ -30,7 +30,7 @@ class Contour:
                +'\n-points: '+str(self.getpoints())+'\n'+str(self._transform)+'\n'
 # Populators
     def popcomment(self, node):
-        if node.get('comment', None) == None:
+        if node.get('comment', None) == None: #if doesn't exist
             return None
         else:
             return node.attrib['comment']

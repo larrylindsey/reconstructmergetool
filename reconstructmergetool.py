@@ -20,28 +20,41 @@
         # 3) check if read similarly in reconstruct
     #===== ZContour: turn points into list of ints/floats/tuples rather than strings
     #===== Check comments/docstrings
-import os, magic, xmlOut
-from xmlTree import *
+import os, xmlOut
+from xmlTree import * #===
 from Series import *
 from Section import *
-
+import xml.etree.ElementTree as ET
 def main():
-    inpath = '/home/michaelm/Documents/TestVolume/testin/'
-    outpath = '/home/michaelm/Documents/TestVolume/testout/'
+    #inpath = '/home/michaelm/Documents/TestVolume/testin/'
+    #outpath = '/home/michaelm/Documents/TestVolume/testout/'
+    path = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     
+
+#MAKE XML TREE
+    tree = ET.parse(path+'testing.xml')
+    root = tree.getroot()
+    transforms = root.getchildren()
+    for transform in transforms:
+        print(transform.get('dim'))
+
+main()
 #SERIES
     #Make series object
-    series = getser(inpath)
+    #series = getser(path)
     
 #SECTIONS
+#=========================================== 
+#===========================================
     #Make list of all section files in inpath
-    secList = getsec(inpath)
+    #secList = getsec(inpath)
     #Add all section objects to series object
-    for sec in secList:
-        section = Section( xmlTree(inpath+sec) )
-        series.addsection( section )
-    print('Section(s) appended to Series: %s'%series._name)
-
+    #for sec in secList:
+      #  section = Section( xmlTree(inpath+sec) )
+     #   series.addsection( section )
+    #('Section(s) appended to Series: %s'%series._name)
+def poo(): 
+    return
 #WRITE OUT
     #Series
     print('Writing series file...'),
@@ -82,4 +95,3 @@ def getsec(inpath):
     print('\t%d section(s) found in %s'%(count,inpath))
     return secList
 
-main()
