@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
@@ -27,7 +26,7 @@ class Contour:
                +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
-               +'\n-points: '+str(self.getpoints())+'\n'+str(self._transform)+'\n'
+               +'\n-points: '+str(self.getpoints())+'\n'
 # Populators
     def popcomment(self, node):
         if node.get('comment', None) == None: #if doesn't exist
@@ -107,7 +106,7 @@ class Contour:
             tupList.append(tup)
         return tupList
     def popattribs(self): #====
-        keys = ['name', 'comment', 'hidden','closed','simplified','border','fill','mode','points']
+        keys = ['tag', 'name', 'comment', 'hidden','closed','simplified','mode','border','fill','points']
         atts = list( self.getattribs() )
         count = 0
         for elem in atts:
@@ -171,11 +170,9 @@ separated by a single space)'''
         self._closed, \
         self._simplified, \
         self._mode, \
-        self._transform, \
         self._border, \
         self._fill, \
-        self._points, \
-        self._attribs
+        self._points
     def retNode(self): #===
         '''Returns an element node consisting of all necessary attributes'''
         return

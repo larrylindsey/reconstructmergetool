@@ -1,18 +1,18 @@
 from Contour import *
 from ZContour import *
-from xmlTree import *
 class Series:
     '''<Series> is an object with attributes: name \
 as well as a list containing all of the <Sections> objects associated with
 it'''
 # Python functions
     # INITIALIZE
-    def __init__(self, xmlTree):
+    def __init__(self, root, name='Unknown'):
         '''Receives an xml file that is a list of sections in the form \
 of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
-        self._tag = 'Series'
-        self._name = xmlTree._name
-        self._list = []
+        self._name = name
+        self._tag = root.tag
+        self._contours = self.popcontours(root)
+        self._sections = []
         self._attribs = ['index', 'viewport', 'units', 'autoSaveSeries', \
         'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \
         'hideTraces', 'unhideTraces', 'hideDomains', 'unhideDomains', 'useAbsolutePaths', \
@@ -32,93 +32,92 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         'satStopWhen', 'satStopValue', 'brightStopWhen', 'brightStopValue', 'tracesStopWhen', \
         'areaStopPercent', 'areaStopSize', 'ContourMaskWidth', 'smoothingLength', \
         'mvmtIncrement', 'ctrlIncrement', 'shiftIncrement']
-        self._index = int(xmlTree._tree.getroot().attrib['index'])
-        self._viewport = self.popviewport(xmlTree)
-        self._units = str(xmlTree._tree.getroot().attrib['units'])
-        self._autoSaveSeries = bool(xmlTree._tree.getroot().attrib['autoSaveSeries'].capitalize())
-        self._autoSaveSection = bool(xmlTree._tree.getroot().attrib['autoSaveSection'].capitalize())
-        self._warnSaveSection = bool(xmlTree._tree.getroot().attrib['warnSaveSection'].capitalize())
-        self._beepDeleting = bool(xmlTree._tree.getroot().attrib['beepDeleting'].capitalize())
-        self._beepPaging = bool(xmlTree._tree.getroot().attrib['beepPaging'].capitalize())
-        self._hideTraces = bool(xmlTree._tree.getroot().attrib['hideTraces'].capitalize())
-        self._unhideTraces = bool(xmlTree._tree.getroot().attrib['unhideTraces'].capitalize())
-        self._hideDomains = bool(xmlTree._tree.getroot().attrib['hideDomains'].capitalize())
-        self._unhideDomains = bool(xmlTree._tree.getroot().attrib['unhideDomains'].capitalize())
-        self._useAbsolutePaths = bool(xmlTree._tree.getroot().attrib['useAbsolutePaths'].capitalize())
-        self._defaultThickness = float(xmlTree._tree.getroot().attrib['defaultThickness'])
-        self._zMidSection = bool(xmlTree._tree.getroot().attrib['zMidSection'].capitalize())
-        self._thumbWidth = int(xmlTree._tree.getroot().attrib['thumbWidth'])
-        self._thumbHeight = int(xmlTree._tree.getroot().attrib['thumbHeight'])
-        self._fitThumbSections = bool(xmlTree._tree.getroot().attrib['fitThumbSections'].capitalize())
-        self._firstThumbSection = int(xmlTree._tree.getroot().attrib['firstThumbSection'])
-        self._lastThumbSection = int(xmlTree._tree.getroot().attrib['lastThumbSection'])
-        self._skipSections = int(xmlTree._tree.getroot().attrib['skipSections'])
-        self._displayThumbContours = bool(xmlTree._tree.getroot().attrib['displayThumbContours'].capitalize())
-        self._useFlipbookStyle = bool(xmlTree._tree.getroot().attrib['useFlipbookStyle'].capitalize())
-        self._flipRate = int(xmlTree._tree.getroot().attrib['flipRate'])
-        self._useProxies = bool(xmlTree._tree.getroot().attrib['useProxies'].capitalize())
-        self._widthUseProxies = int(xmlTree._tree.getroot().attrib['widthUseProxies'])
-        self._heightUseProxies = int(xmlTree._tree.getroot().attrib['heightUseProxies'])
-        self._scaleProxies = float(xmlTree._tree.getroot().attrib['scaleProxies'])
-        self._significantDigits = int(xmlTree._tree.getroot().attrib['significantDigits'])
-        self._defaultBorder = self.popdefborder(xmlTree)
-        self._defaultFill = self.popdeffill(xmlTree)
-        self._defaultMode = int(xmlTree._tree.getroot().attrib['defaultMode'])
-        self._defaultName = str(xmlTree._tree.getroot().attrib['defaultName'])
-        self._defaultComment = str(xmlTree._tree.getroot().attrib['defaultComment'])
-        self._listSectionThickness = bool(xmlTree._tree.getroot().attrib['listSectionThickness'].capitalize())
-        self._listDomainSource = bool(xmlTree._tree.getroot().attrib['listDomainSource'].capitalize())
-        self._listDomainPixelsize = bool(xmlTree._tree.getroot().attrib['listDomainPixelsize'].capitalize())
-        self._listDomainLength = bool(xmlTree._tree.getroot().attrib['listDomainLength'].capitalize())
-        self._listDomainArea = bool(xmlTree._tree.getroot().attrib['listDomainArea'].capitalize())
-        self._listDomainMidpoint = bool(xmlTree._tree.getroot().attrib['listDomainMidpoint'].capitalize())
-        self._listTraceComment = bool(xmlTree._tree.getroot().attrib['listTraceComment'].capitalize())
-        self._listTraceLength = bool(xmlTree._tree.getroot().attrib['listTraceLength'].capitalize())
-        self._listTraceArea = bool(xmlTree._tree.getroot().attrib['listTraceArea'].capitalize())
-        self._listTraceCentroid = bool(xmlTree._tree.getroot().attrib['listTraceCentroid'].capitalize())
-        self._listTraceExtent = bool(xmlTree._tree.getroot().attrib['listTraceExtent'].capitalize())
-        self._listTraceZ = bool(xmlTree._tree.getroot().attrib['listTraceZ'].capitalize())
-        self._listTraceThickness = bool(xmlTree._tree.getroot().attrib['listTraceThickness'].capitalize())
-        self._listObjectRange = bool(xmlTree._tree.getroot().attrib['listObjectRange'].capitalize())
-        self._listObjectCount = bool(xmlTree._tree.getroot().attrib['listObjectCount'].capitalize())
-        self._listObjectSurfarea = bool(xmlTree._tree.getroot().attrib['listObjectSurfarea'].capitalize())
-        self._listObjectFlatarea = bool(xmlTree._tree.getroot().attrib['listObjectFlatarea'].capitalize())
-        self._listObjectVolume = bool(xmlTree._tree.getroot().attrib['listObjectVolume'].capitalize())
-        self._listZTraceNote = bool(xmlTree._tree.getroot().attrib['listZTraceNote'].capitalize())
-        self._listZTraceRange = bool(xmlTree._tree.getroot().attrib['listZTraceRange'].capitalize())
-        self._listZTraceLength = bool(xmlTree._tree.getroot().attrib['listZTraceLength'].capitalize())
-        self._borderColors = self.popbordcolors(xmlTree)
-        self._fillColors = self.popfillcolors(xmlTree)
-        self._offset3D = self.popoffset3D(xmlTree)
-        self._type3Dobject = int(xmlTree._tree.getroot().attrib['type3Dobject'])
-        self._first3Dsection = int(xmlTree._tree.getroot().attrib['first3Dsection'])
-        self._last3Dsection = int(xmlTree._tree.getroot().attrib['last3Dsection'])
-        self._max3Dconnection = int(xmlTree._tree.getroot().attrib['max3Dconnection'])
-        self._upper3Dfaces = bool(xmlTree._tree.getroot().attrib['upper3Dfaces'].capitalize())
-        self._lower3Dfaces = bool(xmlTree._tree.getroot().attrib['lower3Dfaces'].capitalize())
-        self._faceNormals = bool(xmlTree._tree.getroot().attrib['faceNormals'].capitalize())
-        self._vertexNormals = bool(xmlTree._tree.getroot().attrib['vertexNormals'].capitalize())
-        self._facets3D = int(xmlTree._tree.getroot().attrib['facets3D'])
-        self._dim3D = self.popdim3D(xmlTree)
-        self._gridType = int(xmlTree._tree.getroot().attrib['gridType'])
-        self._gridSize = self.popgridsize(xmlTree)
-        self._gridDistance = self.popgriddistance(xmlTree)
-        self._gridNumber = self.popgridnumber(xmlTree)
-        self._hueStopWhen = int(xmlTree._tree.getroot().attrib['hueStopWhen'])
-        self._hueStopValue = int(xmlTree._tree.getroot().attrib['hueStopValue'])
-        self._satStopWhen = int(xmlTree._tree.getroot().attrib['satStopWhen'])
-        self._satStopValue = int(xmlTree._tree.getroot().attrib['satStopValue'])
-        self._brightStopWhen = int(xmlTree._tree.getroot().attrib['brightStopWhen'])
-        self._brightStopValue = int(xmlTree._tree.getroot().attrib['brightStopValue'])
-        self._tracesStopWhen = bool(xmlTree._tree.getroot().attrib['tracesStopWhen'].capitalize())
-        self._areaStopPercent = int(xmlTree._tree.getroot().attrib['areaStopPercent'])
-        self._areaStopSize = int(xmlTree._tree.getroot().attrib['areaStopSize'])
-        self._ContourMaskWidth = int(xmlTree._tree.getroot().attrib['ContourMaskWidth'])
-        self._smoothingLength = int(xmlTree._tree.getroot().attrib['smoothingLength'])
-        self._mvmtIncrement = self.popmvmtincrement(xmlTree)
-        self._ctrlIncrement = self.popctrlincrement(xmlTree)
-        self._shiftIncrement = self.popshiftincrement(xmlTree)
-        self._contours = self.popcontours(xmlTree)   
+        self._index = int(root.attrib['index'])
+        self._viewport = self.popviewport(root)
+        self._units = str(root.attrib['units'])
+        self._autoSaveSeries = bool(root.attrib['autoSaveSeries'].capitalize())
+        self._autoSaveSection = bool(root.attrib['autoSaveSection'].capitalize())
+        self._warnSaveSection = bool(root.attrib['warnSaveSection'].capitalize())
+        self._beepDeleting = bool(root.attrib['beepDeleting'].capitalize())
+        self._beepPaging = bool(root.attrib['beepPaging'].capitalize())
+        self._hideTraces = bool(root.attrib['hideTraces'].capitalize())
+        self._unhideTraces = bool(root.attrib['unhideTraces'].capitalize())
+        self._hideDomains = bool(root.attrib['hideDomains'].capitalize())
+        self._unhideDomains = bool(root.attrib['unhideDomains'].capitalize())
+        self._useAbsolutePaths = bool(root.attrib['useAbsolutePaths'].capitalize())
+        self._defaultThickness = float(root.attrib['defaultThickness'])
+        self._zMidSection = bool(root.attrib['zMidSection'].capitalize())
+        self._thumbWidth = int(root.attrib['thumbWidth'])
+        self._thumbHeight = int(root.attrib['thumbHeight'])
+        self._fitThumbSections = bool(root.attrib['fitThumbSections'].capitalize())
+        self._firstThumbSection = int(root.attrib['firstThumbSection'])
+        self._lastThumbSection = int(root.attrib['lastThumbSection'])
+        self._skipSections = int(root.attrib['skipSections'])
+        self._displayThumbContours = bool(root.attrib['displayThumbContours'].capitalize())
+        self._useFlipbookStyle = bool(root.attrib['useFlipbookStyle'].capitalize())
+        self._flipRate = int(root.attrib['flipRate'])
+        self._useProxies = bool(root.attrib['useProxies'].capitalize())
+        self._widthUseProxies = int(root.attrib['widthUseProxies'])
+        self._heightUseProxies = int(root.attrib['heightUseProxies'])
+        self._scaleProxies = float(root.attrib['scaleProxies'])
+        self._significantDigits = int(root.attrib['significantDigits'])
+        self._defaultBorder = self.popdefborder(root)
+        self._defaultFill = self.popdeffill(root)
+        self._defaultMode = int(root.attrib['defaultMode'])
+        self._defaultName = str(root.attrib['defaultName'])
+        self._defaultComment = str(root.attrib['defaultComment'])
+        self._listSectionThickness = bool(root.attrib['listSectionThickness'].capitalize())
+        self._listDomainSource = bool(root.attrib['listDomainSource'].capitalize())
+        self._listDomainPixelsize = bool(root.attrib['listDomainPixelsize'].capitalize())
+        self._listDomainLength = bool(root.attrib['listDomainLength'].capitalize())
+        self._listDomainArea = bool(root.attrib['listDomainArea'].capitalize())
+        self._listDomainMidpoint = bool(root.attrib['listDomainMidpoint'].capitalize())
+        self._listTraceComment = bool(root.attrib['listTraceComment'].capitalize())
+        self._listTraceLength = bool(root.attrib['listTraceLength'].capitalize())
+        self._listTraceArea = bool(root.attrib['listTraceArea'].capitalize())
+        self._listTraceCentroid = bool(root.attrib['listTraceCentroid'].capitalize())
+        self._listTraceExtent = bool(root.attrib['listTraceExtent'].capitalize())
+        self._listTraceZ = bool(root.attrib['listTraceZ'].capitalize())
+        self._listTraceThickness = bool(root.attrib['listTraceThickness'].capitalize())
+        self._listObjectRange = bool(root.attrib['listObjectRange'].capitalize())
+        self._listObjectCount = bool(root.attrib['listObjectCount'].capitalize())
+        self._listObjectSurfarea = bool(root.attrib['listObjectSurfarea'].capitalize())
+        self._listObjectFlatarea = bool(root.attrib['listObjectFlatarea'].capitalize())
+        self._listObjectVolume = bool(root.attrib['listObjectVolume'].capitalize())
+        self._listZTraceNote = bool(root.attrib['listZTraceNote'].capitalize())
+        self._listZTraceRange = bool(root.attrib['listZTraceRange'].capitalize())
+        self._listZTraceLength = bool(root.attrib['listZTraceLength'].capitalize())
+        self._borderColors = self.popbordcolors(root)
+        self._fillColors = self.popfillcolors(root)
+        self._offset3D = self.popoffset3D(root)
+        self._type3Dobject = int(root.attrib['type3Dobject'])
+        self._first3Dsection = int(root.attrib['first3Dsection'])
+        self._last3Dsection = int(root.attrib['last3Dsection'])
+        self._max3Dconnection = int(root.attrib['max3Dconnection'])
+        self._upper3Dfaces = bool(root.attrib['upper3Dfaces'].capitalize())
+        self._lower3Dfaces = bool(root.attrib['lower3Dfaces'].capitalize())
+        self._faceNormals = bool(root.attrib['faceNormals'].capitalize())
+        self._vertexNormals = bool(root.attrib['vertexNormals'].capitalize())
+        self._facets3D = int(root.attrib['facets3D'])
+        self._dim3D = self.popdim3D(root)
+        self._gridType = int(root.attrib['gridType'])
+        self._gridSize = self.popgridsize(root)
+        self._gridDistance = self.popgriddistance(root)
+        self._gridNumber = self.popgridnumber(root)
+        self._hueStopWhen = int(root.attrib['hueStopWhen'])
+        self._hueStopValue = int(root.attrib['hueStopValue'])
+        self._satStopWhen = int(root.attrib['satStopWhen'])
+        self._satStopValue = int(root.attrib['satStopValue'])
+        self._brightStopWhen = int(root.attrib['brightStopWhen'])
+        self._brightStopValue = int(root.attrib['brightStopValue'])
+        self._tracesStopWhen = bool(root.attrib['tracesStopWhen'].capitalize())
+        self._areaStopPercent = int(root.attrib['areaStopPercent'])
+        self._areaStopSize = int(root.attrib['areaStopSize'])
+        self._ContourMaskWidth = int(root.attrib['ContourMaskWidth'])
+        self._smoothingLength = int(root.attrib['smoothingLength'])
+        self._mvmtIncrement = self.popmvmtincrement(root)
+        self._ctrlIncrement = self.popctrlincrement(root)
+        self._shiftIncrement = self.popshiftincrement(root)  
     # INDEX REPRESENTATION
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
@@ -129,14 +128,21 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
 
 # Accessors
+    def output(self, outpath): #==
+        '''Creates a series (.ser) file in outpath'''
+        attributes = {}
+        keys = self._attribs
+        values = list(self.getattribs())
+        count = 0
+        for value in values:
+            attributes[keys[count]] = value
+            count += 1
+        print(attributes)
+        return attributes
     def getname(self):
         return self._name
     def gettag(self):
         return self._tag
-    def printsections(self):
-        '''Prints the name of all the sections in a series'''
-        for elem in self._list._list:
-            print(elem._name)
     def getattribs(self):
         '''Attributes as strings for XML OUTPUT FORMATTING'''
         return (self._index, self._viewport, self._units, self._autoSaveSeries, \
@@ -167,44 +173,44 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._tag = str(x)
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
-        self._list.append(section)
-    def popcontours(self, xmlTree):
+        self._sections.append(section)
+    def popcontours(self, root):
         #self._contours
         ret = []
-        for node in xmlTree.gettreelist():
-            if node.tag == 'Contour':
-                C = Contour(node)
+        for child in root:
+            if child.tag == 'Contour':
+                C = Contour(child)
                 ret.append(C)
-            elif node.tag == 'ZContour': #=========
-                Z = ZContour(node)
+            elif child.tag == 'ZContour': #=========
+                Z = ZContour(child)
                 ret.append(Z)
         return ret
-    def popviewport(self, xmlTree):
+    def popviewport(self, root):
         # viewport
-        rawList = list(xmlTree._tree.getroot().attrib['viewport'].split(' '))
+        rawList = list(root.attrib['viewport'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popdefborder(self, xmlTree):
+    def popdefborder(self, root):
         #defaultBorder
-        rawList = list(xmlTree._tree.getroot().attrib['defaultBorder'].split(' '))
+        rawList = list(root.attrib['defaultBorder'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popdeffill(self, xmlTree):
+    def popdeffill(self, root):
         #defaultFill
-        rawList = list(xmlTree._tree.getroot().attrib['defaultFill'].split(' '))
+        rawList = list(root.attrib['defaultFill'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popbordcolors(self, xmlTree):
+    def popbordcolors(self, root):
         #borderColors (Floating points are reduced to 0.0 if no other digits)
         #May need to output as 0.000 later =====================
             #Split up string into a list of strings containing 3 float points 
-        splitList = xmlTree._tree.getroot().attrib['borderColors'].replace(',','').split('   ')
+        splitList = root.attrib['borderColors'].replace(',','').split('   ')
             #Make a list of lists containing floating points
         refinedList = []
         for elem in splitList:
@@ -217,11 +223,11 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
                     intfloats.append(num)
                 refinedList.append(intfloats)
         return refinedList
-    def popfillcolors(self, xmlTree): 
+    def popfillcolors(self, root): 
         #fillColors (Floating points are reduced to 0.0 if no other digits)
         #May need to output as 0.000 later =====================
             #Split up string into a list of strings containing 3 float points 
-        splitList = xmlTree._tree.getroot().attrib['fillColors'].replace(',','').split('   ')
+        splitList = root.attrib['fillColors'].replace(',','').split('   ')
             #Make a list of lists containing floating points
         refinedList = []
         for elem in splitList:
@@ -234,58 +240,58 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
                     intfloats.append(num)
                 refinedList.append(intfloats)
         return refinedList
-    def popoffset3D(self, xmlTree):
+    def popoffset3D(self, root):
         #offset3D
-        rawList = list(xmlTree._tree.getroot().attrib['offset3D'].split(' '))
+        rawList = list(root.attrib['offset3D'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popdim3D(self, xmlTree):
+    def popdim3D(self, root):
         #dim3D
-        rawList = list(xmlTree._tree.getroot().attrib['dim3D'].split(' '))
+        rawList = list(root.attrib['dim3D'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popgridsize(self, xmlTree):
+    def popgridsize(self, root):
         #gridSize
-        rawList = list(xmlTree._tree.getroot().attrib['gridSize'].split(' '))
+        rawList = list(root.attrib['gridSize'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popgriddistance(self, xmlTree):
+    def popgriddistance(self, root):
         #gridDistance
-        rawList = list(xmlTree._tree.getroot().attrib['gridDistance'].split(' '))
+        rawList = list(root.attrib['gridDistance'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popgridnumber(self, xmlTree):
+    def popgridnumber(self, root):
         #gridNumber
-        rawList = list(xmlTree._tree.getroot().attrib['gridNumber'].split(' '))
+        rawList = list(root.attrib['gridNumber'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popmvmtincrement(self, xmlTree):
+    def popmvmtincrement(self, root):
         #mvmtIncrement
-        rawList = list(xmlTree._tree.getroot().attrib['mvmtIncrement'].split(' '))
+        rawList = list(root.attrib['mvmtIncrement'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popctrlincrement(self, xmlTree):
+    def popctrlincrement(self, root):
         #ctrlIncrement
-        rawList = list(xmlTree._tree.getroot().attrib['ctrlIncrement'].split(' '))
+        rawList = list(root.attrib['ctrlIncrement'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popshiftincrement(self, xmlTree):
+    def popshiftincrement(self, root):
         #shiftIncrement
-        rawList = list(xmlTree._tree.getroot().attrib['shiftIncrement'].split(' '))
+        rawList = list(root.attrib['shiftIncrement'].split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )

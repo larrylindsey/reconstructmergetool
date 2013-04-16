@@ -8,15 +8,14 @@ as well as a list containing <Image> and <Contour> objects. \
 Attributes printed with print(<Section>) objects in list printed with print(<Section>._list)'''
 # Python Functions
     # INITIALIZE
-    def __init__(self, xmlTree):
+    def __init__(self, root, name='Unknown'):
         # Create <section>
-        self._name = xmlTree._name
-        self._list = self.popseclist(xmlTree)
+        self._name = name
         self._tag = 'Section'
-        # Create <section> attributes
-        self._index = xmlTree.getsection()[0]
-        self._thick = xmlTree.getsection()[1]
-        self._alignLock = xmlTree.getsection()[2]
+        self._list = self.popseclist(root)
+        self._index = int(root.attrib['index'])
+        self._thick = float(root.attrib['thickness'])
+        self._alignLock = root.attrib['alignLocked']
         self._attribs = ['index','thickness','alignLocked'] # List of attributes for xml output
     # LENGTH
     def __len__(self):
@@ -33,47 +32,25 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
                                                                  self._thick, \
                                                                  self._alignLock)     
 # Accessors
-    def gettag(self):
-        '''--> (str)'''
-        return str(self._tag)
-    def getindex(self):
-        '''--> (int)'''
-        return int(self._index)
-    def getthickness(self):
-        '''--> (float)'''
-        return float(self._thick)
-    def getalignlock(self):
-        '''--> (bool)''' 
-        return bool(self._alignLock)
     def getattribs(self):
         '''Return main attributes as strings'''
-        return str(self.getindex()), str(self.getthickness()), str(self.getalignlock()).lower()
+        return str(self._index), str(self._thick), str(self._alignLock).lower()
 
 # Mutators       
-    def chgtag(self, x):
-        self._tag = str(x)
-    def chgindex(self, x):
-        self._index = int(x)
-    def chgthickness(self, x):
-        self._thick = float(x)
-    def chgalignlock(self, x):
-        self._alignLock = bool(x)
-    def chgtag(self, x):
-        self._tag = str(x)
-    def popseclist(self,xmlTree):
+    def popseclist(self, root):
         '''Populates section with Contours/Images/etc.'''
         tmpT = '' #current transform
         ret = []
-        for node in xmlTree.gettreelist():
-            if node.tag == 'Transform':
-                tmpT = Transform(node)
-            elif node.tag == 'Image':
-                I = Image(node, tmpT)
-                ret.append(I)
-            elif node.tag == 'Contour':
-                C = Contour(node, tmpT)
-                ret.append(C)
-            elif node.tag == 'ZContour': #=== can image have ZContour?
-                Z = ZContour(node, tmpT)
-                ret.append(Z)
+        for transform in root:
+            ret.append(Transform(transform))
+            for child in transform:
+                if child.tag == 'Image':
+                    I = Image(child, tmpT)
+                    ret.append(I)
+                elif child.tag == 'Contour':
+                    C = Contour(child, tmpT)
+                    ret.append(C)
+                elif child.tag == 'ZContour': #=== can image have ZContour?
+                    Z = ZContour(child, tmpT)
+                    ret.append(Z)
         return ret 

@@ -7,52 +7,122 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 4/10/2013
+#  Date Last Modified: 4/16/2013
 #
 # Currently working on:
     #===== XML file creation (xmlOut)
-        # Problems: Attribs out of order (use ordereddictionary),
-        #           outputting None (e.g. .ser Contour hidden/simplified attributes)
-        #            ^ attribs list in all objects? xmlOut.getattribs()
-        #           Image has own contour within single transsform
+        # To do: 
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
         # 3) check if read similarly in reconstruct
-    #===== ZContour: turn points into list of ints/floats/tuples rather than strings
-    #===== Check comments/docstrings
-import os, xmlOut
-from xmlTree import * #===
+        
+        # Problems:
+        # 1) Series attributes may not be correct (string, bools, lists)
+        # 2) Check output for xml, especially booleans/lists
+        # 3) xmlOut.py probably obsolete, keep in case
+import os,magic
 from Series import *
 from Section import *
 import xml.etree.ElementTree as ET
+
 def main():
-    #inpath = '/home/michaelm/Documents/TestVolume/testin/'
-    #outpath = '/home/michaelm/Documents/TestVolume/testout/'
-    path = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
+    # = = = = = = = = = = = = = = = = = = = = =
+    #Folder containing series and section files
+    inpath = '/home/michaelm/Documents/TestVolume/testin/'
+    outpath = 'home/michaelm/Documents/TestVolume/testout/'
+    # = = = = = = = = = = = = = = = = = = = = =
+    #1)Create series object
+    series = getseries(inpath)
+    #2)Append sections to series
+    getsections(series, inpath)
+    #3)Write series files
+    series.output(outpath)
     
+    
+    
+    
+    
+    
+    
+    
+    # === TESTING ===
+#     print('Series contours')
+#     for contour in series._contours:
+#         print(contour)
+#     print('\nSections & stuff')
+#     for section in series._sections:
+#         print(section)
+#         for elem in section._list:
+#             print(elem._tag)
+    
+    
+# HELPER FUNCTIONS
+def getseries(inpath):
+    print('Creating series...'),
+    ser = ''
+    #Get series path
+    for file in os.listdir(inpath):
+        if file.endswith('.ser'):
+            ser = str(file)
+    #Parse series
+    serpath = inpath + ser
+    tree = ET.parse(serpath)
+    root = tree.getroot() #Series
+    
+    #Create series object
+    series = Series(root, ser.replace('.ser',''))
+    print('DONE')
+    print('\tSeries: '+series._name)
+    return series
 
-#MAKE XML TREE
-    tree = ET.parse(path+'testing.xml')
-    root = tree.getroot()
-    transforms = root.getchildren()
-    for transform in transforms:
-        print(transform.get('dim'))
+def getsections(series, inpath):
+    #Build list of paths to sections
+    print('Finding sections...'),
+    pathlist = []
+    count = 0
+    for file in os.listdir(inpath):
+        if 'XML' in str(magic.from_file(inpath+file)) and '.ser' not in file:
+            pathlist.append( str(file) )
+            count+=1
+    print('DONE')
+    print('\t%d section(s) found in %s'%(count,inpath))
+    
+    #Create and add section objects to series
+    print('Creating section objects...'),
+    for sec in pathlist:
+        secpath = inpath + sec
+        tree = ET.parse(secpath)
+        root = tree.getroot() #Section
+        section = Section(root,sec)
+        series.addsection(section)
+    print('DONE')
 
+    
 main()
-#SERIES
-    #Make series object
-    #series = getser(path)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
-#SECTIONS
-#=========================================== 
-#===========================================
-    #Make list of all section files in inpath
-    #secList = getsec(inpath)
-    #Add all section objects to series object
-    #for sec in secList:
-      #  section = Section( xmlTree(inpath+sec) )
-     #   series.addsection( section )
-    #('Section(s) appended to Series: %s'%series._name)
+
 def poo(): 
     return
 #WRITE OUT
@@ -69,29 +139,4 @@ def poo():
         xmlOut.output(rawlist, outpath+sec._name, 'xml')
     print('DONE')
     print('\tFiles placed in: %s'%outpath)
-
-# HELPER FUNCTIONS
-def getser(inpath):
-    '''Searches <inpath> for a .ser file and returns a <series> object for that file'''
-    print('Creating series...'),
-    for file in os.listdir(inpath):
-        if file.endswith('.ser'):
-            tree = xmlTree(inpath+file)
-            series = Series(tree)
-    print('DONE')
-    print('\tSeries: '+series._name)
-    return series
-
-def getsec(inpath):
-    '''Searches <inpath> for section files and returns a list of all the sections'''
-    print('Finding sections...'),
-    secList = []
-    count = 0
-    for file in os.listdir(inpath):
-        if 'XML' in str(magic.from_file(inpath+file)) and '.ser' not in file: #====
-            secList.append( str(file) )
-            count+=1
-    print('DONE')
-    print('\t%d section(s) found in %s'%(count,inpath))
-    return secList
 
