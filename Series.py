@@ -137,8 +137,9 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         for value in values:
             attributes[keys[count]] = value
             count += 1
-        print(attributes)
         return attributes
+    
+    
     def getname(self):
         return self._name
     def gettag(self):

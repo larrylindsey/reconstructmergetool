@@ -60,7 +60,7 @@ class Contour:
         else:
             return int( node.attrib['mode'] )
     def poptransform(self, transform):
-        if transform == None: #=== flag for img contours
+        if transform == None:
             return None
         else:
             return transform
@@ -85,10 +85,10 @@ class Contour:
         ptList = []
         for i in range( len(partPoints) ):
             ptList.append( partPoints[i].strip() )
-        #remove empty points
+        #remove empty spots in list
         for i in range( len(ptList) ):
             if ptList[i] == '':
-                ptList.remove('') 
+                ptList.remove('')
         #convert strings into tuples
         strTupList = []
         for elem in ptList:

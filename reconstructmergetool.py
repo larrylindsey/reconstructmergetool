@@ -1,5 +1,5 @@
 #  Files: reconstructmergetool.py, Series.py, Section.py, Transform.py,
-#         Contour.py, ZContour.py, Image.py, ObjectList.py, xmlTree.py
+#         Contour.py, ZContour.py, Image.py
 #
 #  Description: Driver for reconstructmergetool
 #
@@ -27,48 +27,44 @@ import xml.etree.ElementTree as ET
 
 def main():
     # = = = = = = = = = = = = = = = = = = = = =
-    #Folder containing series and section files
-    inpath = '/home/michaelm/Documents/TestVolume/testin/'
-    outpath = 'home/michaelm/Documents/TestVolume/testout/'
+    #Input/Output paths
+    #inpath = '/home/michaelm/Documents/TestVolume/testin/'
+    #outpath = 'home/michaelm/Documents/TestVolume/testout/'
+    inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
+    outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
     #1)Create series object
     series = getseries(inpath)
     #2)Append sections to series
     getsections(series, inpath)
-    #3)Write series files
+    #3)Output series file
     series.output(outpath)
     
-    
-    
-    
-    
-    
-    
-    
     # === TESTING ===
-#     print('Series contours')
-#     for contour in series._contours:
-#         print(contour)
-#     print('\nSections & stuff')
-#     for section in series._sections:
-#         print(section)
-#         for elem in section._list:
-#             print(elem._tag)
+    print('Series contours')
+    for contour in series._contours:
+        print(contour)
+    print('\nSections & stuff')
+    for section in series._sections:
+        print(section)
+        for elem in section._list:
+            print(elem._tag)
+            
     
+    # === === === ===
     
 # HELPER FUNCTIONS
 def getseries(inpath):
     print('Creating series...'),
-    ser = ''
     #Get series path
+    ser = ''
     for file in os.listdir(inpath):
         if file.endswith('.ser'):
             ser = str(file)
     #Parse series
     serpath = inpath + ser
     tree = ET.parse(serpath)
-    root = tree.getroot() #Series
-    
+    root = tree.getroot() #Series    
     #Create series object
     series = Series(root, ser.replace('.ser',''))
     print('DONE')
@@ -86,7 +82,6 @@ def getsections(series, inpath):
             count+=1
     print('DONE')
     print('\t%d section(s) found in %s'%(count,inpath))
-    
     #Create and add section objects to series
     print('Creating section objects...'),
     for sec in pathlist:
@@ -97,46 +92,5 @@ def getsections(series, inpath):
         series.addsection(section)
     print('DONE')
 
-    
 main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-def poo(): 
-    return
-#WRITE OUT
-    #Series
-    print('Writing series file...'),
-    #rawlist = xmlOut.outseries(series)
-    #xmlOut.output(rawlist, outpath+series._name, 'ser')
-    print('DONE')
-    
-    #Sections
-    print('Writing section file(s)...'),
-    for sec in series._list:   
-        rawlist = xmlOut.outsection(sec)
-        xmlOut.output(rawlist, outpath+sec._name, 'xml')
-    print('DONE')
-    print('\tFiles placed in: %s'%outpath)
 
