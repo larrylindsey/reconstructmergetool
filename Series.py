@@ -61,8 +61,8 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._heightUseProxies = int(root.attrib['heightUseProxies'])
         self._scaleProxies = float(root.attrib['scaleProxies'])
         self._significantDigits = int(root.attrib['significantDigits'])
-        self._defaultBorder = self.popdefborder(root)
-        self._defaultFill = self.popdeffill(root)
+        self._defaultBorder = self.popdefborder(root) #===
+        self._defaultFill = self.popdeffill(root) #===
         self._defaultMode = int(root.attrib['defaultMode'])
         self._defaultName = str(root.attrib['defaultName'])
         self._defaultComment = str(root.attrib['defaultComment'])
@@ -87,9 +87,9 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._listZTraceNote = bool(root.attrib['listZTraceNote'].capitalize())
         self._listZTraceRange = bool(root.attrib['listZTraceRange'].capitalize())
         self._listZTraceLength = bool(root.attrib['listZTraceLength'].capitalize())
-        self._borderColors = self.popbordcolors(root)
-        self._fillColors = self.popfillcolors(root)
-        self._offset3D = self.popoffset3D(root)
+        self._borderColors = self.popbordcolors(root) #===
+        self._fillColors = self.popfillcolors(root) #===
+        self._offset3D = self.popoffset3D(root) #===
         self._type3Dobject = int(root.attrib['type3Dobject'])
         self._first3Dsection = int(root.attrib['first3Dsection'])
         self._last3Dsection = int(root.attrib['last3Dsection'])
@@ -99,9 +99,9 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._faceNormals = bool(root.attrib['faceNormals'].capitalize())
         self._vertexNormals = bool(root.attrib['vertexNormals'].capitalize())
         self._facets3D = int(root.attrib['facets3D'])
-        self._dim3D = self.popdim3D(root)
+        self._dim3D = self.popdim3D(root) #===
         self._gridType = int(root.attrib['gridType'])
-        self._gridSize = self.popgridsize(root)
+        self._gridSize = self.popgridsize(root) #===
         self._gridDistance = self.popgriddistance(root)
         self._gridNumber = self.popgridnumber(root)
         self._hueStopWhen = int(root.attrib['hueStopWhen'])
@@ -116,8 +116,8 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._ContourMaskWidth = int(root.attrib['ContourMaskWidth'])
         self._smoothingLength = int(root.attrib['smoothingLength'])
         self._mvmtIncrement = self.popmvmtincrement(root)
-        self._ctrlIncrement = self.popctrlincrement(root)
-        self._shiftIncrement = self.popshiftincrement(root)  
+        self._ctrlIncrement = self.popctrlincrement(root) #===
+        self._shiftIncrement = self.popshiftincrement(root) #===
     # INDEX REPRESENTATION
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
@@ -128,44 +128,44 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
 
 # Accessors
-    def output(self, outpath): #==
-        '''Creates a series (.ser) file in outpath'''
+    def output(self): #==
+        '''Returns a dictionary of attributes and a list of contours for building .ser xml file'''
         attributes = {}
         keys = self._attribs
-        values = list(self.getattribs())
+        values = list(self.xgetattribs())
         count = 0
         for value in values:
             attributes[keys[count]] = value
             count += 1
-        return attributes
-    
-    
-    def getname(self):
-        return self._name
-    def gettag(self):
-        return self._tag
+        return attributes, self._contours
     def getattribs(self):
-        '''Attributes as strings for XML OUTPUT FORMATTING'''
-        return (self._index, self._viewport, self._units, self._autoSaveSeries, \
-        self._autoSaveSection, self._warnSaveSection, self._beepDeleting, self._beepPaging, \
-        self._hideTraces, self._unhideTraces, self._hideDomains, self._unhideDomains, self._useAbsolutePaths, \
-        self._defaultThickness, self._zMidSection, self._thumbWidth, self._thumbHeight, self._fitThumbSections, \
-        self._firstThumbSection, self._lastThumbSection, self._skipSections, self._displayThumbContours, \
-        self._useFlipbookStyle, self._flipRate, self._useProxies, self._widthUseProxies, self._heightUseProxies, \
-        self._scaleProxies, self._significantDigits, self._defaultBorder, self._defaultFill, self._defaultMode, \
-        self._defaultName, self._defaultComment, self._listSectionThickness, self._listDomainSource, \
-        self._listDomainPixelsize, self._listDomainLength, self._listDomainArea, self._listDomainMidpoint, \
-        self._listTraceComment, self._listTraceLength, self._listTraceArea, self._listTraceCentroid, \
-        self._listTraceExtent, self._listTraceZ, self._listTraceThickness, self._listObjectRange, \
-        self._listObjectCount, self._listObjectSurfarea, self._listObjectFlatarea, self._listObjectVolume, \
-        self._listZTraceNote, self._listZTraceRange, self._listZTraceLength, self._borderColors, self._fillColors, \
-        self._offset3D, self._type3Dobject, self._first3Dsection, self._last3Dsection, self._max3Dconnection, \
-        self._upper3Dfaces, self._lower3Dfaces, self._faceNormals, self._vertexNormals, self._facets3D, self._dim3D, \
-        self._gridType, self._gridSize, self._gridDistance, self._gridNumber, self._hueStopWhen, self._hueStopValue, \
-        self._satStopWhen, self._satStopValue, self._brightStopWhen, self._brightStopValue, self._tracesStopWhen, \
-        self._areaStopPercent, self._areaStopSize, self._ContourMaskWidth, self._smoothingLength, \
-        self._mvmtIncrement, self._ctrlIncrement, self._shiftIncrement)
-        
+        '''Returns attributes as appropriate python data type'''
+    def xgetattribs(self):
+        '''Returns attributes in appropriate format for xml output'''
+        return (str(self._index), str(self.getviewport()), str(self._units), str(self._autoSaveSeries).lower(), \
+        str(self._autoSaveSection).lower(), str(self._warnSaveSection).lower(), str(self._beepDeleting).lower(), str(self._beepPaging).lower(), \
+        str(self._hideTraces).lower(), str(self._unhideTraces).lower(), str(self._hideDomains).lower(), str(self._unhideDomains).lower(), str(self._useAbsolutePaths).lower(), \
+        str(self._defaultThickness), str(self._zMidSection).lower(), str(self._thumbWidth), str(self._thumbHeight), str(self._fitThumbSections).lower(), \
+        str(self._firstThumbSection), str(self._lastThumbSection), str(self._skipSections), str(self._displayThumbContours).lower(), \
+        str(self._useFlipbookStyle).lower(), str(self._flipRate), str(self._useProxies).lower(), str(self._widthUseProxies), str(self._heightUseProxies), \
+        str(self._scaleProxies), str(self._significantDigits), str(self._defaultBorder), str(self._defaultFill), str(self._defaultMode), \
+        str(self._defaultName), str(self._defaultComment), str(self._listSectionThickness).lower(), str(self._listDomainSource).lower(), \
+        str(self._listDomainPixelsize).lower(), str(self._listDomainLength).lower(), str(self._listDomainArea).lower(), str(self._listDomainMidpoint).lower(), \
+        str(self._listTraceComment).lower(), str(self._listTraceLength).lower(), str(self._listTraceArea).lower(), str(self._listTraceCentroid), \
+        str(self._listTraceExtent).lower(), str(self._listTraceZ).lower(), str(self._listTraceThickness).lower(), str(self._listObjectRange).lower(), \
+        str(self._listObjectCount).lower(), str(self._listObjectSurfarea).lower(), str(self._listObjectFlatarea).lower(), str(self._listObjectVolume).lower(), \
+        str(self._listZTraceNote).lower(), str(self._listZTraceRange).lower(), str(self._listZTraceLength).lower(), str(self._borderColors), str(self._fillColors), \
+        str(self._offset3D), str(self._type3Dobject), str(self._first3Dsection), str(self._last3Dsection), str(self._max3Dconnection), \
+        str(self._upper3Dfaces).lower(), str(self._lower3Dfaces).lower(), str(self._faceNormals).lower(), str(self._vertexNormals).lower(), str(self._facets3D), str(self._dim3D), \
+        str(self._gridType), str(self._gridSize), str(self._gridDistance), str(self._gridNumber), str(self._hueStopWhen), str(self._hueStopValue), \
+        str(self._satStopWhen), str(self._satStopValue), str(self._brightStopWhen), str(self._brightStopValue), str(self._tracesStopWhen).lower(), \
+        str(self._areaStopPercent), str(self._areaStopSize), str(self._ContourMaskWidth), str(self._smoothingLength), \
+        str(self._mvmtIncrement), str(self._ctrlIncrement), str(self._shiftIncrement))
+    def getviewport(self):
+        ret = ''
+        for float in self._viewport:
+            ret += str(float)+' '
+        return ret.rstrip()
 
 # Mutators
     def chgname(self, x):
@@ -207,9 +207,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         for elem in rawList:
             tmpList.append( float(elem) )
         return tmpList
-    def popbordcolors(self, root):
-        #borderColors (Floating points are reduced to 0.0 if no other digits)
-        #May need to output as 0.000 later =====================
+    def popbordcolors(self, root): #=== should be new line every 3 pts in xml
             #Split up string into a list of strings containing 3 float points 
         splitList = root.attrib['borderColors'].replace(',','').split('   ')
             #Make a list of lists containing floating points
@@ -224,9 +222,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
                     intfloats.append(num)
                 refinedList.append(intfloats)
         return refinedList
-    def popfillcolors(self, root): 
-        #fillColors (Floating points are reduced to 0.0 if no other digits)
-        #May need to output as 0.000 later =====================
+    def popfillcolors(self, root): #=== should be new line every 3 pts in xml
             #Split up string into a list of strings containing 3 float points 
         splitList = root.attrib['fillColors'].replace(',','').split('   ')
             #Make a list of lists containing floating points

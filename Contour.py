@@ -13,11 +13,11 @@ class Contour:
         self._closed = self.popclosed(node)
         self._simplified = self.popsimplified(node)
         self._mode = self.popmode(node)
-        self._transform = self.poptransform(transform)
+        self._transform = transform
         self._border = self.popborder(node) #===
         self._fill = self.popfill(node) #===
         self._points = self.poppoints(node) #===
-        self._attribs = self.popattribs()
+        self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points']
 
     # STRING REPRESENTATION
     def __str__(self):
@@ -59,17 +59,12 @@ class Contour:
             return None
         else:
             return int( node.attrib['mode'] )
-    def poptransform(self, transform):
-        if transform == None:
-            return None
-        else:
-            return transform
-    def popborder(self, node):
+    def popborder(self, node): #can be ints or floats
         '''Populates self._border'''
         bord = []
-        for char in node.attrib['border']: #===
-            if char.isdigit():
-                bord.append( int(char) )
+#         for char in node.attrib['border']: #===
+#             if char.isdigit():
+#                 bord.append( int(char) )
         return bord
     def popfill(self, node):
         '''Populates self._fill'''
@@ -105,15 +100,7 @@ class Contour:
             tup = (a,b)
             tupList.append(tup)
         return tupList
-    def popattribs(self): #====
-        keys = ['tag', 'name', 'comment', 'hidden','closed','simplified','mode','border','fill','points']
-        atts = list( self.getattribs() )
-        count = 0
-        for elem in atts:
-            if elem in [None, 'none', 'None']:
-                keys.remove(keys[count])
-            count += 1
-        return keys
+
 # Accessors
     def gettracepts(self):
         '''Returns trace space coordinates as [ (x,y), ... ]'''
@@ -150,32 +137,34 @@ class Contour:
         '''Returns Fill attribute'''
         ret = str(self._fill[0])+' '+str(self._fill[1])+' '+str(self._fill[2])
         return ret
-    def getpoints(self):
+    def getxpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
         ret = ''
         for tup in self._points:
             ret += str(tup[0])+' '+str(tup[1])+', '
         return ret
-    def getxattribs(self):
-        '''Returns all contour attributes (as string) XML OUTPUT FORMATTING'''
-        return str(self.getname()), str(self._comment), str(self.gethidden()).lower(), str(self.getclosed()).lower(), str(self.getsimp()).lower(), \
-               str(self.getbord()), str(self.getfill()), str(self.getmode()), str(self.getpoints())
-    def getattribs(self): #===
+    def getattribs(self):
         '''Returns all attributes'''
-        return self._tag, \
-        self._name, \
-        self._comment, \
-        self._hidden, \
-        self._closed, \
-        self._simplified, \
-        self._mode, \
-        self._border, \
-        self._fill, \
-        self._points
-    def retNode(self): #===
-        '''Returns an element node consisting of all necessary attributes'''
-        return
+        return str(self._name), \
+        str(self._comment), \
+        str(self._hidden), \
+        str(self._closed), \
+        str(self._simplified), \
+        str(self._mode), \
+        str(self._border), \
+        str(self._fill), \
+        str(self.getxpoints())
+    def output(self): #===
+        '''Returns a dictionary of attributes'''
+        attributes = {}
+        keys = self._attribs
+        values = list(self.getattribs())
+        count = 0
+        for value in values:
+            attributes[keys[count]] = value
+            count += 1
+        return attributes
         
 # Mutators
     def chgtag(self, x):

@@ -7,7 +7,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 4/16/2013
+#  Date Last Modified: 4/17/2013
 #
 # Currently working on:
     #===== XML file creation (xmlOut)
@@ -17,38 +17,42 @@
         # 3) check if read similarly in reconstruct
         
         # Problems:
-        # 1) Series attributes may not be correct (string, bools, lists)
-        # 2) Check output for xml, especially booleans/lists
-        # 3) xmlOut.py probably obsolete, keep in case
+        # 1) Series.py needs appropriate output format
+        # 2) Default attributes to replace None type
+        # 3) Newline characters?
 import os,magic
 from Series import *
 from Section import *
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+from lxml import etree as ET
 
 def main():
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    #inpath = '/home/michaelm/Documents/TestVolume/testin/'
-    #outpath = 'home/michaelm/Documents/TestVolume/testout/'
-    inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
-    outpath = inpath
+    inpath = '/home/michaelm/Documents/TestVolume/testin/'
+    outpath = '/home/michaelm/Documents/TestVolume/testout/'
+    #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
+    #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
     #1)Create series object
     series = getseries(inpath)
     #2)Append sections to series
     getsections(series, inpath)
     #3)Output series file
-    series.output(outpath)
+    writeseries(series, outpath)
+    
+    
+    
     
     # === TESTING ===
-    print('Series contours')
-    for contour in series._contours:
-        print(contour)
-    print('\nSections & stuff')
-    for section in series._sections:
-        print(section)
-        for elem in section._list:
-            print(elem._tag)
+#     print('Series contours')
+#     for contour in series._contours:
+#         print(contour)
+#     print('\nSections & stuff')
+#     for section in series._sections:
+#         print(section)
+#         for elem in section._list:
+#             print(elem._tag)
             
     
     # === === === ===
@@ -92,5 +96,24 @@ def getsections(series, inpath):
         series.addsection(section)
     print('DONE')
 
+def writeseries(series, outpath):
+    print('Writing series file...'),
+    seriesoutpath = outpath+series._name+'.ser'
+    #Build series root element
+    attdict, contours = series.output()
+    element = ET.Element(series._tag, attdict)
+    #Build contour elements and append to root
+    for contour in contours:
+        element.append( ET.Element(contour._tag,contour.output()) )
+    #Xml tree wrapper
+    elemtree = ET.ElementTree(element)
+    for c in elemtree.iter():
+        print(c.attrib)
+    elemtree.write(seriesoutpath, pretty_print = True)
+    #ET.ElementTree(element).write(seriesoutpath)
+
+    print('DONE')
+    print('\tSeries output to: '+str(outpath+series._name+'.ser'))
+    
 main()
 
