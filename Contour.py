@@ -59,19 +59,17 @@ class Contour:
             return None
         else:
             return int( node.attrib['mode'] )
-    def popborder(self, node): #can be ints or floats
+    def popborder(self, node): #can be ints or floats #===
         '''Populates self._border'''
         bord = []
-#         for char in node.attrib['border']: #===
-#             if char.isdigit():
-#                 bord.append( int(char) )
+        for elem in list(node.attrib['border'].split(' ')):
+            bord.append(float(elem))
         return bord
-    def popfill(self, node):
+    def popfill(self, node): #===
         '''Populates self._fill'''
-        fill= list(node.attrib['fill'].split(' '))
-#         for char in node.attrib['fill']: #===
-#             if char.isdigit():
-#                 fill.append( int(char) )
+        fill = []
+        for elem in list(node.attrib['fill'].split(' ')):
+            fill.append(float(elem))
         return fill
     def poppoints(self, node):
         '''Populates self._points'''
@@ -137,32 +135,54 @@ class Contour:
         '''Returns Fill attribute'''
         ret = str(self._fill[0])+' '+str(self._fill[1])+' '+str(self._fill[2])
         return ret
-    def getxpoints(self):
+    def getxbord(self):
+        bord = ''
+        for elem in self._border:
+            bord += str(elem)+' '
+        return str(bord).rstrip()
+    def getxfill(self):
+        fill = ''
+        for elem in self._fill:
+            fill += str(elem)+' '
+        return str(fill).rstrip()
+    def getxpoints(self): #===
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
         ret = ''
         for tup in self._points:
             ret += str(tup[0])+' '+str(tup[1])+', '
-        return ret
+        return ret.rstrip()
     def getattribs(self):
         '''Returns all attributes'''
+        return self._name, \
+        self._comment, \
+        self._hidden, \
+        self._closed, \
+        self._simplified, \
+        self._mode, \
+        self._border, \
+        self._fill, \
+        self._points
+    def xgetattribs(self):
+        '''Returns all attributes in XML format'''
         return str(self._name), \
         str(self._comment), \
         str(self._hidden), \
-        str(self._closed), \
+        str(self._closed).lower(), \
         str(self._simplified), \
         str(self._mode), \
-        str(self._border), \
-        str(self._fill), \
-        str(self.getxpoints())
+        str(self.getxbord()), \
+        str(self.getxfill()), \
+        str(self.getxpoints()) 
     def output(self): #===
         '''Returns a dictionary of attributes'''
         attributes = {}
         keys = self._attribs
-        values = list(self.getattribs())
+        values = list(self.xgetattribs())
         count = 0
         for value in values:
-            attributes[keys[count]] = value
+            if value not in [None, 'None', 'none']:
+                attributes[keys[count]] = value
             count += 1
         return attributes
         

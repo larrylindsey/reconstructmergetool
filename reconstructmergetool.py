@@ -34,29 +34,14 @@ def main():
     #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
+    
     #1)Create series object
     series = getseries(inpath)
     #2)Append sections to series
     getsections(series, inpath)
     #3)Output series file
     writeseries(series, outpath)
-    
-    
-    
-    
-    # === TESTING ===
-#     print('Series contours')
-#     for contour in series._contours:
-#         print(contour)
-#     print('\nSections & stuff')
-#     for section in series._sections:
-#         print(section)
-#         for elem in section._list:
-#             print(elem._tag)
-            
-    
-    # === === === ===
-    
+
 # HELPER FUNCTIONS
 def getseries(inpath):
     print('Creating series...'),
@@ -107,9 +92,7 @@ def writeseries(series, outpath):
         element.append( ET.Element(contour._tag,contour.output()) )
     #Xml tree wrapper
     elemtree = ET.ElementTree(element)
-    for c in elemtree.iter():
-        print(c.attrib)
-    elemtree.write(seriesoutpath, pretty_print = True)
+    elemtree.write(seriesoutpath, pretty_print = True, xml_declaration=True, encoding="UTF-8")
     #ET.ElementTree(element).write(seriesoutpath)
 
     print('DONE')
