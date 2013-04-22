@@ -17,15 +17,13 @@
         # 3) check if read similarly in reconstruct
         
         # Problems:
-        # 1) Series.py needs appropriate output format
-        # 2) Default attributes to replace None type
-        # 3) Newline characters?
+        # 1) section files int vs float
+        
 import os,magic
 from Series import *
 from Section import *
-#import xml.etree.ElementTree as ET
 from lxml import etree as ET
-
+  
 def main():
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
@@ -41,7 +39,10 @@ def main():
     getsections(series, inpath)
     #3)Output series file
     writeseries(series, outpath)
-
+    #4)Output section file(s)
+    writesections(series, outpath)
+    
+    
 # HELPER FUNCTIONS
 def getseries(inpath):
     print('Creating series...'),
@@ -53,6 +54,7 @@ def getseries(inpath):
     #Parse series
     serpath = inpath + ser
     tree = ET.parse(serpath)
+
     root = tree.getroot() #Series    
     #Create series object
     series = Series(root, ser.replace('.ser',''))
@@ -86,17 +88,46 @@ def writeseries(series, outpath):
     seriesoutpath = outpath+series._name+'.ser'
     #Build series root element
     attdict, contours = series.output()
-    element = ET.Element(series._tag, attdict)
+    root = ET.Element(series._tag, attdict)
     #Build contour elements and append to root
     for contour in contours:
-        element.append( ET.Element(contour._tag,contour.output()) )
+        root.append( ET.Element(contour._tag,contour.output()) )
     #Xml tree wrapper
-    elemtree = ET.ElementTree(element)
+    elemtree = ET.ElementTree(root)
     elemtree.write(seriesoutpath, pretty_print = True, xml_declaration=True, encoding="UTF-8")
-    #ET.ElementTree(element).write(seriesoutpath)
-
     print('DONE')
     print('\tSeries output to: '+str(outpath+series._name+'.ser'))
+
+def writesections(series, outpath):
+    print('Writing section file(s)...'),
     
+    count = 0
+    for section in series._sections:
+        sectionoutpath = outpath+section._name
+        count += 1
+        #Build section root element
+        attdict = section.output()
+        root = ET.Element(section._tag, attdict)
+        curT = 'current transform'
+        for elem in section._list:
+            #If transform, make element and append to root
+            if elem._tag == 'Transform':
+                tmpT = ET.Element(elem._tag, elem.output())
+                if curT == 'current transform':
+                    curT = tmpT
+                #elif  tmpT != curT:
+                else:
+                    root.append(curT)
+                    curT = tmpT
+            #If not transform make element and append to transform
+            else:
+                subelem = ET.Element(elem._tag, elem.output())
+                curT.append(subelem)
+        root.append(curT)
+        elemtree = ET.ElementTree(root)
+        elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
+    print('DONE')
+    print('\t%d Section(s) output to: '+str(outpath))%count
 main()
+
 

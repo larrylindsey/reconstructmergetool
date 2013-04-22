@@ -32,10 +32,21 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
                                                                  self._thick, \
                                                                  self._alignLock)     
 # Accessors
+    def output(self):
+        '''Returns a dictionary of attributes and a list of contours for building xml'''
+        attributes = {}
+        keys = self._attribs
+        values = list(self.xgetattribs())
+        count = 0
+        for value in values:
+            attributes[keys[count]] = value
+            count += 1
+        return attributes
     def getattribs(self):
         '''Return main attributes as strings'''
+        return self._index, self._thick, self._alignLock
+    def xgetattribs(self):
         return str(self._index), str(self._thick), str(self._alignLock).lower()
-
 # Mutators       
     def popseclist(self, root):
         '''Populates section with Contours/Images/etc.'''

@@ -23,6 +23,16 @@ transform (object)'''
 -red: %s\n-green: %s\n-blue: %s\n-%s\n'%(self.getattribs())
 
 # Accessors
+    def output(self):
+        '''Returns a dictionary of attributes and a list of contours for building xml'''
+        attributes = {}
+        keys = self._attribs
+        values = list(self.xgetattribs())
+        count = 0
+        for value in values:
+            attributes[keys[count]] = value
+            count += 1
+        return attributes      
     def gettag(self):
         '''tag ---> string'''
         return self._tag
@@ -50,11 +60,12 @@ transform (object)'''
     def gettransform(self):
         '''transform ---> object'''
         return self._transform
-    def getattribs(self):
+    def xgetattribs(self):
         '''Returns all attributes for <image> (as strings)'''
         return str(self._mag), str(self._cntrst), str(self._bright), \
             str(self._red).lower(), str(self._green).lower(), str(self._blue).lower(), str(self._src)
-
+    def getattribs(self):
+        return self._mag, self._cntrst, self._bright, self._red, self._green, self._blue, self._src
 
 # Mutators
     def popred(self, node):

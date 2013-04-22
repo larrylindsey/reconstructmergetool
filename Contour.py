@@ -167,9 +167,9 @@ separated by a single space)'''
         '''Returns all attributes in XML format'''
         return str(self._name), \
         str(self._comment), \
-        str(self._hidden), \
+        str(self._hidden).lower(), \
         str(self._closed).lower(), \
-        str(self._simplified), \
+        str(self._simplified).lower(), \
         str(self._mode), \
         str(self.getxbord()), \
         str(self.getxfill()), \

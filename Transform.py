@@ -50,9 +50,21 @@ class Transform:
             ret += ' '+str(int)
         return ret
     def getattribs(self):
-        '''Returns Dim, ycoefs, and xcoefs (as string) XML OUTPUT FORMATTING'''
-        return str(self.getdim()), str(self.getxcoef()), str(self.getycoef())
-
+        '''Returns Dim, xcoefs, and ycoefs'''
+        return self._dim, self._xcoef, self._ycoef
+    def xgetattribs(self):
+        '''Returns dim, xcoefs, and ycoefs as strings for XML formatting'''
+        return str(self._dim), str(self.getxcoef()), str(self.getycoef())
+    def output(self):
+        '''Returns a dictionary of attributes and a list of contours for building xml'''
+        attributes = {}
+        keys = self._attribs
+        values = list(self.xgetattribs())
+        count = 0
+        for value in values:
+            attributes[keys[count]] = value
+            count += 1
+        return attributes      
 # Mutators                
     def chgtag(self, x):
         self._tag = str(x)
