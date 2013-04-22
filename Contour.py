@@ -9,9 +9,9 @@ class Contour:
         self._tag = 'Contour'
         self._name = str( node.attrib['name'] )
         self._comment = self.popcomment(node)
-        self._hidden = self.pophidden(node)
-        self._closed = self.popclosed(node)
-        self._simplified = self.popsimplified(node)
+        self._hidden = self.s2b(str(node.get('hidden'))) #self.pophidden(node)
+        self._closed = self.s2b(str(node.get('closed'))) #self.popclosed(node)
+        self._simplified = self.s2b(str(node.get('simplified'))) #self.popsimplified(node)
         self._mode = self.popmode(node)
         self._transform = transform
         self._border = self.popborder(node) #===
@@ -187,6 +187,9 @@ separated by a single space)'''
         return attributes
         
 # Mutators
+    def s2b(self, string):
+        '''Converts string to bool'''
+        return string.lower() in ('true')
     def chgtag(self, x):
         self._tag = str(x)
     def chgname(self, x):

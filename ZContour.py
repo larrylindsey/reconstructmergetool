@@ -44,10 +44,24 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
 separated by a single space)'''
         return self._points
     def getattribs(self):
-        '''Returns all contour attributes as strings XML OUTPUT FORMATTING'''
+        '''Returns all zcontour attributes'''
+        return self._name, self._closed, self._mode, self._border, \
+               self._fill, self._points
+    def xgetattribs(self):
+        '''Returns all zcontour attributes, xml formatting (strings)'''
         return str(self.getname()), str(self.getclosed()), str(self.getmode()), str(self.getbord()), \
-               str(self.getfill()), str(self.getpoints)
-
+               str(self.getfill()), str(self.getpoints())
+    def output(self): #===
+        '''Returns a dictionary of attributes'''
+        attributes = {}
+        keys = self._attribs
+        values = list(self.xgetattribs())
+        count = 0
+        for value in values:
+            if value not in [None, 'None', 'none']:
+                attributes[keys[count]] = value
+            count += 1
+        return attributes
 # Mutators
     def chgtag(self, x):
         self._tag = str(x)
