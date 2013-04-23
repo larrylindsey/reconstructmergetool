@@ -18,6 +18,7 @@
         
         # Problems:
         # 1) section files int vs float
+        # 2) reading appropriate files from directory
         
 import os,magic
 from Series import *
