@@ -4,19 +4,20 @@ class Contour:
   Mode \n   Points'''
 # Python Functions
     # INITIALIZE
-    def __init__(self, node, transform=None):
+    def __init__(self, node, imgflag=False, transform=None):
         '''Initializes the Contour object. Attributes vary depending on file type (.ser vs .xml).'''
         self._tag = 'Contour'
         self._name = str( node.attrib['name'] )
+        self._img = imgflag
         self._comment = self.popcomment(node)
-        self._hidden = self.s2b(str(node.get('hidden'))) #self.pophidden(node)
-        self._closed = self.s2b(str(node.get('closed'))) #self.popclosed(node)
-        self._simplified = self.s2b(str(node.get('simplified'))) #self.popsimplified(node)
+        self._hidden = self.s2b(str(node.get('hidden')))
+        self._closed = self.s2b(str(node.get('closed')))
+        self._simplified = self.s2b(str(node.get('simplified')))
         self._mode = self.popmode(node)
         self._transform = transform
-        self._border = self.popborder(node) #===
-        self._fill = self.popfill(node) #===
-        self._points = self.poppoints(node) #===
+        self._border = self.popborder(node)
+        self._fill = self.popfill(node)
+        self._points = self.poppoints(node)
         self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points']
 
     # STRING REPRESENTATION
@@ -26,7 +27,7 @@ class Contour:
                +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
-               +'\n-points: '+str(self.getpoints())+'\n'
+               +'\n-points: '+str(self._points)+'\n'
 # Populators
     def popcomment(self, node):
         if node.get('comment', None) == None: #if doesn't exist
@@ -59,13 +60,13 @@ class Contour:
             return None
         else:
             return int( node.attrib['mode'] )
-    def popborder(self, node): #can be ints or floats #===
+    def popborder(self, node):
         '''Populates self._border'''
         bord = []
         for elem in list(node.attrib['border'].split(' ')):
             bord.append(float(elem))
         return bord
-    def popfill(self, node): #===
+    def popfill(self, node):
         '''Populates self._fill'''
         fill = []
         for elem in list(node.attrib['fill'].split(' ')):
@@ -87,7 +88,7 @@ class Contour:
         for elem in ptList:
             strTupList.append(tuple(elem.split(' ')))
         tupList = []
-        for elem in strTupList: # ===
+        for elem in strTupList:
             if '.' in elem[0]:
                 a=float(elem[0])
             if '.' in elem[1]:

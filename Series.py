@@ -40,7 +40,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._warnSaveSection = self.s2b(root.attrib['warnSaveSection'])
         self._beepDeleting = self.s2b(root.attrib['beepDeleting'])
         self._beepPaging = self.s2b(root.attrib['beepPaging'])
-        self._hideTraces = self.s2b(root.attrib['hideTraces']) #==
+        self._hideTraces = self.s2b(root.attrib['hideTraces'])
         self._unhideTraces = self.s2b(root.attrib['unhideTraces'])
         self._hideDomains = self.s2b(root.attrib['hideDomains'])
         self._unhideDomains = self.s2b(root.attrib['unhideDomains'])
@@ -61,8 +61,8 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._heightUseProxies = int(root.attrib['heightUseProxies'])
         self._scaleProxies = float(root.attrib['scaleProxies'])
         self._significantDigits = int(root.attrib['significantDigits'])
-        self._defaultBorder = self.popdefborder(root) #===
-        self._defaultFill = self.popdeffill(root) #===
+        self._defaultBorder = self.popdefborder(root)
+        self._defaultFill = self.popdeffill(root)
         self._defaultMode = int(root.attrib['defaultMode'])
         self._defaultName = str(root.attrib['defaultName'])
         self._defaultComment = str(root.attrib['defaultComment'])
@@ -89,7 +89,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._listZTraceLength = self.s2b(root.attrib['listZTraceLength'])
         self._borderColors = self.popbordcolors(root)
         self._fillColors = self.popfillcolors(root)
-        self._offset3D = self.popoffset3D(root) #===
+        self._offset3D = self.popoffset3D(root)
         self._type3Dobject = int(root.attrib['type3Dobject'])
         self._first3Dsection = int(root.attrib['first3Dsection'])
         self._last3Dsection = int(root.attrib['last3Dsection'])
@@ -99,11 +99,11 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._faceNormals = self.s2b(root.attrib['faceNormals'])
         self._vertexNormals = self.s2b(root.attrib['vertexNormals'])
         self._facets3D = int(root.attrib['facets3D'])
-        self._dim3D = self.popdim3D(root) #===
+        self._dim3D = self.popdim3D(root)
         self._gridType = int(root.attrib['gridType'])
-        self._gridSize = self.popgridsize(root) #=== changed float to int
-        self._gridDistance = self.popgriddistance(root) #changed float to int
-        self._gridNumber = self.popgridnumber(root) #changed float to int
+        self._gridSize = self.popgridsize(root)
+        self._gridDistance = self.popgriddistance(root)
+        self._gridNumber = self.popgridnumber(root)
         self._hueStopWhen = int(root.attrib['hueStopWhen'])
         self._hueStopValue = int(root.attrib['hueStopValue'])
         self._satStopWhen = int(root.attrib['satStopWhen'])
@@ -116,8 +116,8 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._ContourMaskWidth = int(root.attrib['ContourMaskWidth'])
         self._smoothingLength = int(root.attrib['smoothingLength'])
         self._mvmtIncrement = self.popmvmtincrement(root)
-        self._ctrlIncrement = self.popctrlincrement(root) #===
-        self._shiftIncrement = self.popshiftincrement(root) #=== 
+        self._ctrlIncrement = self.popctrlincrement(root)
+        self._shiftIncrement = self.popshiftincrement(root)
     # INDEX REPRESENTATION
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
@@ -250,7 +250,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
             if child.tag == 'Contour':
                 C = Contour(child)
                 ret.append(C)
-            elif child.tag == 'ZContour': #=========
+            elif child.tag == 'ZContour':
                 Z = ZContour(child)
                 ret.append(Z)
         return ret

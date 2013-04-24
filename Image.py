@@ -19,8 +19,8 @@ transform (object)'''
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows print( <image> ) function. Returns attributes as string.'''
-        return 'Image Object:\n-src: %s\n-mag: %f\n-contrast: %f\n-brightness: %f\n\
--red: %s\n-green: %s\n-blue: %s\n-%s\n'%(self.getattribs())
+        return '\nImage Object:\n-src: %s\n-mag: %f\n-contrast: %f\n-brightness: %f\n\
+-red: %s\n-green: %s\n-blue: %s'%(self.getattribs())
 
 # Accessors
     def output(self):

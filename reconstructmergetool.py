@@ -7,24 +7,33 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 4/17/2013
+#  Date Last Modified: 4/24/2013
 #
 # Currently working on:
     #===== XML file creation (xmlOut)
         # To do: 
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
-        # 3) check if read similarly in reconstruct
         
-        # Problems:
-        # 1) section files int vs float
-        # 2) reading appropriate files from directory
-        
+        # Problems: #===
+        # 1) Get rid of transform objects in seclist, rework XML output: if transform == prevtransform: etc
+        # 2) method of reading files, determine section files from series name
+
 import os,magic
 from Series import *
 from Section import *
 from lxml import etree as ET
-  
+def test():
+    inpath = '/home/michaelm/Documents/TestVolume/testin/Volumejosef.99'
+    outpath = '/home/michaelm/Documents/TestVolume/testout/'
+    tree = ET.parse(inpath)
+    root = tree.getroot()
+    section = Section(root, 'Volumejosef.99')
+    print(section._list)
+    for i in section._list:
+        if i._tag == 'Contour':
+            print(i._img)
+
 def main():
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
@@ -99,7 +108,7 @@ def writeseries(series, outpath):
     print('DONE')
     print('\tSeries output to: '+str(outpath+series._name+'.ser'))
 
-def writesections(series, outpath):
+def writesections(series, outpath): #===
     print('Writing section file(s)...'),
     
     count = 0
@@ -109,6 +118,8 @@ def writesections(series, outpath):
         #Build section root element
         attdict = section.output()
         root = ET.Element(section._tag, attdict)
+        
+        #===
         curT = 'current transform'
         for elem in section._list:
             #If transform, make element and append to root
@@ -129,6 +140,6 @@ def writesections(series, outpath):
         elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
-main()
-
+#main()
+test()
 

@@ -12,11 +12,11 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         # Create <section>
         self._name = name
         self._tag = 'Section'
-        self._list = self.popseclist(root)
+        self._list, self._ilist = self.poplists(root)
         self._index = int(root.attrib['index'])
         self._thick = float(root.attrib['thickness'])
         self._alignLock = root.attrib['alignLocked']
-        self._attribs = ['index','thickness','alignLocked'] # List of attributes for xml output
+        self._attribs = ['index','thickness','alignLocked']
     # LENGTH
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length'''
@@ -48,20 +48,22 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
     def xgetattribs(self):
         return str(self._index), str(self._thick), str(self._alignLock).lower()
 # Mutators       
-    def popseclist(self, root):
+    def poplists(self, root): #===
         '''Populates section with Contours/Images/etc.'''
-        tmpT = '' #current transform
-        ret = []
+        contours = []
+        images = []
         for transform in root:
-            ret.append(Transform(transform))
+            imgflag = False
             for child in transform:
                 if child.tag == 'Image':
-                    I = Image(child, tmpT)
-                    ret.append(I)
+                    imgflag = True
+                    I = Image(child, Transform(transform))
+                    images.append(I)
                 elif child.tag == 'Contour':
-                    C = Contour(child, tmpT)
-                    ret.append(C)
-                elif child.tag == 'ZContour': #=== can image have ZContour?
-                    Z = ZContour(child, tmpT)
-                    ret.append(Z)
-        return ret 
+                    C = Contour(child, imgflag, Transform(transform))
+                    contours.append(C)
+                    imgflag = False
+                elif child.tag == 'ZContour':
+                    Z = ZContour(child, Transform(transform))
+                    contours.append(Z)
+        return contours, images
