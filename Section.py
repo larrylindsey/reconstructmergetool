@@ -12,7 +12,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         # Create <section>
         self._name = name
         self._tag = 'Section'
-        self._list, self._ilist = self.poplists(root)
+        self._list, self._imgs = self.poplists(root) #List of contours, list of images
         self._index = int(root.attrib['index'])
         self._thick = float(root.attrib['thickness'])
         self._alignLock = root.attrib['alignLocked']
@@ -48,7 +48,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
     def xgetattribs(self):
         return str(self._index), str(self._thick), str(self._alignLock).lower()
 # Mutators       
-    def poplists(self, root): #===
+    def poplists(self, root):
         '''Populates section with Contours/Images/etc.'''
         contours = []
         images = []

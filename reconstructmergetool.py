@@ -7,7 +7,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 4/24/2013
+#  Date Last Modified: 5/6/2013
 #
 # Currently working on:
     #===== XML file creation (xmlOut)
@@ -16,23 +16,14 @@
         # 2) read in section, write out section with all dim = 0
         
         # Problems: #===
-        # 1) Get rid of transform objects in seclist, rework XML output: if transform == prevtransform: etc
-        # 2) method of reading files, determine section files from series name
+        # 1) Image trans assumes not like others
+        # 2) Changes name of sec. file when opened in notepad
+        # 3) method of reading files, determine section files from series name
 
 import os,magic
 from Series import *
 from Section import *
 from lxml import etree as ET
-def test():
-    inpath = '/home/michaelm/Documents/TestVolume/testin/Volumejosef.99'
-    outpath = '/home/michaelm/Documents/TestVolume/testout/'
-    tree = ET.parse(inpath)
-    root = tree.getroot()
-    section = Section(root, 'Volumejosef.99')
-    print(section._list)
-    for i in section._list:
-        if i._tag == 'Contour':
-            print(i._img)
 
 def main():
     # = = = = = = = = = = = = = = = = = = = = =
@@ -65,7 +56,7 @@ def getseries(inpath):
     serpath = inpath + ser
     tree = ET.parse(serpath)
 
-    root = tree.getroot() #Series    
+    root = tree.getroot() #Series
     #Create series object
     series = Series(root, ser.replace('.ser',''))
     print('DONE')
@@ -119,27 +110,47 @@ def writesections(series, outpath): #===
         attdict = section.output()
         root = ET.Element(section._tag, attdict)
         
-        #===
-        curT = 'current transform'
         for elem in section._list:
-            #If transform, make element and append to root
-            if elem._tag == 'Transform':
-                tmpT = ET.Element(elem._tag, elem.output())
-                if curT == 'current transform':
-                    curT = tmpT
-                #elif  tmpT != curT:
-                else:
-                    root.append(curT)
-                    curT = tmpT
-            #If not transform make element and append to transform
+            curT = ET.Element('Transform', elem._transform.output())
+            
+            #build list of transforms in root; check if transform already exists
+            tlist=[]
+            for trnsfrm in root.getchildren():
+                tlist.append(trnsfrm.attrib)
+
+            # Image/Image contour transform
+            if elem._img: # Make transform from image
+                subelem = ET.Element('Image', section._imgs[0].output())
+                curT.append(subelem)
+                subelem = ET.Element(elem._tag, elem.output())
+                curT.append(subelem)
+                root.append(curT)
+                
+            # Transform already exist 
+            elif curT.attrib in tlist:
+                for trnsfrm in root.getchildren():
+                    if curT.attrib == trnsfrm.attrib:
+                        subelem = ET.Element(elem._tag, elem.output())
+                        trnsfrm.append(subelem)
+            # New transform   
             else:
                 subelem = ET.Element(elem._tag, elem.output())
                 curT.append(subelem)
-        root.append(curT)
+                root.append(curT)
         elemtree = ET.ElementTree(root)
         elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
-#main()
-test()
+    
+def test():
+    inpath = '/home/michaelm/Documents/TestVolume/testin/Volumejosef.99'
+    outpath = '/home/michaelm/Documents/TestVolume/testout/'
+    tree = ET.parse(inpath)
+    root = tree.getroot()
+    section = Section(root, 'Volumejosef.99')
+    print(section._list)
+    print(section._imgs)
+
+main()
+#test()
 

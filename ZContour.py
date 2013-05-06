@@ -6,8 +6,8 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
     def __init__(self, node):
         self._tag = 'ZContour'
         self._name = str( node.attrib['name'] )
-        self._closed = bool( node.attrib['closed'].capitalize() )
-        self._mode = int( node.attrib['mode'] )
+        self._closed = self.s2b(str(node.get('closed')))
+        self._mode = self.popmode(node)
         self._border = self.popborder(node)
         self._fill = self.popfill(node)
         self._points = self.poppts(node) #List of strings. Each string contains 3 numbers: 'float, float, section'
@@ -21,36 +21,33 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
                +'\n-points: '+str(self.getpoints())+'\n'
 
 # Accessors
-    def gettag(self):
-        '''Returns Tag (str)'''
-        return self._tag
-    def getname(self):
-        '''Returns Name attribute (str)'''
-        return self._name
-    def getclosed(self):
-        '''Returns Closed attribute (bool)'''
-        return self._closed
-    def getmode(self):
-        '''Returns Mode attribute (int)'''
-        return self._mode
-    def getbord(self):
-        '''Returns Border attribute (list of ints)'''
-        return self._border
-    def getfill(self):
-        '''Returns Fill attribute (list of ints)'''
-        return self._fill
     def getpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
         return self._points
+    def getxbord(self):
+        bord = ''
+        for elem in self._border:
+            bord += str(elem)+' '
+        return str(bord).rstrip()
+    def getxfill(self):
+        fill = ''
+        for elem in self._fill:
+            fill += str(elem)+' '
+        return str(fill).rstrip()
+    def getxpoints(self):
+        ret = ''
+        for tup in self._points:
+            ret += tup+', '
+        return ret.rstrip()
     def getattribs(self):
         '''Returns all zcontour attributes'''
-        return self._name, self._closed, self._mode, self._border, \
-               self._fill, self._points
+        return self._name, self._closed, self._border, self._fill, \
+               self._mode, self._points
     def xgetattribs(self):
         '''Returns all zcontour attributes, xml formatting (strings)'''
-        return str(self.getname()), str(self.getclosed()), str(self.getmode()), str(self.getbord()), \
-               str(self.getfill()), str(self.getpoints())
+        return str(self._name), str(self._closed).lower(), self.getxbord(), self.getxfill(), \
+            str(self._mode), str(self.getxpoints())
     def output(self): #===
         '''Returns a dictionary of attributes'''
         attributes = {}
@@ -63,36 +60,25 @@ separated by a single space)'''
             count += 1
         return attributes
 # Mutators
-    def chgtag(self, x):
-        self._tag = str(x)
-    def chgname(self, x):
-        self._name = str(x)
-    def chgclosed(self, x):
-        self._closed = bool(x)
-    def chgmode(self, x):
-        self._mode = int(x)
-    def chgbord(self, x):
-        '''List of ints'''
-        self._border = list(x)
-    def chgfill(self, x):
-        '''List of ints'''
-        self._fill = list(x)
-    def chgpoints(self, x):
-        '''List of strings'''
-        self._points = list(x)
-    def popborder(self, node): #======
+    def s2b(self, string):
+        '''Converts string to bool'''
+        return string.lower() in ('true')
+    def popmode(self, node):
+        if node.get('mode', None) == None:
+            return None
+        else:
+            return int( node.attrib['mode'] )
+    def popborder(self, node):
         '''Populates self._border'''
         bord = []
-        for char in node.attrib['border']:
-            if char.isdigit():
-                bord.append( float(char) )
+        for elem in list(node.attrib['border'].split(' ')):
+            bord.append(float(elem))
         return bord
-    def popfill(self, node): #=====
+    def popfill(self, node):
         '''Populates self._fill'''
         fill = []
-        for char in node.attrib['fill']:
-            if char.isdigit():
-                fill.append( float(char) )
+        for elem in list(node.attrib['fill'].split(' ')):
+            fill.append(float(elem))
         return fill
     def poppts(self, node):
             #partition points into a list of messy crap

@@ -165,7 +165,7 @@ separated by a single space)'''
         self._fill, \
         self._points
     def xgetattribs(self):
-        '''Returns all attributes in XML format'''
+        '''Returns all attributes as list of strings'''
         return str(self._name), \
         str(self._comment), \
         str(self._hidden).lower(), \
@@ -204,12 +204,9 @@ separated by a single space)'''
     def chgmode(self, x):
         self._mode = int(x)
     def chgbord(self, x):
-        '''List of ints'''
         self._border = list(x)
     def chgfill(self, x):
-        '''List of ints'''
         self._fill = list(x)
     def chgpoints(self, x):
-        '''List of strings'''
         self._points = list(x)
         
