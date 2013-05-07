@@ -7,18 +7,20 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/6/2013
+#  Date Last Modified: 5/7/2013
 #
 # Currently working on:
     #===== XML file creation (xmlOut)
         # To do: 
         # 1) read in section, write out section
         # 2) read in section, write out section with all dim = 0
+        # 3) Change how prog. recognizes section files
+        # 4) Polynomial transforms
         
         # Problems: #===
         # 1) Image trans assumes not like others
         # 2) Changes name of sec. file when opened in notepad
-        # 3) method of reading files, determine section files from series name
+        # 3) sometimes shows/sometimes not in reconstruct
 
 import os,magic
 from Series import *
@@ -99,7 +101,7 @@ def writeseries(series, outpath):
     print('DONE')
     print('\tSeries output to: '+str(outpath+series._name+'.ser'))
 
-def writesections(series, outpath): #===
+def writesections(series, outpath):
     print('Writing section file(s)...'),
     
     count = 0
@@ -120,11 +122,14 @@ def writesections(series, outpath): #===
 
             # Image/Image contour transform
             if elem._img: # Make transform from image
-                subelem = ET.Element('Image', section._imgs[0].output())
-                curT.append(subelem)
-                subelem = ET.Element(elem._tag, elem.output())
-                curT.append(subelem)
-                root.append(curT)
+                if elem._transform.output() == section._imgs[0]._transform.output():
+                    subelem = ET.Element('Image', section._imgs[0].output())
+                    curT.append(subelem)
+                    subelem = ET.Element(elem._tag, elem.output())
+                    curT.append(subelem)
+                    root.append(curT)
+                else:
+                    print('Error: Image transform does not match contour transform '+'('+str(section._name)+')')
                 
             # Transform already exist 
             elif curT.attrib in tlist:
