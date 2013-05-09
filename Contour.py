@@ -5,7 +5,8 @@ class Contour:
 # Python Functions
     # INITIALIZE
     def __init__(self, node, imgflag=False, transform=None):
-        '''Initializes the Contour object. Attributes vary depending on file type (.ser vs .xml).'''
+        '''Initializes the Contour object. Two different Contour objects: Image Contours and Contours \
+        delineated by the imgflag parameter.'''
         self._tag = 'Contour'
         self._name = str( node.attrib['name'] )
         self._img = imgflag
@@ -18,9 +19,10 @@ class Contour:
         self._border = self.popborder(node)
         self._fill = self.popfill(node)
         self._points = self.poppoints(node)
+        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
         self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points']
 
-    # STRING REPRESENTATION
+    # print(<Contour>) function output
     def __str__(self):
         '''Allows user to use print(<Contour>) function'''
         return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \
@@ -28,13 +30,18 @@ class Contour:
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
                +'\n-points: '+str(self._points)+'\n'
-# Populators
+# Helper Functions
+    def s2b(self, string):
+        '''Converts string to bool'''
+        return string.lower() in ('true')
     def popcomment(self, node):
-        if node.get('comment', None) == None: #if doesn't exist
+        '''Searches xml node for comments.'''
+        if node.get('comment', None) == None:
             return None
         else:
             return node.attrib['comment']
     def pophidden(self, node):
+        '''Searches xml node for hidden.'''
         if node.get('hidden', None) == None:
             return None
         elif node.attrib['hidden'].capitalize() == 'True':
@@ -42,6 +49,7 @@ class Contour:
         else:
             return False
     def popclosed(self, node):
+        '''Searches xml node for closed.'''
         if node.get('closed', None) == None:
             return None
         elif node.attrib['closed'].capitalize() == 'True':
@@ -49,6 +57,7 @@ class Contour:
         else:
             return False
     def popsimplified(self, node):
+        '''Searches xml node for closed.'''
         if node.get('simplified', None) == None:
             return None
         elif node.attrib['simplified'].capitalize() == 'True':
@@ -56,24 +65,26 @@ class Contour:
         else:
             return False
     def popmode(self, node):
+        '''Searches xml node for mode.'''
         if node.get('mode', None) == None:
             return None
         else:
             return int( node.attrib['mode'] )
     def popborder(self, node):
-        '''Populates self._border'''
+        '''Searches xml node for border. Creates a list of floats.'''
         bord = []
         for elem in list(node.attrib['border'].split(' ')):
             bord.append(float(elem))
         return bord
     def popfill(self, node):
-        '''Populates self._fill'''
+        '''Searches xml node for fill. Creates a list of floats.'''
         fill = []
         for elem in list(node.attrib['fill'].split(' ')):
             fill.append(float(elem))
         return fill
     def poppoints(self, node):
-        '''Populates self._points'''
+        '''Searches xml node for points. List of points tuples (x,y), \
+        int or float depends on type in the xml node.'''
         partPoints = list(node.attrib['points'].lstrip(' ').split(','))
         #make a new list of clean points, to be added to object
         ptList = []
@@ -89,11 +100,11 @@ class Contour:
             strTupList.append(tuple(elem.split(' ')))
         tupList = []
         for elem in strTupList:
-            if '.' in elem[0]:
-                a=float(elem[0])
-            if '.' in elem[1]:
+            if '.' in elem[0]: #Float
+                a=float(elem[0]) 
+            if '.' in elem[1]: #Float
                 b=float(elem[1])
-            if '.' not in elem[0] and '.' not in elem[1]:    
+            if '.' not in elem[0] and '.' not in elem[1]: #Int
                 a=int(elem[0])
                 b=int(elem[1])
             tup = (a,b)
@@ -137,11 +148,13 @@ class Contour:
         ret = str(self._fill[0])+' '+str(self._fill[1])+' '+str(self._fill[2])
         return ret
     def getxbord(self):
+        '''Returns border attribute in xml output format'''
         bord = ''
         for elem in self._border:
             bord += str(elem)+' '
         return str(bord).rstrip()
     def getxfill(self):
+        '''Returns fill attribute in xml output format'''
         fill = ''
         for elem in self._fill:
             fill += str(elem)+' '
@@ -165,7 +178,7 @@ separated by a single space)'''
         self._fill, \
         self._points
     def xgetattribs(self):
-        '''Returns all attributes as list of strings'''
+        '''Returns all attributes as list of strings in xml output format'''
         return str(self._name), \
         str(self._comment), \
         str(self._hidden).lower(), \
@@ -186,27 +199,4 @@ separated by a single space)'''
                 attributes[keys[count]] = value
             count += 1
         return attributes
-        
-# Mutators
-    def s2b(self, string):
-        '''Converts string to bool'''
-        return string.lower() in ('true')
-    def chgtag(self, x):
-        self._tag = str(x)
-    def chgname(self, x):
-        self._name = str(x)
-    def chghidden(self, x):
-        self._hidden = bool(x)
-    def chgclosed(self, x):
-        self._closed = bool(x)
-    def chgsimp(self, x):
-        self._simplified = bool(x)
-    def chgmode(self, x):
-        self._mode = int(x)
-    def chgbord(self, x):
-        self._border = list(x)
-    def chgfill(self, x):
-        self._fill = list(x)
-    def chgpoints(self, x):
-        self._points = list(x)
         

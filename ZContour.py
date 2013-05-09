@@ -11,6 +11,7 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
         self._border = self.popborder(node)
         self._fill = self.popfill(node)
         self._points = self.poppts(node) #List of strings. Each string contains 3 numbers: 'float, float, section'
+        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
         self._attribs = ['name','closed','border','fill','mode','points']
     # STRING REPRESENTATION
     def __str__(self):

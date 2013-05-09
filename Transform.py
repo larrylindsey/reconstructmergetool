@@ -14,6 +14,7 @@ class Transform:
         self._ycoef = self.popyxcoef(node)[0]
         self._xcoef = self.popyxcoef(node)[1]
         self._tform = self.poptform()
+        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
         self._attribs = ['dim','xcoef','ycoef']
     # STRING REPRESENTATION
     def __str__(self):
@@ -62,15 +63,7 @@ class Transform:
             count += 1
         return attributes      
 # Mutators                
-    def chgtag(self, x):
-        self._tag = str(x)
-    def chgdim(self, x):
-        self._dim = int(x)
-    def chgycoef(self, x):
-        self._ycoef = list(x)
-    def chgxcoef(self, x):
-        self._xcoef = list(x)
-    def poptform(self):
+    def poptform(self): # ===
         '''Creates self._tform variable which represents the transform'''
         a = self._xcoef
         b = self._ycoef

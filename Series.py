@@ -13,6 +13,7 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._tag = root.tag
         self._contours = self.popcontours(root)
         self._sections = []
+        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
         self._attribs = ['index', 'viewport', 'units', 'autoSaveSeries', \
         'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \
         'hideTraces', 'unhideTraces', 'hideDomains', 'unhideDomains', 'useAbsolutePaths', \
@@ -118,11 +119,11 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._mvmtIncrement = self.popmvmtincrement(root)
         self._ctrlIncrement = self.popctrlincrement(root)
         self._shiftIncrement = self.popshiftincrement(root)
-    # INDEX REPRESENTATION
+    # Allows indexing of section object
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
         return self._list[x]
-    # STRING REPRESENTATION
+    # print(<Section>) output
     def __str__(self):
         '''Allows use of print(<Series>) function.'''
         return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
@@ -231,15 +232,10 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
             ret += tmp.rstrip()+', '   
         return ret.rstrip()
 
-
-# Mutators
+# Helper functions
     def s2b(self, string):
         '''Converts string to bool'''
         return string.lower() in ('true')
-    def chgname(self, x):
-        self._name = str(x)
-    def chgtag(self, x):
-        self._tag = str(x)
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
         self._sections.append(section)

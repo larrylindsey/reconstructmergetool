@@ -7,17 +7,14 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/7/2013
+#  Date Last Modified: 5/9/2013
 #
 # Currently working on:
-    #===== XML file creation (xmlOut)
-        # To do: 
-        # 1) read in section, write out section
-        # 2) read in section, write out section with all dim = 0
-        # 3) Change how prog. recognizes section files
-        # 4) Polynomial transforms
+        # 1) read in section, write out section with all dim = 0
+        # 2) Change how prog. recognizes section files
+        # 3) Polynomial transforms
         
-        # Problems: #===
+        # Problems:
         # 1) Image trans assumes not like others
         # 2) Changes name of sec. file when opened in notepad
         # 3) sometimes shows/sometimes not in reconstruct

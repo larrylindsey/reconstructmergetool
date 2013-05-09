@@ -15,8 +15,9 @@ transform (object)'''
         self._green = self.popgreen(node)
         self._blue = self.popblue(node)
         self._transform = transform
+        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
         self._attribs = ['mag','contrast','brightness','red','green','blue','src']
-    # STRING REPRESENTATION
+    # print(<Image>) function output
     def __str__(self):
         '''Allows print( <image> ) function. Returns attributes as string.'''
         return '\nImage Object:\n-src: %s\n-mag: %f\n-contrast: %f\n-brightness: %f\n\
@@ -24,7 +25,7 @@ transform (object)'''
 
 # Accessors
     def output(self):
-        '''Returns a dictionary of attributes and a list of contours for building xml'''
+        '''Returns a dictionary of attributes'''
         attributes = {}
         keys = self._attribs
         values = list(self.xgetattribs())
@@ -69,6 +70,7 @@ transform (object)'''
 
 # Mutators
     def popred(self, node):
+        '''Searches xml node for red attribute'''
         if node.get('red', None) == None:
             return True
         elif node.attrib['red'].capitalize() == 'True':
@@ -76,6 +78,7 @@ transform (object)'''
         else:
             return False
     def popgreen(self, node):
+        '''Searches xml node for green attribute'''
         if node.get('green', None) == None:
             return True
         elif node.attrib['green'].capitalize() == 'True':
@@ -83,27 +86,10 @@ transform (object)'''
         else:
             return False
     def popblue(self, node):
+        '''Searches xml node for blue attribute'''
         if node.get('blue', None) == None:
             return True
         elif node.attrib['blue'].capitalize() == 'True':
             return True
         else:
-            return False    
-    def chgtag(self, x):
-        self._tag = str(x)
-    def chgsrc(self, x):
-        self._src = str(x)  
-    def chgmag(self, x):
-        self._mag = float(x)
-    def chgcontrast(self, x):
-        self._cntrst = float(x)
-    def chgbrightness(self, x):
-        self._bright = float(x)
-    def chgred(self, x):
-        self._red = bool(x)
-    def chggreen(self, x):
-        self._green = bool(x)
-    def chgblue(self, x):
-        self._blue = bool(x)
-    def chgtransform(self, x):
-        self._transform = x
+            return False
