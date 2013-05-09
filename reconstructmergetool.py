@@ -11,13 +11,14 @@
 #
 # Currently working on:
         # 1) read in section, write out section with all dim = 0
-        # 2) Change how prog. recognizes section files
+        # 2) Change how prog. recognizes section files in a dir (regular expressions)
         # 3) Polynomial transforms
+        # 4) tospace() fromspace() in transform object
         
         # Problems:
         # 1) Image trans assumes not like others
         # 2) Changes name of sec. file when opened in notepad
-        # 3) sometimes shows/sometimes not in reconstruct
+        # 3) sometimes shows/sometimes not in reconstruct (field order of image contour)
 
 import os,magic
 from Series import *
@@ -27,8 +28,8 @@ from lxml import etree as ET
 def main():
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    inpath = '/home/michaelm/Documents/TestVolume/testin/'
-    outpath = '/home/michaelm/Documents/TestVolume/testout/'
+    inpath = '/home/michaelm/Documents/TestVolume/testin2/'
+    outpath = '/home/michaelm/Documents/TestVolume/testout2/'
     #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
@@ -74,9 +75,10 @@ def getsections(series, inpath):
     print('DONE')
     print('\t%d section(s) found in %s'%(count,inpath))
     #Create and add section objects to series
-    print('Creating section objects...'),
+    print('Creating section objects...')
     for sec in pathlist:
         secpath = inpath + sec
+        print(secpath)
         tree = ET.parse(secpath)
         root = tree.getroot() #Section
         section = Section(root,sec)
@@ -126,6 +128,10 @@ def writesections(series, outpath):
                     curT.append(subelem)
                     root.append(curT)
                 else:
+                    print(elem._name),
+                    print(elem._transform.output()) #===
+                    
+                    print( section._imgs[0]._transform.output() ) #===
                     print('Error: Image transform does not match contour transform '+'('+str(section._name)+')')
                 
             # Transform already exist 

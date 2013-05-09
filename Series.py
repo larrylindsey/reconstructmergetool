@@ -13,26 +13,6 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._tag = root.tag
         self._contours = self.popcontours(root)
         self._sections = []
-        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
-        self._attribs = ['index', 'viewport', 'units', 'autoSaveSeries', \
-        'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \
-        'hideTraces', 'unhideTraces', 'hideDomains', 'unhideDomains', 'useAbsolutePaths', \
-        'defaultThickness', 'zMidSection', 'thumbWidth', 'thumbHeight', 'fitThumbSections', \
-        'firstThumbSection', 'lastThumbSection', 'skipSections', 'displayThumbContours', \
-        'useFlipbookStyle', 'flipRate', 'useProxies', 'widthUseProxies', 'heightUseProxies', \
-        'scaleProxies', 'significantDigits', 'defaultBorder', 'defaultFill', 'defaultMode', \
-        'defaultName', 'defaultComment', 'listSectionThickness', 'listDomainSource', \
-        'listDomainPixelsize', 'listDomainLength', 'listDomainArea', 'listDomainMidpoint', \
-        'listTraceComment', 'listTraceLength', 'listTraceArea', 'listTraceCentroid', \
-        'listTraceExtent', 'listTraceZ', 'listTraceThickness', 'listObjectRange', \
-        'listObjectCount', 'listObjectSurfarea', 'listObjectFlatarea', 'listObjectVolume', \
-        'listZTraceNote', 'listZTraceRange', 'listZTraceLength', 'borderColors', 'fillColors', \
-        'offset3D', 'type3Dobject', 'first3Dsection', 'last3Dsection', 'max3Dconnection', \
-        'upper3Dfaces', 'lower3Dfaces', 'faceNormals', 'vertexNormals', 'facets3D', 'dim3D', \
-        'gridType', 'gridSize', 'gridDistance', 'gridNumber', 'hueStopWhen', 'hueStopValue', \
-        'satStopWhen', 'satStopValue', 'brightStopWhen', 'brightStopValue', 'tracesStopWhen', \
-        'areaStopPercent', 'areaStopSize', 'ContourMaskWidth', 'smoothingLength', \
-        'mvmtIncrement', 'ctrlIncrement', 'shiftIncrement']
         self._index = int(root.attrib['index'])
         self._viewport = self.popviewport(root)
         self._units = str(root.attrib['units'])
@@ -119,6 +99,26 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         self._mvmtIncrement = self.popmvmtincrement(root)
         self._ctrlIncrement = self.popctrlincrement(root)
         self._shiftIncrement = self.popshiftincrement(root)
+        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
+        self._attribs = ['index', 'viewport', 'units', 'autoSaveSeries', \
+        'autoSaveSection', 'warnSaveSection', 'beepDeleting', 'beepPaging', \
+        'hideTraces', 'unhideTraces', 'hideDomains', 'unhideDomains', 'useAbsolutePaths', \
+        'defaultThickness', 'zMidSection', 'thumbWidth', 'thumbHeight', 'fitThumbSections', \
+        'firstThumbSection', 'lastThumbSection', 'skipSections', 'displayThumbContours', \
+        'useFlipbookStyle', 'flipRate', 'useProxies', 'widthUseProxies', 'heightUseProxies', \
+        'scaleProxies', 'significantDigits', 'defaultBorder', 'defaultFill', 'defaultMode', \
+        'defaultName', 'defaultComment', 'listSectionThickness', 'listDomainSource', \
+        'listDomainPixelsize', 'listDomainLength', 'listDomainArea', 'listDomainMidpoint', \
+        'listTraceComment', 'listTraceLength', 'listTraceArea', 'listTraceCentroid', \
+        'listTraceExtent', 'listTraceZ', 'listTraceThickness', 'listObjectRange', \
+        'listObjectCount', 'listObjectSurfarea', 'listObjectFlatarea', 'listObjectVolume', \
+        'listZTraceNote', 'listZTraceRange', 'listZTraceLength', 'borderColors', 'fillColors', \
+        'offset3D', 'type3Dobject', 'first3Dsection', 'last3Dsection', 'max3Dconnection', \
+        'upper3Dfaces', 'lower3Dfaces', 'faceNormals', 'vertexNormals', 'facets3D', 'dim3D', \
+        'gridType', 'gridSize', 'gridDistance', 'gridNumber', 'hueStopWhen', 'hueStopValue', \
+        'satStopWhen', 'satStopValue', 'brightStopWhen', 'brightStopValue', 'tracesStopWhen', \
+        'areaStopPercent', 'areaStopSize', 'ContourMaskWidth', 'smoothingLength', \
+        'mvmtIncrement', 'ctrlIncrement', 'shiftIncrement']
     # Allows indexing of section object
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
