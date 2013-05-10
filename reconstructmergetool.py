@@ -7,7 +7,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/9/2013
+#  Date Last Modified: 5/10/2013
 #
 # Currently working on:
         # 1) read in section, write out section with all dim = 0
@@ -16,9 +16,9 @@
         # 4) tospace() fromspace() in transform object
         
         # Problems:
-        # 1) Image trans assumes not like others
+        # 1) Image trans assumes not like others (commented out the common transform compression)
         # 2) Changes name of sec. file when opened in notepad
-        # 3) sometimes shows/sometimes not in reconstruct (field order of image contour)
+        # 3) sometimes shows/sometimes not in reconstruct (field order of image contour) prob with .ser
 
 import os,magic
 from Series import *
@@ -26,10 +26,13 @@ from Section import *
 from lxml import etree as ET
 
 def main():
+    if __name__ != '__main__':
+        return
+    
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    inpath = '/home/michaelm/Documents/TestVolume/testin2/'
-    outpath = '/home/michaelm/Documents/TestVolume/testout2/'
+    inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
+    outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
     #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
@@ -43,6 +46,7 @@ def main():
     #4)Output section file(s)
     writesections(series, outpath)
     
+    #==TEST==
     
 # HELPER FUNCTIONS
 def getseries(inpath):
@@ -134,17 +138,18 @@ def writesections(series, outpath):
                     print( section._imgs[0]._transform.output() ) #===
                     print('Error: Image transform does not match contour transform '+'('+str(section._name)+')')
                 
-            # Transform already exist 
-            elif curT.attrib in tlist:
-                for trnsfrm in root.getchildren():
-                    if curT.attrib == trnsfrm.attrib:
-                        subelem = ET.Element(elem._tag, elem.output())
-                        trnsfrm.append(subelem)
+            # Transform already exist === Issues grouping under img transform
+            #elif curT.attrib in tlist:
+            #    for trnsfrm in root.getchildren():
+            #        if curT.attrib == trnsfrm.attrib:
+            #            subelem = ET.Element(elem._tag, elem.output())
+            #            trnsfrm.append(subelem)
             # New transform   
             else:
                 subelem = ET.Element(elem._tag, elem.output())
                 curT.append(subelem)
                 root.append(curT)
+        
         elemtree = ET.ElementTree(root)
         elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
     print('DONE')

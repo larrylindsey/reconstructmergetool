@@ -107,6 +107,12 @@ class Contour:
             if '.' not in elem[0] and '.' not in elem[1]: #Int
                 a=int(elem[0])
                 b=int(elem[1])
+            if '.' not in elem[0] and '.' in elem[1]:
+                a = int(elem[0])
+                b = float(elem[1])
+            if '.' in elem[0] and '.' not in elem[1]:
+                a = float(elem[0])
+                b = int(elem[1])
             tup = (a,b)
             tupList.append(tup)
         return tupList
@@ -188,7 +194,7 @@ separated by a single space)'''
         str(self.getxbord()), \
         str(self.getxfill()), \
         str(self.getxpoints()) 
-    def output(self): #===
+    def output(self):
         '''Returns a dictionary of attributes'''
         attributes = {}
         keys = self._attribs

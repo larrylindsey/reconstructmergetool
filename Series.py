@@ -1,5 +1,6 @@
 from Contour import *
 from ZContour import *
+# Recent changes: popgridSize int -> float
 class Series:
     '''<Series> is an object with attributes: name \
 as well as a list containing all of the <Sections> objects associated with
@@ -319,8 +320,8 @@ of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
         #gridSize
         rawList = list(root.attrib['gridSize'].split(' '))
         tmpList = []
-        for elem in rawList:
-            tmpList.append( int(elem) )
+        for elem in rawList: #===
+            tmpList.append( float(elem) )
         return tmpList
     def popgriddistance(self, root):
         #gridDistance
