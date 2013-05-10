@@ -31,8 +31,8 @@ def main():
     
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
-    outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
+    inpath = '/home/michaelm/Documents/TestVolume/Volumejosef-in/'
+    outpath = '/home/michaelm/Documents/TestVolume/Volumejosef-out/'
     #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
