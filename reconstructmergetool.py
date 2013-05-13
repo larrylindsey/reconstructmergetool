@@ -17,9 +17,8 @@
         
         # Problems:
         # 1) Image trans assumes not like others (commented out the common transform compression)
-        # 2) Changes name of sec. file when opened in notepad
-        # 3) sometimes shows/sometimes not in reconstruct (field order of image contour) prob with .ser
-
+        # 2) sometimes shows/sometimes not in reconstruct (field order of image contour) prob with .ser
+        #    Has to do with hide/unhide traces/domans block. If in block, no problem. separated = problem
 import os,magic
 from Series import *
 from Section import *
@@ -31,8 +30,8 @@ def main():
     
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    inpath = '/home/michaelm/Documents/TestVolume/Volumejosef-in/'
-    outpath = '/home/michaelm/Documents/TestVolume/Volumejosef-out/'
+    inpath = '/home/michaelm/Documents/TestVolume/R34js-gs-in/'
+    outpath = '/home/michaelm/Documents/TestVolume/R34js-gs-out/'
     #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
