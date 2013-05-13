@@ -17,9 +17,8 @@
         
         # Problems:
         # 1) Image trans assumes not like others (commented out the common transform compression)
-        # 2) Changes name of sec. file when opened in notepad
-        # 3) sometimes shows/sometimes not in reconstruct (field order of image contour) prob with .ser
-
+        # 2) sometimes shows/sometimes not in reconstruct (field order of image contour) prob with .ser
+        #    Has to do with hide/unhide traces/domans block. If in block, no problem. separated = problem
 import os,magic
 from Series import *
 from Section import *
@@ -31,8 +30,8 @@ def main():
     
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    inpath = '/home/michaelm/Documents/TestVolume/Volumejosef-in/'
-    outpath = '/home/michaelm/Documents/TestVolume/Volumejosef-out/'
+    inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
+    outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
     #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
     #outpath = inpath
     # = = = = = = = = = = = = = = = = = = = = =
@@ -67,6 +66,67 @@ def getseries(inpath):
     print('\tSeries: '+series._name)
     return series
 
+def writeseries(series, outpath):
+    print('Writing series file...'),
+    seriesoutpath = outpath+series._name+'.ser'
+    #Build series root element
+    attdict, contours = series.output()
+    root = ET.Element(series._tag, attdict)
+    #Build contour elements and append to root
+    for contour in contours:
+        root.append( ET.Element(contour._tag,contour.output()) )
+
+    strlist = ET.tostringlist(root) # 1st str list; hide/unhide Domains/Traces is not in correct order
+    # Needs to be: hideTraces/unhideTraces/hideDomains/unhideDomains
+        # Fix order:
+    strlist = strlist[0].split(' ') # Separate single string into multple strings for each elem
+    count = 0
+    for elem in strlist:
+        if 'hideTraces' in elem and 'unhideTraces' not in elem:
+            strlist.insert(1, strlist.pop(count))
+        count += 1
+    count = 0
+    for elem in strlist:
+        if 'unhideTraces' in elem:
+            strlist.insert(2, strlist.pop(count))
+        count += 1
+    count = 0
+    for elem in strlist:
+        if 'hideDomains' in elem and 'unhideDomains' not in elem:
+            strlist.insert(3, strlist.pop(count))
+        count += 1
+    count = 0
+    for elem in strlist:
+        if 'unhideDomains' in elem:
+            strlist.insert(4, strlist.pop(count))
+        count += 1
+        # Recombine into list of single str
+    tempstr = ''
+    for elem in strlist:
+        tempstr += elem + ' '
+    strlist = []
+    strlist.append( tempstr.rstrip(' ') )
+
+    # Write to .ser file
+    f = open(seriesoutpath, 'w')
+    f.write('<?xml version="1.0"?>\n')
+    f.write('<!DOCTYPE Section SYSTEM "series.dtd">\n\n')
+    for elem in strlist:
+        if '>' not in elem:
+            f.write(elem),
+        else:
+            elem = elem+'\n'
+            f.write(elem)
+            if '/' in elem:
+                f.write('\n')        
+        
+#!!!!!!!!! ===    Removed for keeping hide/unhide traces/domains in order
+#     #Xml tree wrapper
+#     elemtree = ET.ElementTree(root)
+#     elemtree.write(seriesoutpath, pretty_print = True, xml_declaration=True, encoding="UTF-8")
+    print('DONE')
+    print('\tSeries output to: '+str(outpath+series._name+'.ser'))
+
 def getsections(series, inpath):
     #Build list of paths to sections
     print('Finding sections...'),
@@ -88,21 +148,6 @@ def getsections(series, inpath):
         section = Section(root,sec)
         series.addsection(section)
     print('DONE')
-
-def writeseries(series, outpath):
-    print('Writing series file...'),
-    seriesoutpath = outpath+series._name+'.ser'
-    #Build series root element
-    attdict, contours = series.output()
-    root = ET.Element(series._tag, attdict)
-    #Build contour elements and append to root
-    for contour in contours:
-        root.append( ET.Element(contour._tag,contour.output()) )
-    #Xml tree wrapper
-    elemtree = ET.ElementTree(root)
-    elemtree.write(seriesoutpath, pretty_print = True, xml_declaration=True, encoding="UTF-8")
-    print('DONE')
-    print('\tSeries output to: '+str(outpath+series._name+'.ser'))
 
 def writesections(series, outpath):
     print('Writing section file(s)...'),
@@ -154,16 +199,7 @@ def writesections(series, outpath):
         elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
-    
-def test():
-    inpath = '/home/michaelm/Documents/TestVolume/testin/Volumejosef.99'
-    outpath = '/home/michaelm/Documents/TestVolume/testout/'
-    tree = ET.parse(inpath)
-    root = tree.getroot()
-    section = Section(root, 'Volumejosef.99')
-    print(section._list)
-    print(section._imgs)
 
 main()
-#test()
+
 
