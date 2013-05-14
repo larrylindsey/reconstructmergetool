@@ -13,7 +13,7 @@
         # 1) read in section, write out section with all dim = 0
         # 2) Change how prog. recognizes section files in a dir (regular expressions)
         # 3) Polynomial transforms
-        # 4) tospace() fromspace() in transform object
+        # 4) tospace() fromspace() in transform
         
         # Problems:
         # 1) Image trans assumes not like others (commented out the common transform compression)
