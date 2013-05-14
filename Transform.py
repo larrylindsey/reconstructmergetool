@@ -14,6 +14,8 @@ class Transform:
         self._ycoef = self.popyxcoef(node)[0]
         self._xcoef = self.popyxcoef(node)[1]
         self._tform = self.poptform()
+        self._tospace = ''
+        self._fromspace = ''
         # List of all attributes, used for creating an attribute dictionary for output (see output(self))
         self._attribs = ['dim','xcoef','ycoef']
     # STRING REPRESENTATION

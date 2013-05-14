@@ -7,7 +7,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/10/2013
+#  Date Last Modified: 5/14/2013
 #
 # Currently working on:
         # 1) read in section, write out section with all dim = 0
@@ -17,12 +17,18 @@
         
         # Problems:
         # 1) Image trans assumes not like others (commented out the common transform compression)
-        # 2) sometimes shows/sometimes not in reconstruct (field order of image contour) prob with .ser
-        #    Has to do with hide/unhide traces/domans block. If in block, no problem. separated = problem
-import os,magic
+import sys,os,magic
 from Series import *
 from Section import *
 from lxml import etree as ET
+
+# For command line call
+ser = sys.argv[1]
+inpath = os.getcwd()+'/'
+if len(sys.argv) < 3:
+    outpath = inpath
+else:
+    outpath = str(sys.argv[2])
 
 def main():
     if __name__ != '__main__':
@@ -30,10 +36,8 @@ def main():
     
     # = = = = = = = = = = = = = = = = = = = = =
     #Input/Output paths
-    inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
-    outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
-    #inpath = '/home/wtrdrnkr/Documents/reconstructmergetool/References/'
-    #outpath = inpath
+#     inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
+#     outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
     # = = = = = = = = = = = = = = = = = = = = =
     
     #1)Create series object
@@ -44,15 +48,13 @@ def main():
     writeseries(series, outpath)
     #4)Output section file(s)
     writesections(series, outpath)
-    
-    #==TEST==
-    
-# HELPER FUNCTIONS
+
+
 def getseries(inpath):
     print('Creating series...'),
     #Get series path
     ser = ''
-    for file in os.listdir(inpath):
+    for file in os.listdir(inpath): # Search dir for .ser file
         if file.endswith('.ser'):
             ser = str(file)
     #Parse series
@@ -76,8 +78,8 @@ def writeseries(series, outpath):
     for contour in contours:
         root.append( ET.Element(contour._tag,contour.output()) )
 
-    strlist = ET.tostringlist(root) # 1st str list; hide/unhide Domains/Traces is not in correct order
-    # Needs to be: hideTraces/unhideTraces/hideDomains/unhideDomains
+    strlist = ET.tostringlist(root)
+    # Needs to be in order: hideTraces/unhideTraces/hideDomains/unhideDomains
         # Fix order:
     strlist = strlist[0].split(' ') # Separate single string into multple strings for each elem
     count = 0
@@ -105,7 +107,7 @@ def writeseries(series, outpath):
     for elem in strlist:
         tempstr += elem + ' '
     strlist = []
-    strlist.append( tempstr.rstrip(' ') )
+    strlist.append( tempstr.rstrip(' ') ) # Removes last blank space
 
     # Write to .ser file
     f = open(seriesoutpath, 'w')
