@@ -7,38 +7,36 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/14/2013
+#  Date Last Modified: 5/15/2013
 #
 # Currently working on:
         # 1) read in section, write out section with all dim = 0
-        # 2) Change how prog. recognizes section files in a dir (regular expressions)
+        # 2) phase out magic, use regular expressions
         # 3) Polynomial transforms
         # 4) tospace() fromspace() in transform
         
-        # Problems:
+        # Issues:
         # 1) Image trans assumes not like others (commented out the common transform compression)
 import sys,os,magic
 from Series import *
 from Section import *
 from lxml import etree as ET
 
-# For command line call
-ser = sys.argv[1]
-inpath = os.getcwd()+'/'
-if len(sys.argv) < 3:
-    outpath = inpath
-else:
-    outpath = str(sys.argv[2])
-
 def main():
     if __name__ != '__main__':
         return
-    
-    # = = = = = = = = = = = = = = = = = = = = =
-    #Input/Output paths
-#     inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
-#     outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
-    # = = = = = = = = = = = = = = = = = = = = =
+
+    if len(sys.argv) > 1: #For command line call
+        ser = sys.argv[1]
+        inpath = os.getcwd()+'/'
+        if len(sys.argv) < 3:
+            outpath = inpath
+        else:
+            outpath = str(sys.argv[2])
+    else:                                                       # === FOR TESTING
+        inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
+        outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
+
     
     #1)Create series object
     series = getseries(inpath)
