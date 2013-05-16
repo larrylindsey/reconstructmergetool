@@ -16,10 +16,10 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <ZContour> ) function'''
-        return 'Contour object:\n-name: '+str(self.getname())+'\n-closed: ' \
-               +str(self.getclosed())+'\n-mode: '+str(self.getmode()) \
-               +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
-               +'\n-points: '+str(self.getpoints())+'\n'
+        return 'ZContour object:\n-name: '+str(self._name)+'\n-closed: ' \
+               +str(self._closed)+'\n-mode: '+str(self._mode) \
+               +'\n-border: '+str(self._border)+'\n-fill: '+str(self._fill) \
+               +'\n-points: '+str(self._points)+'\n'
 
 # Accessors
     def getpoints(self):

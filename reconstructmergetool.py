@@ -7,56 +7,54 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/15/2013
+#  Date Last Modified: 5/16/2013
 #
 # Currently working on:
-        # 1) read in section, write out section with all dim = 0
+        # 1) read in section, write out section with all dim = 0 (def setidentzero())
         # 2) phase out magic, use regular expressions
         # 3) Polynomial transforms
         # 4) tospace() fromspace() in transform
         
         # Issues:
         # 1) Image trans assumes not like others (commented out the common transform compression)
-import sys,os,magic
+        # 2) PyDev console not using updated reconstructmergetool.py
+        # 3) ZContours have no transform
+        
+'''Reconstructmergetool - Merge two series together'''
+import sys, os, re
 from Series import *
 from Section import *
 from lxml import etree as ET
 
+if len(sys.argv) > 1:
+    ser = os.path.basename(sys.argv[1])
+    inpath = os.path.dirname(sys.argv[1])+'/'
+    outpath = inpath+'rmt/'
+
 def main():
     if __name__ != '__main__':
         return
-
-    if len(sys.argv) > 1: #For command line call
-        ser = sys.argv[1]
-        inpath = os.getcwd()+'/'
-        if len(sys.argv) < 3:
-            outpath = inpath
-        else:
-            outpath = str(sys.argv[2])
-    else:                                                       # === FOR TESTING
-        inpath = '/home/michaelm/Documents/TestVolume/CLZBJ-in/'
-        outpath = '/home/michaelm/Documents/TestVolume/CLZBJ-out/'
-
-    
-    #1)Create series object
-    series = getseries(inpath)
-    #2)Append sections to series
-    getsections(series, inpath)
-    #3)Output series file
-    writeseries(series, outpath)
-    #4)Output section file(s)
-    writesections(series, outpath)
-
+    if len(sys.argv) > 1:
+        #1)Create series object
+        series = getseries(inpath+ser)
+        #2)Append sections to series
+        getsections(series)
+        #3)Output series file
+        writeseries(series, outpath)
+        #4)Output section file(s)
+        writesections(series, outpath)
+    else:
+        print('Welcome to reconstructmergetool')
+        print('To create a series, use the function series = getseries(<path>)')
+        print('Next, find sections using getsections(series)')
+        print('To write the series file(s), use writeseries(series, <outpath>')
+        print('Finally, to write the section file(s), use writesections(series, <outpath>)')
 
 def getseries(inpath):
     print('Creating series...'),
-    #Get series path
-    ser = ''
-    for file in os.listdir(inpath): # Search dir for .ser file
-        if file.endswith('.ser'):
-            ser = str(file)
     #Parse series
-    serpath = inpath + ser
+    ser = os.path.basename(inpath)
+    serpath = os.path.dirname(inpath)+'/'+ser
     tree = ET.parse(serpath)
 
     root = tree.getroot() #Series
@@ -67,6 +65,11 @@ def getseries(inpath):
     return series
 
 def writeseries(series, outpath):
+    print('Creating output directory...'),
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+    print('DONE')
+    print('\tCreated: '+outpath)
     print('Writing series file...'),
     seriesoutpath = outpath+series._name+'.ser'
     #Build series root element
@@ -127,22 +130,21 @@ def writeseries(series, outpath):
     print('DONE')
     print('\tSeries output to: '+str(outpath+series._name+'.ser'))
 
-def getsections(series, inpath):
+def getsections(series):
     #Build list of paths to sections
     print('Finding sections...'),
-    pathlist = []
-    count = 0
-    for file in os.listdir(inpath):
-        if 'XML' in str(magic.from_file(inpath+file)) and '.ser' not in file:
-            pathlist.append( str(file) )
-            count+=1
+    serfixer = re.compile(re.escape('.ser'), re.IGNORECASE)
+    sername = serfixer.sub('', ser)
+    # look for files with 'seriesname'+'.'+'number'
+    p = re.compile('^'+sername+'[.][0-9]*$')
+    pathlist = [f for f in os.listdir(inpath) if p.match(f)]
     print('DONE')
-    print('\t%d section(s) found in %s'%(count,inpath))
+    print('\t%d section(s) found in %s'%(len(pathlist),inpath))
     #Create and add section objects to series
-    print('Creating section objects...')
+    print('Creating section objects...'),
     for sec in pathlist:
         secpath = inpath + sec
-        print(secpath)
+        #print(secpath)
         tree = ET.parse(secpath)
         root = tree.getroot() #Section
         section = Section(root,sec)
@@ -199,7 +201,11 @@ def writesections(series, outpath):
         elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
-
+def setidentzero(inpath):
+    series = getseries(inpath)
+    print('Converting series...'),
+    for cont in series._contours:
+        print(cont)
 main()
 
 
