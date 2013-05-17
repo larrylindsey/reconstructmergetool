@@ -31,7 +31,12 @@ class Transform:
         for ptset in points:
             newpts.append( tuple(self._tform(list(ptset))[0]) )
         return newpts
-    
+    def worldpts2(self, points):
+        newpts = []
+        for ptset in points:
+            print(ptset)
+            newpts.append( tuple(self._tform.inverse(ptset))) 
+        return newpts
     def imgpts(self, points): #===
         '''Returns imgpts'''
         return

@@ -38,7 +38,7 @@ def main():
         #1)Create series object
         series = getseries(inpath+ser)
         #2)Append sections to series
-        getsections(series)
+        getsections(series, inpath)
         #3)Output series file
         writeseries(series, outpath)
         #4)Output section file(s)
@@ -56,7 +56,7 @@ def getseries(inpath):
     ser = os.path.basename(inpath)
     serpath = os.path.dirname(inpath)+'/'+ser
     tree = ET.parse(serpath)
-
+    
     root = tree.getroot() #Series
     #Create series object
     series = Series(root, ser.replace('.ser',''))
@@ -130,9 +130,11 @@ def writeseries(series, outpath):
     print('DONE')
     print('\tSeries output to: '+str(outpath+series._name+'.ser'))
 
-def getsections(series):
+def getsections(series, path_to_series):
     #Build list of paths to sections
     print('Finding sections...'),
+    ser = os.path.basename(path_to_series) #===
+    inpath = os.path.dirname(path_to_series)+'/' #===
     serfixer = re.compile(re.escape('.ser'), re.IGNORECASE)
     sername = serfixer.sub('', ser)
     # look for files with 'seriesname'+'.'+'number'
@@ -178,12 +180,14 @@ def writesections(series, outpath):
                     subelem = ET.Element(elem._tag, elem.output())
                     curT.append(subelem)
                     root.append(curT)
-                else:
-                    print(elem._name),
-                    print(elem._transform.output()) #===
-                    
-                    print( section._imgs[0]._transform.output() ) #===
-                    print('Error: Image transform does not match contour transform '+'('+str(section._name)+')')
+
+# === Problems with setidentzero() function
+#                 else:
+#                     print(elem._name),
+#                     print(elem._transform.output()) #===
+#                     
+#                     print( section._imgs[0]._transform.output() ) #===
+#                     print('Error: Image transform does not match contour transform '+'('+str(section._name)+')')
                 
             # Transform already exist === Issues grouping under img transform
             #elif curT.attrib in tlist:
@@ -201,11 +205,30 @@ def writesections(series, outpath):
         elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
-def setidentzero(inpath):
-    series = getseries(inpath)
-    print('Converting series...'),
-    for cont in series._contours:
-        print(cont)
-main()
+
+def setidentzero(path_to_series):
+    outpath = os.path.dirname(path_to_series)+'/'+'ident2/'
+    # Create series object
+    series = getseries(path_to_series)
+    # Load with sections
+    getsections(series, path_to_series)
+    # Convert sections to identity transform
+    print('Converting sections...'),
+    for sec in series._sections:
+        for c in sec._list:
+            if not c._img:
+                #c._points = c._transform.worldpts(c._points)
+                c._points = c._transform.worldpts2(c._points)
+                c._transform._dim = 0
+                c._transform._ycoef = [0,0,1,0,0,0]
+                c._transform._xcoef = [0,1,0,0,0,0]
+                c._tform = c._transform.poptform()
+    print('DONE')
+    #3)Output series file
+    writeseries(series, outpath)
+    #4)Output section file(s)
+    writesections(series, outpath)
+        
+#main()
 
 
