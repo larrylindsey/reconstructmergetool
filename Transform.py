@@ -25,17 +25,11 @@ class Transform:
                +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())
 
 # Accessors
-    def worldpts(self, points): #===
-        '''Returns worldpts'''
+    def worldpts(self, points):
         newpts = []
-        for ptset in points:
-            newpts.append( tuple(self._tform(list(ptset))[0]) )
-        return newpts
-    def worldpts2(self, points):
-        newpts = []
-        for ptset in points:
-            print(ptset)
-            newpts.append( tuple(self._tform.inverse(ptset))) 
+        for pt in points:
+            print(self._tform.inverse(pt))
+            newpts.append( tuple(self._tform.inverse(pt)[0]) ) 
         return newpts
     def imgpts(self, points): #===
         '''Returns imgpts'''
@@ -83,12 +77,12 @@ class Transform:
             tmatrix = np.array([a[1],0,a[0],0,b[1],b[0],0,0,1]).reshape((3,3))
         elif self._dim == 3:
             tmatrix = np.array([a[1],a[2],a[0],b[1],b[2],b[0],0,0,1]).reshape((3,3))
-        else: # === PLACE HOLDER
-            tmatrix = np.array([1,0,0,0,1,0,0,0,1]).reshape((3,3))
         # Polynomial transform
 #         elif self._dim == 4:
 #         elif self._dim == 5:
 #         elif self._dim == 6:
+        else: # === PLACE HOLDER
+            tmatrix = np.array([1,0,0,0,1,0,0,0,1]).reshape((3,3))
         return tf.AffineTransform(tmatrix)
     def popyxcoef(self, node):
         '''Populates self._ycoef and self._xcoef'''

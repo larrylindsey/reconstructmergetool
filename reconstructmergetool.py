@@ -7,51 +7,57 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/16/2013
+#  Date Last Modified: 5/21/2013
 #
-# Currently working on:
-        # 1) read in section, write out section with all dim = 0 (def setidentzero())
-        # 2) phase out magic, use regular expressions
-        # 3) Polynomial transforms
-        # 4) tospace() fromspace() in transform
+# Currently working on: 
+        # 1) Check if identical, two series (ident trans, and norm trans) -> merge 2 to single output
+        # 2) Polynomial transforms
+        # 3) tospace() fromspace() in transform
         
         # Issues:
         # 1) Image trans assumes not like others (commented out the common transform compression)
         # 2) PyDev console not using updated reconstructmergetool.py
         # 3) ZContours have no transform
         
-'''Reconstructmergetool - Merge two series together'''
+'''Merge two series together'''
 import sys, os, re
 from Series import *
 from Section import *
 from lxml import etree as ET
 
 if len(sys.argv) > 1:
-    ser = os.path.basename(sys.argv[1])
-    inpath = os.path.dirname(sys.argv[1])+'/'
-    outpath = inpath+'rmt/'
+    ser = os.path.basename(sys.argv[1]) #Name of series
+    ser2 = os.path.basename(sys.argv[2]) 
+    inpath = os.path.dirname(sys.argv[1])+'/' #Directory of series
+    inpath2 = os.path.dirname(sys.argv[2])+'/'
+    outpath = inpath+'rmt/' #=== #Output directory of series
+    outpath2 = inpath2+'rmt2/' #===
+    mergeoutpath = os.path.dirname(os.path.dirname(inpath))+'/merged/' #===
 
 def main():
     if __name__ != '__main__':
+        print('Welcome to reconstructmergetool')
         return
     if len(sys.argv) > 1:
         #1)Create series object
         series = getseries(inpath+ser)
+        series2 = getseries(inpath2+ser2)
         #2)Append sections to series
-        getsections(series, inpath)
-        #3)Output series file
-        writeseries(series, outpath)
-        #4)Output section file(s)
-        writesections(series, outpath)
-    else:
-        print('Welcome to reconstructmergetool')
-        print('To create a series, use the function series = getseries(<path>)')
-        print('Next, find sections using getsections(series)')
-        print('To write the series file(s), use writeseries(series, <outpath>')
-        print('Finally, to write the section file(s), use writesections(series, <outpath>)')
+        getsections(series, inpath+ser)
+        getsections(series2, inpath2+ser2)
+        #3)Check if identical
+        
+#         #3)Output series file
+#         writeseries(series, mergeoutpath)
+#         writeseries(series2, mergeoutpath)
+#         #4)Output section file(s)
+#         writesections(series, mergeoutpath)
+#         writesections(series2, mergeoutpath)
+
+
 
 def getseries(inpath):
-    print('Creating series...'),
+    print('Creating series object...'),
     #Parse series
     ser = os.path.basename(inpath)
     serpath = os.path.dirname(inpath)+'/'+ser
@@ -64,7 +70,8 @@ def getseries(inpath):
     print('\tSeries: '+series._name)
     return series
 
-def writeseries(series, outpath):
+def writeseries(series_object, outpath):
+    series = series_object
     print('Creating output directory...'),
     if not os.path.exists(outpath):
         os.makedirs(outpath)
@@ -133,8 +140,8 @@ def writeseries(series, outpath):
 def getsections(series, path_to_series):
     #Build list of paths to sections
     print('Finding sections...'),
-    ser = os.path.basename(path_to_series) #===
-    inpath = os.path.dirname(path_to_series)+'/' #===
+    ser = os.path.basename(path_to_series)
+    inpath = os.path.dirname(path_to_series)+'/'
     serfixer = re.compile(re.escape('.ser'), re.IGNORECASE)
     sername = serfixer.sub('', ser)
     # look for files with 'seriesname'+'.'+'number'
@@ -146,14 +153,14 @@ def getsections(series, path_to_series):
     print('Creating section objects...'),
     for sec in pathlist:
         secpath = inpath + sec
-        #print(secpath)
         tree = ET.parse(secpath)
         root = tree.getroot() #Section
         section = Section(root,sec)
         series.addsection(section)
     print('DONE')
 
-def writesections(series, outpath):
+def writesections(series_object, outpath):
+    series = series_object
     print('Writing section file(s)...'),
     
     count = 0
@@ -206,29 +213,25 @@ def writesections(series, outpath):
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
 
-def setidentzero(path_to_series):
-    outpath = os.path.dirname(path_to_series)+'/'+'ident2/'
-    # Create series object
-    series = getseries(path_to_series)
-    # Load with sections
-    getsections(series, path_to_series)
-    # Convert sections to identity transform
+def setidentzero(series_object):
+    '''Converts series to identity transform'''
     print('Converting sections...'),
+    series = series_object
     for sec in series._sections:
         for c in sec._list:
             if not c._img:
-                #c._points = c._transform.worldpts(c._points)
-                c._points = c._transform.worldpts2(c._points)
+                c._points = c._transform.worldpts(c._points)
                 c._transform._dim = 0
                 c._transform._ycoef = [0,0,1,0,0,0]
                 c._transform._xcoef = [0,1,0,0,0,0]
                 c._tform = c._transform.poptform()
     print('DONE')
-    #3)Output series file
-    writeseries(series, outpath)
-    #4)Output section file(s)
-    writesections(series, outpath)
+#     outpath = os.path.dirname(path_to_series)+'/'+str(series._name)+'/'
+#     #3)Output series file
+#     writeseries(series, outpath)
+#     #4)Output section file(s)
+#     writesections(series, outpath)
         
-#main()
+main()
 
 
