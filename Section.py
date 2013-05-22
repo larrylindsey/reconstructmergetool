@@ -4,14 +4,14 @@ from Contour import *
 class Section:
     '''<Section> is an object with attributes: index, thickness, alignLocked \
 as well as a list containing <Image> and <Contour> objects. \
-Attributes printed with print(<Section>) objects in list printed with print(<Section>._list)'''
+Attributes printed with print(<Section>) objects in list printed with print(<Section>._contours)'''
 # Python Functions
     # INITIALIZE
-    def __init__(self, root, name='Unknown'):
+    def __init__(self, root=None, name='Unknown'): #root is xml tree
         # Create <section>
         self._name = name
         self._tag = 'Section'
-        self._list = self.poplists(root)[0] # List of contours
+        self._contours = self.poplists(root)[0] # List of contours 
         self._imgs = self.poplists(root)[1] # list of images
         self._index = int(root.attrib['index'])
         self._thick = float(root.attrib['thickness'])
@@ -20,12 +20,12 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         self._attribs = ['index','thickness','alignLocked']
     # LENGTH
     def __len__(self):
-        '''Allows use of len(<Section>) function. Returns length of _list'''
-        return len(self._list)
+        '''Allows use of len(<Section>) function. Returns length of _contours'''
+        return len(self._contours)
     # allows indexing of Section object
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
-        return self._list[x]
+        return self._contours[x]
     # print(<Section>) output
     def __str__(self):
         '''Allows use of print(<section>) function.'''
@@ -54,6 +54,8 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         '''Populates section object with Contours/Images/etc.'''
         contours = []
         images = []
+        if root == None:
+            return contours, images
         for transform in root:
             imgflag = False
             for child in transform:

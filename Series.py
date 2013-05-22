@@ -7,13 +7,13 @@ as well as a list containing all of the <Sections> objects associated with
 it'''
 # Python functions
     # INITIALIZE
-    def __init__(self, root, name='Unknown'):
-        '''Receives an xml file that is a list of sections in the form \
-of an xml file. _list for <Sections>, _contours for <Contours>&<ZContours>'''
+    def __init__(self, root=None, name='Unknown'):
+        '''Receives an xml file (root) that is a list of sections in the form \
+of an xml file. _sections for <Sections>, _contours for <Contours>&<ZContours>'''
         self._name = name
         self._tag = root.tag
-        self._contours = self.popcontours(root)
-        self._sections = []
+        self._contours = self.popcontours(root) #=== needs sort
+        self._sections = [] #Sorted in reconstructmergetool.py
         self._index = int(root.attrib['index'])
         self._viewport = self.popviewport(root)
         self._units = str(root.attrib['units'])

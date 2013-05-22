@@ -5,7 +5,7 @@ class Transform:
     '''Transform object containing the following data: \nTag \nDim \nyCoef \nxCoef \ntmatrix'''
 # Python functions
     # INITIALIZE
-    def __init__(self, node):
+    def __init__(self, node): # node is xml tree node
         '''Initializes the Transform object'''
         # Attributes
         self._tag = 'Transform'
@@ -28,7 +28,6 @@ class Transform:
     def worldpts(self, points):
         newpts = []
         for pt in points:
-            print(self._tform.inverse(pt))
             newpts.append( tuple(self._tform.inverse(pt)[0]) ) 
         return newpts
     def imgpts(self, points): #===
