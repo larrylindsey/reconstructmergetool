@@ -9,7 +9,4 @@ Driver file: reconstructmergetool.py
 
 Classes: Series, Section, Transform, Image, Contour, ZContour
 
-Command line call: python reconstructmergetool <series path> <mode>
-	mode 0: trace pts
-	mode 1: 
-	mode 2:
+Command line call: python reconstructmergetool <series path1> <series path2> 
