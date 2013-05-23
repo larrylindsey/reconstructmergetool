@@ -21,7 +21,7 @@ class Contour:
         self.fill = self.popfill(node)
         self.points = self.poppoints(node)
         # Private
-        self._polygon = None
+        self._shape = None
         self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
 
     # print(<Contour>) function output
@@ -36,9 +36,14 @@ class Contour:
     def s2b(self, string):
         '''Converts string to bool'''
         return string.lower() in ('true')
-    def poppoly(self):
+    def popshape(self):
         '''Adds polygon object (shapely) to self._polygon'''
-        self._polygon = Polygon(contour.transform.worldpts(contour.points))
+        if self.closed == True: # Closed trace
+            self._shape = Polygon(self.transform.worldpts(self.points))
+        elif self.closed == False and len(self.points)>1: # Open trace
+            self._shape = LineString(self.transform.worldpts(self.points))
+        else:
+            print('Invalid shape characteristics: '+self.name)
         
     def popcomment(self, node):
         '''Searches xml node for comments.'''

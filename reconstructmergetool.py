@@ -231,46 +231,46 @@ def setidentzero(serObj):
                 c._tform = c.transform.poptform()
     print('DONE')
     
-def conts2shapes(sectionObj, mode=None):
-    '''Returns a list of polygons and a list of lines from closed and open traces in a section, respectively'''
-    closed = [Polygon(contour.transform.worldpts(contour.points)) for contour in sectionObj.contours if contour.closed == True]
-    open = open1 = [LineString(contour.transform.worldpts(contour.points)) for contour in sectionObj.contours if contour.closed == False and len(contour.points)>1]
-    return closed, open
-
 def mergeSeries(serObj1, serObj2, outpath=None):
     '''Takes in two series objects and outputs a 3rd, merged series object'''
     if not outpath: #optional output path parameter
         outpath = '/home/michaelm/Documents/TestVolume/merged/' #===
     
     serObj3 = getseries(inpath+ser) #=== copy vals from ser1, later merge vals
-
+    # Populate shapes in all the contours
+    print('Populating shapely shapes...'),
+    for section in serObj1.sections:
+        for contour in section.contours:
+            contour.popshape()
+    for section in serObj2.sections:
+        for contour in section.contours:
+            contour.popshape()
+    print('DONE')
     # Compare parallel sections between series
-    for i in range(len(serObj1.sections)): #For each section
-        # Make 1 list of contours for each section
+#    for i in range(len(serObj1.sections)): #For each section
+        # Populate contours with shapely shapes :)
+#             contour.popshape()
+#             print(contour._shape)
+       # Make 1 list of contours for each section
             # Pop 1st contour, find all overlapping contours in list2
             # For each overlapping list2 contour, find overlapping contours in list 1
             # User input
-
-        #Make a list of polygons (closed traces) and lines (open traces) for both sections (biological coordinates)
-        poly1, open1 = conts2shapes(serObj1.sections[i])
-        poly2, open2 = conts2shapes(serObj2.sections[i])
-       
-        #=== Compare polygons
-        for i in range(len(poly1)):
-            AoU = (poly1[i].union(poly2[i])).area #area of union
-            AoI = (poly1[i].intersection(poly2[i])).area #area of intersection
-
-            if AoU/AoI < (1+2**(-17)):
-                print('Same area '+str(AoU/AoI)) #===
-            else:
-                print(str(AoU/AoI) - 1) #===
+        #=== Compare Polygon (not good: find all overlaps not just same index in list)
+#         for i in range(len(poly1)):
+#             AoU = (poly1[i].union(poly2[i])).area #area of union
+#             AoI = (poly1[i].intersection(poly2[i])).area #area of intersection
+# 
+#             if AoU/AoI < (1+2**(-17)):
+#                 print('Same area '+str(AoU/AoI)) #===
+#             else:
+#                 print(str(AoU/AoI) - 1) #===
                 
-        #=== Compare open traces
-        for i in range(len(open1)):
-            if open1[i].length == open2[i].length:
-                print('Same length '+str(open1[i].length)) #===
-            else:
-                print(str(open1[i].length)+' '+str(open2[i].length)) #===
+        #=== Compare LineString (open traces)
+#         for i in range(len(open1)):
+#             if open1[i].length == open2[i].length:
+#                 print('Same length '+str(open1[i].length)) #===
+#             else:
+#                 print(str(open1[i].length)+' '+str(open2[i].length)) #===
 
     return serObj3
 main()
