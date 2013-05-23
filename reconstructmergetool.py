@@ -12,14 +12,13 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/22/2013
+#  Date Last Modified: 5/23/2013
 #
 # Currently working on: 
-        # 1) Check if identical, two series (ident trans, and norm trans) -> merge 2 to single output
-        # 2) Polynomial transforms
-        # 3) tospace() fromspace() in transform
-        # 4) SORT ALL CLASS LISTS (contours sorted by what?)
-        # 5) Make attributes public
+        # Check if identical, two series (ident trans, and norm trans) -> merge 2 to single output
+        # Polynomial transforms
+        # tospace() fromspace() in transform
+        # polygon in contour
 
         
 '''Merge two series together'''
@@ -27,7 +26,6 @@ import sys, os, re, math
 from Series import *
 from Section import *
 from lxml import etree as ET
-from shapely.geometry import Polygon, LineString, Point
 
 
 if len(sys.argv) > 1:
@@ -72,7 +70,7 @@ def getseries(path_to_series, name=None):
     #Create series object
     series = Series(root, ser.replace('.ser',''))
     print('DONE')
-    print('\tSeries: '+series._name)
+    print('\tSeries: '+series.name)
     return series
 
 def writeseries(series_object, outpath):
@@ -83,13 +81,13 @@ def writeseries(series_object, outpath):
     print('DONE')
     print('\tCreated: '+outpath)
     print('Writing series file...'),
-    seriesoutpath = outpath+series._name+'.ser'
+    seriesoutpath = outpath+series.name+'.ser'
     #Build series root element
     attdict, contours = series.output()
-    root = ET.Element(series._tag, attdict)
+    root = ET.Element(series.tag, attdict)
     #Build contour elements and append to root
     for contour in contours:
-        root.append( ET.Element(contour._tag,contour.output()) )
+        root.append( ET.Element(contour.tag,contour.output()) )
 
     strlist = ET.tostringlist(root)
     # Needs to be in order: hideTraces/unhideTraces/hideDomains/unhideDomains
@@ -140,7 +138,7 @@ def writeseries(series_object, outpath):
 #     elemtree = ET.ElementTree(root)
 #     elemtree.write(seriesoutpath, pretty_print = True, xml_declaration=True, encoding="UTF-8")
     print('DONE')
-    print('\tSeries output to: '+str(outpath+series._name+'.ser'))
+    print('\tSeries output to: '+str(outpath+series.name+'.ser'))
 
 def getsections(series, path_to_series):
     #Build list of paths to sections
@@ -162,7 +160,7 @@ def getsections(series, path_to_series):
         root = tree.getroot() #Section
         section = Section(root,sec)
         series.addsection(section)
-    series._sections = sorted(series._sections, key=lambda Section: Section._name) #sort by name
+    series.sections = sorted(series.sections, key=lambda Section: Section.name) #sort by name
     print('DONE')
 
 def writesections(series_object, outpath):
@@ -170,15 +168,15 @@ def writesections(series_object, outpath):
     print('Writing section file(s)...'),
     
     count = 0
-    for section in series._sections:
-        sectionoutpath = outpath+section._name
+    for section in series.sections:
+        sectionoutpath = outpath+section.name
         count += 1
         #Build section root element
         attdict = section.output()
-        root = ET.Element(section._tag, attdict)
+        root = ET.Element(section.tag, attdict)
         
-        for elem in section._contours:
-            curT = ET.Element('Transform', elem._transform.output())
+        for elem in section.contours:
+            curT = ET.Element('Transform', elem.transform.output())
             
             #build list of transforms in root; check if transform already exists
             tlist=[]
@@ -186,31 +184,31 @@ def writesections(series_object, outpath):
                 tlist.append(trnsfrm.attrib)
 
             # Image/Image contour transform
-            if elem._img: # Make transform from image
-                if elem._transform.output() == section._imgs[0]._transform.output():
-                    subelem = ET.Element('Image', section._imgs[0].output())
+            if elem.img: # Make transform from image
+                if elem.transform.output() == section.imgs[0].transform.output():
+                    subelem = ET.Element('Image', section.imgs[0].output())
                     curT.append(subelem)
-                    subelem = ET.Element(elem._tag, elem.output())
+                    subelem = ET.Element(elem.tag, elem.output())
                     curT.append(subelem)
                     root.append(curT)
 
 # === Problems with setidentzero() function
 #                 else:
-#                     print(elem._name),
-#                     print(elem._transform.output()) #===
+#                     print(elem.name),
+#                     print(elem.transform.output()) #===
 #                     
-#                     print( section._imgs[0]._transform.output() ) #===
-#                     print('Error: Image transform does not match contour transform '+'('+str(section._name)+')')
+#                     print( section.imgs[0].transform.output() ) #===
+#                     print('Error: Image transform does not match contour transform '+'('+str(section.name)+')')
                 
             # Transform already exist === Issues grouping under img transform
             #elif curT.attrib in tlist:
             #    for trnsfrm in root.getchildren():
             #        if curT.attrib == trnsfrm.attrib:
-            #            subelem = ET.Element(elem._tag, elem.output())
+            #            subelem = ET.Element(elem.tag, elem.output())
             #            trnsfrm.append(subelem)
             # New transform   
             else:
-                subelem = ET.Element(elem._tag, elem.output())
+                subelem = ET.Element(elem.tag, elem.output())
                 curT.append(subelem)
                 root.append(curT)
         
@@ -223,20 +221,20 @@ def setidentzero(serObj):
     '''Converts series to biological coordinates (permanent)'''
     print('Converting sections...'),
     series = serObj
-    for sec in series._sections:
-        for c in sec._contours:
-            if not c._img:
-                c._points = c._transform.worldpts(c._points)
-                c._transform._dim = 0
-                c._transform._ycoef = [0,0,1,0,0,0]
-                c._transform._xcoef = [0,1,0,0,0,0]
-                c._tform = c._transform.poptform()
+    for sec in series.sections:
+        for c in sec.contours:
+            if not c.img:
+                c.points = c.transform.worldpts(c.points)
+                c.transform.dim = 0
+                c.transform.ycoef = [0,0,1,0,0,0]
+                c.transform.xcoef = [0,1,0,0,0,0]
+                c._tform = c.transform.poptform()
     print('DONE')
     
 def conts2shapes(sectionObj, mode=None):
     '''Returns a list of polygons and a list of lines from closed and open traces in a section, respectively'''
-    closed = [Polygon(contour._transform.worldpts(contour._points)) for contour in sectionObj._contours if contour._closed == True]
-    open = open1 = [LineString(contour._transform.worldpts(contour._points)) for contour in sectionObj._contours if contour._closed == False and len(contour._points)>1]
+    closed = [Polygon(contour.transform.worldpts(contour.points)) for contour in sectionObj.contours if contour.closed == True]
+    open = open1 = [LineString(contour.transform.worldpts(contour.points)) for contour in sectionObj.contours if contour.closed == False and len(contour.points)>1]
     return closed, open
 
 def mergeSeries(serObj1, serObj2, outpath=None):
@@ -246,16 +244,16 @@ def mergeSeries(serObj1, serObj2, outpath=None):
     
     serObj3 = getseries(inpath+ser) #=== copy vals from ser1, later merge vals
 
-    # Compare each section between serObjs
-    for i in range(len(serObj1._sections)): #For each section
+    # Compare parallel sections between series
+    for i in range(len(serObj1.sections)): #For each section
         # Make 1 list of contours for each section
             # Pop 1st contour, find all overlapping contours in list2
             # For each overlapping list2 contour, find overlapping contours in list 1
             # User input
 
         #Make a list of polygons (closed traces) and lines (open traces) for both sections (biological coordinates)
-        poly1, open1 = conts2shapes(serObj1._sections[i])
-        poly2, open2 = conts2shapes(serObj2._sections[i])
+        poly1, open1 = conts2shapes(serObj1.sections[i])
+        poly2, open2 = conts2shapes(serObj2.sections[i])
        
         #=== Compare polygons
         for i in range(len(poly1)):

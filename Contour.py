@@ -1,3 +1,4 @@
+from shapely.geometry import Polygon, LineString, Point
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
@@ -7,20 +8,21 @@ class Contour:
     def __init__(self, node, imgflag=False, transform=None):
         '''Initializes the Contour object. Two different Contour objects: Image Contours and Contours \
         delineated by the imgflag parameter.'''
-        self._tag = 'Contour'
-        self._name = str( node.attrib['name'] )
-        self._img = imgflag
-        self._comment = self.popcomment(node)
-        self._hidden = self.s2b(str(node.get('hidden')))
-        self._closed = self.s2b(str(node.get('closed')))
-        self._simplified = self.s2b(str(node.get('simplified')))
-        self._mode = self.popmode(node)
-        self._transform = transform
-        self._border = self.popborder(node)
-        self._fill = self.popfill(node)
-        self._points = self.poppoints(node)
-        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
-        self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points']
+        self.tag = 'Contour'
+        self.name = str( node.attrib['name'] )
+        self.img = imgflag
+        self.comment = self.popcomment(node)
+        self.hidden = self.s2b(str(node.get('hidden')))
+        self.closed = self.s2b(str(node.get('closed')))
+        self.simplified = self.s2b(str(node.get('simplified')))
+        self.mode = self.popmode(node)
+        self.transform = transform
+        self.border = self.popborder(node)
+        self.fill = self.popfill(node)
+        self.points = self.poppoints(node)
+        # Private
+        self._polygon = None
+        self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
 
     # print(<Contour>) function output
     def __str__(self):
@@ -29,11 +31,15 @@ class Contour:
                +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
-               +'\n-points: '+str(self._points)+'\n'
+               +'\n-points: '+str(self.points)+'\n'
 # Helper Functions
     def s2b(self, string):
         '''Converts string to bool'''
         return string.lower() in ('true')
+    def poppoly(self):
+        '''Adds polygon object (shapely) to self._polygon'''
+        self._polygon = Polygon(contour.transform.worldpts(contour.points))
+        
     def popcomment(self, node):
         '''Searches xml node for comments.'''
         if node.get('comment', None) == None:
@@ -120,77 +126,77 @@ class Contour:
 # Accessors
     def gettracepts(self):
         '''Returns trace space coordinates as [ (x,y), ... ]'''
-        return self._points
+        return self.points
     def getworldpts(self):
         '''Returns world space coordinates as [ (x,y), ... ]'''
-        return self._transform.worldpts(self._points)
+        return self.transform.worldpts(self.points)
     def getiamgepts(self): 
         '''Returns pixel space coordinates as [ (x,y), ... ]'''
-        return self._transform.imgpts() 
+        return self.transform.imgpts() 
     def gettag(self):
         '''Returns Tag (str)'''
-        return self._tag
+        return self.tag
     def getname(self):
         '''Returns Name attribute (str)'''
-        return self._name
+        return self.name
     def gethidden(self):
         '''Returns Hidden attribute (bool)'''
-        return self._hidden
+        return self.hidden
     def getclosed(self):
         '''Returns Closed attribute (bool)'''
-        return self._closed
+        return self.closed
     def getsimp(self):
         '''Returns Simplified attribute (bool)'''
-        return self._simplified
+        return self.simplified
     def getmode(self):
         '''Returns Mode attribute (int)'''
-        return self._mode
+        return self.mode
     def getbord(self):
         '''Returns Border attribute'''
-        ret = str(self._border[0])+' '+str(self._border[1])+' '+str(self._border[2])
+        ret = str(self.border[0])+' '+str(self.border[1])+' '+str(self.border[2])
         return ret
     def getfill(self):
         '''Returns Fill attribute'''
-        ret = str(self._fill[0])+' '+str(self._fill[1])+' '+str(self._fill[2])
+        ret = str(self.fill[0])+' '+str(self.fill[1])+' '+str(self.fill[2])
         return ret
     def getxbord(self):
         '''Returns border attribute in xml output format'''
         bord = ''
-        for elem in self._border:
+        for elem in self.border:
             bord += str(elem)+' '
         return str(bord).rstrip()
     def getxfill(self):
         '''Returns fill attribute in xml output format'''
         fill = ''
-        for elem in self._fill:
+        for elem in self.fill:
             fill += str(elem)+' '
         return str(fill).rstrip()
     def getxpoints(self): #===
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
         ret = ''
-        for tup in self._points:
+        for tup in self.points:
             ret += str(tup[0])+' '+str(tup[1])+', '
         return ret.rstrip()
     def getattribs(self):
         '''Returns all attributes'''
-        return self._name, \
-        self._comment, \
-        self._hidden, \
-        self._closed, \
-        self._simplified, \
-        self._mode, \
-        self._border, \
-        self._fill, \
-        self._points
+        return self.name, \
+        self.comment, \
+        self.hidden, \
+        self.closed, \
+        self.simplified, \
+        self.mode, \
+        self.border, \
+        self.fill, \
+        self.points
     def xgetattribs(self):
         '''Returns all attributes as list of strings in xml output format'''
-        return str(self._name), \
-        str(self._comment), \
-        str(self._hidden).lower(), \
-        str(self._closed).lower(), \
-        str(self._simplified).lower(), \
-        str(self._mode), \
+        return str(self.name), \
+        str(self.comment), \
+        str(self.hidden).lower(), \
+        str(self.closed).lower(), \
+        str(self.simplified).lower(), \
+        str(self.mode), \
         str(self.getxbord()), \
         str(self.getxfill()), \
         str(self.getxpoints()) 

@@ -4,51 +4,51 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
 # Python Functions
     # INITIALIZE
     def __init__(self, node):
-        self._tag = 'ZContour'
-        self._name = str( node.attrib['name'] )
-        self._closed = self.s2b(str(node.get('closed')))
-        self._mode = self.popmode(node)
-        self._border = self.popborder(node)
-        self._fill = self.popfill(node)
-        self._points = self.poppts(node) #List of strings. Each string contains 3 numbers: 'float, float, section'
-        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
-        self._attribs = ['name','closed','border','fill','mode','points']
+        self.tag = 'ZContour'
+        self.name = str( node.attrib['name'] )
+        self.closed = self.s2b(str(node.get('closed')))
+        self.mode = self.popmode(node)
+        self.border = self.popborder(node)
+        self.fill = self.popfill(node)
+        self.points = self.poppts(node) #List of strings. Each string contains 3 numbers: 'float, float, section'
+        # Private
+        self._attribs = ['name','closed','border','fill','mode','points'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <ZContour> ) function'''
-        return 'ZContour object:\n-name: '+str(self._name)+'\n-closed: ' \
-               +str(self._closed)+'\n-mode: '+str(self._mode) \
-               +'\n-border: '+str(self._border)+'\n-fill: '+str(self._fill) \
-               +'\n-points: '+str(self._points)+'\n'
+        return 'ZContour object:\n-name: '+str(self.name)+'\n-closed: ' \
+               +str(self.closed)+'\n-mode: '+str(self.mode) \
+               +'\n-border: '+str(self.border)+'\n-fill: '+str(self.fill) \
+               +'\n-points: '+str(self.points)+'\n'
 
 # Accessors
     def getpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
-        return self._points
+        return self.points
     def getxbord(self):
         bord = ''
-        for elem in self._border:
+        for elem in self.border:
             bord += str(elem)+' '
         return str(bord).rstrip()
     def getxfill(self):
         fill = ''
-        for elem in self._fill:
+        for elem in self.fill:
             fill += str(elem)+' '
         return str(fill).rstrip()
     def getxpoints(self):
         ret = ''
-        for tup in self._points:
+        for tup in self.points:
             ret += tup+', '
         return ret.rstrip()
     def getattribs(self):
         '''Returns all zcontour attributes'''
-        return self._name, self._closed, self._border, self._fill, \
-               self._mode, self._points
+        return self.name, self.closed, self.border, self.fill, \
+               self.mode, self.points
     def xgetattribs(self):
         '''Returns all zcontour attributes, xml formatting (strings)'''
-        return str(self._name), str(self._closed).lower(), self.getxbord(), self.getxfill(), \
-            str(self._mode), str(self.getxpoints())
+        return str(self.name), str(self.closed).lower(), self.getxbord(), self.getxfill(), \
+            str(self.mode), str(self.getxpoints())
     def output(self): #===
         '''Returns a dictionary of attributes'''
         attributes = {}
@@ -70,13 +70,13 @@ separated by a single space)'''
         else:
             return int( node.attrib['mode'] )
     def popborder(self, node):
-        '''Populates self._border'''
+        '''Populates self.border'''
         bord = []
         for elem in list(node.attrib['border'].split(' ')):
             bord.append(float(elem))
         return bord
     def popfill(self, node):
-        '''Populates self._fill'''
+        '''Populates self.fill'''
         fill = []
         for elem in list(node.attrib['fill'].split(' ')):
             fill.append(float(elem))

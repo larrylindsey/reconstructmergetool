@@ -8,20 +8,20 @@ class Transform:
     def __init__(self, node): # node is xml tree node
         '''Initializes the Transform object'''
         # Attributes
-        self._tag = 'Transform'
-        self._name = 'Transform'
-        self._dim = int(node.get('dim'))
-        self._ycoef = self.popyxcoef(node)[0]
-        self._xcoef = self.popyxcoef(node)[1]
+        self.tag = 'Transform'
+        self.name = 'Transform'
+        self.dim = int(node.get('dim'))
+        self.ycoef = self.popyxcoef(node)[0]
+        self.xcoef = self.popyxcoef(node)[1]
+        self.tospace = ''
+        self.fromspace = ''
+        # Private
         self._tform = self.poptform()
-        self._tospace = ''
-        self._fromspace = ''
-        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
-        self._attribs = ['dim','xcoef','ycoef']
+        self._attribs = ['dim','xcoef','ycoef'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
     # STRING REPRESENTATION
     def __str__(self):
         '''Allows user to use print( <Transform> ) function'''
-        return 'Transform object:\n-dim: '+str(self._dim)+'\n-ycoef: ' \
+        return 'Transform object:\n-dim: '+str(self.dim)+'\n-ycoef: ' \
                +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())
 
 # Accessors
@@ -37,21 +37,21 @@ class Transform:
     def getycoef(self):
         '''Returns ycoefs'''
         ret = ''
-        for int in self._ycoef:
+        for int in self.ycoef:
             ret += ' '+str(int)
         return ret
     def getxcoef(self):
         '''Returns xcoefs'''
         ret = ''
-        for int in self._xcoef:
+        for int in self.xcoef:
             ret += ' '+str(int)
         return ret
     def getattribs(self):
         '''Returns Dim, xcoefs, and ycoefs'''
-        return self._dim, self._xcoef, self._ycoef
+        return self.dim, self.xcoef, self.ycoef
     def xgetattribs(self):
         '''Returns dim, xcoefs, and ycoefs as strings for XML formatting'''
-        return str(self._dim), str(self.getxcoef()), str(self.getycoef())
+        return str(self.dim), str(self.getxcoef()), str(self.getycoef())
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building xml'''
         attributes = {}
@@ -65,26 +65,26 @@ class Transform:
 # Mutators                
     def poptform(self): # ===
         '''Creates self._tform variable which represents the transform'''
-        a = self._xcoef
-        b = self._ycoef
+        a = self.xcoef
+        b = self.ycoef
         # Affine transform
-        if self._dim == 0:
+        if self.dim == 0:
             tmatrix = np.array([1,0,0,0,1,0,0,0,1]).reshape((3,3))
-        elif self._dim == 1:
+        elif self.dim == 1:
             tmatrix = np.array([1,0,a[0],0,1,b[0],0,0,1]).reshape((3,3))
-        elif self._dim == 2: # Special case, swap b[1] and b[2]
+        elif self.dim == 2: # Special case, swap b[1] and b[2]
             tmatrix = np.array([a[1],0,a[0],0,b[1],b[0],0,0,1]).reshape((3,3))
-        elif self._dim == 3:
+        elif self.dim == 3:
             tmatrix = np.array([a[1],a[2],a[0],b[1],b[2],b[0],0,0,1]).reshape((3,3))
         # Polynomial transform
-#         elif self._dim == 4:
-#         elif self._dim == 5:
-#         elif self._dim == 6:
+#         elif self.dim == 4:
+#         elif self.dim == 5:
+#         elif self.dim == 6:
         else: # === PLACE HOLDER
             tmatrix = np.array([1,0,0,0,1,0,0,0,1]).reshape((3,3))
         return tf.AffineTransform(tmatrix)
     def popyxcoef(self, node):
-        '''Populates self._ycoef and self._xcoef'''
+        '''Populates self.ycoef and self.xcoef'''
         # digits added as int, everything else float
         y = []
         for elem in node.attrib['ycoef'].split(' '):

@@ -4,34 +4,34 @@ from Contour import *
 class Section:
     '''<Section> is an object with attributes: index, thickness, alignLocked \
 as well as a list containing <Image> and <Contour> objects. \
-Attributes printed with print(<Section>) objects in list printed with print(<Section>._contours)'''
+Attributes printed with print(<Section>) objects in list printed with print(<Section>.contours)'''
 # Python Functions
     # INITIALIZE
     def __init__(self, root=None, name='Unknown'): #root is xml tree
         # Create <section>
-        self._name = name
-        self._tag = 'Section'
-        self._contours = self.poplists(root)[0] # List of contours 
-        self._imgs = self.poplists(root)[1] # list of images
-        self._index = int(root.attrib['index'])
-        self._thick = float(root.attrib['thickness'])
-        self._alignLock = root.attrib['alignLocked']
-        # List of all attributes, used for creating an attribute dictionary for output (see output(self))
-        self._attribs = ['index','thickness','alignLocked']
+        self.name = name
+        self.tag = 'Section'
+        self.contours = self.poplists(root)[0] # List of contours 
+        self.imgs = self.poplists(root)[1] # list of images
+        self.index = int(root.attrib['index'])
+        self.thickness = float(root.attrib['thickness'])
+        self.alignLocked = root.attrib['alignLocked']
+        # Private
+        self._attribs = ['index','thickness','alignLocked'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
     # LENGTH
     def __len__(self):
-        '''Allows use of len(<Section>) function. Returns length of _contours'''
-        return len(self._contours)
+        '''Allows use of len(<Section>) function. Returns length of contours'''
+        return len(self.contours)
     # allows indexing of Section object
     def __getitem__(self,x):
         '''Allows use of <Section>[x] to return xth elements in list'''
-        return self._contours[x]
+        return self.contours[x]
     # print(<Section>) output
     def __str__(self):
         '''Allows use of print(<section>) function.'''
-        return 'Index: %d\nThickness: %f\nAlign Locked: %s'%(self._index, \
-                                                                 self._thick, \
-                                                                 self._alignLock)     
+        return 'Index: %d\nThickness: %f\nAlign Locked: %s'%(self.index, \
+                                                                 self.thickness, \
+                                                                 self.alignLocked)     
 # Accessors
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building xml'''
@@ -45,10 +45,10 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         return attributes
     def getattribs(self):
         '''Returns attributes'''
-        return self._index, self._thick, self._alignLock
+        return self.index, self.thickness, self.alignLocked
     def xgetattribs(self):
         '''Returns attributes in xml output format'''
-        return str(self._index), str(self._thick), str(self._alignLock).lower()
+        return str(self.index), str(self.thickness), str(self.alignLocked).lower()
 # Mutators       
     def poplists(self, root):
         '''Populates section object with Contours/Images/etc.'''
