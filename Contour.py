@@ -1,4 +1,4 @@
-from shapely.geometry import Polygon, LineString, Point
+from shapely.geometry import Polygon, LineString, Point, box
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
@@ -44,7 +44,13 @@ class Contour:
             self._shape = LineString(self.transform.worldpts(self.points))
         else:
             print('Invalid shape characteristics: '+self.name)
-        
+    def box(self):
+        '''Returns bounding box of shape'''
+        if self._shape != None:
+            minx, miny, maxx, maxy = self._shape.bounds
+            return box(minx, miny, maxx, maxy)
+        else:
+            print('NoneType for shape: '+self.name)
     def popcomment(self, node):
         '''Searches xml node for comments.'''
         if node.get('comment', None) == None:

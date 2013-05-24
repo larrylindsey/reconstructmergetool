@@ -218,7 +218,7 @@ def writesections(series_object, outpath):
     print('\t%d Section(s) output to: '+str(outpath))%count
 
 def setidentzero(serObj):
-    '''Converts series to biological coordinates (permanent)'''
+    '''Converts points for all sections in a series to identity trans'''
     print('Converting sections...'),
     series = serObj
     for sec in series.sections:
@@ -234,45 +234,89 @@ def setidentzero(serObj):
 def mergeSeries(serObj1, serObj2, outpath=None):
     '''Takes in two series objects and outputs a 3rd, merged series object'''
     if not outpath: #optional output path parameter
-        outpath = '/home/michaelm/Documents/TestVolume/merged/' #===
+        outpath = '/home/michaelm/Documents/TestVolume/merged/'
     
     serObj3 = getseries(inpath+ser) #=== copy vals from ser1, later merge vals
-    # Populate shapes in all the contours
-    print('Populating shapely shapes...'),
-    for section in serObj1.sections:
-        for contour in section.contours:
-            contour.popshape()
-    for section in serObj2.sections:
-        for contour in section.contours:
-            contour.popshape()
-    print('DONE')
-    # Compare parallel sections between series
-#    for i in range(len(serObj1.sections)): #For each section
-        # Populate contours with shapely shapes :)
-#             contour.popshape()
-#             print(contour._shape)
-       # Make 1 list of contours for each section
-            # Pop 1st contour, find all overlapping contours in list2
-            # For each overlapping list2 contour, find overlapping contours in list 1
-            # User input
-        #=== Compare Polygon (not good: find all overlaps not just same index in list)
-#         for i in range(len(poly1)):
-#             AoU = (poly1[i].union(poly2[i])).area #area of union
-#             AoI = (poly1[i].intersection(poly2[i])).area #area of intersection
-# 
-#             if AoU/AoI < (1+2**(-17)):
-#                 print('Same area '+str(AoU/AoI)) #===
-#             else:
-#                 print(str(AoU/AoI) - 1) #===
-                
+    
+    # Populate shapely shapes in all contours
+    popshapes(serObj1)
+    popshapes(serObj2)
+
+    # Create list of section pairs
+    pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.name.partition('.')[2] == y.name.partition('.')[2]  ]
+         
+    for pair in pairlist:
+        print()
+        print(pair[0].name+' '+pair[1].name) #===
+        # Build lists of contours
+        conts1 = [contour for contour in pair[0].contours]
+        conts2 = [contour for contour in pair[1].contours]
+        # Compare contours
+        overlaps = [] # collection of overlap groups
+        for cont in conts1:
+            ovlpGrp = [] # Tuples containing overlapping contours
+            for cont2 in conts2:
+                if boxOverlaps(cont, cont2): #=== If fail, deeper analysis 
+                    if difShape(cont, cont2):
+                        ovlpGrp.append( tuple([cont,cont2]) )
+            overlaps.append(ovlpGrp)
+        #print(overlaps)
+    
+def boxOverlaps(cont1, cont2):
+    '''Determines if there is an overlap between the shape bounding boxes.
+    Returns True if there is overlap, otherwise false.'''
+    if cont1._shape == None or cont2._shape == None:
+        print('No shape: '+cont1.name+' '+cont2.name)
+        return False
+    elif cont1.box().intersects(cont2.box()) or cont1.box().touches(cont2.box()):
+        return True
+    else:
+        return False  
+    
+def difShape(cont1, cont2):
+    '''Handles LineString and Polygons separately.
+    For Polygons: returns True if area of union/area of intersection is >= 1+2**(-17)
+    For LineStrings: returns True if...................................''' #===
+    # Closed traces
+    if cont1.closed == True and cont2.closed == True:
+        AoU = cont1._shape.union(cont2._shape).area # Area of union
+        AoI = cont1._shape.intersection(cont2._shape).area # Area of intersection
+        # Overlap is near 100%
+        if AoI != 0.0 and AoU/AoI < (1+2**(-17)):
+            print('Overlap near 100: '+cont1.name+' '+cont2.name) #===
+            return False
+        # AoI is zero, no overlap
+        elif AoI == 0.0:
+            print('Polygons no overlap, boxes do: '+cont1.name+' '+cont2.name)
+        # Overlap not near 100%
+        else: #=== user input?
+            print('User input req: '+cont1.name+' '+cont2.name) #===
+            return True
+    
+    # Open traces    
+    elif cont1.closed == False and cont2.closed == False:
+        print('LineString: '+cont1.name+' '+cont2.name) #===
+    
+    # Unknown error
+    else:
+        print('Error: '+cont1.name+' '+cont2.name)
+        
         #=== Compare LineString (open traces)
 #         for i in range(len(open1)):
 #             if open1[i].length == open2[i].length:
 #                 print('Same length '+str(open1[i].length)) #===
 #             else:
 #                 print(str(open1[i].length)+' '+str(open2[i].length)) #===
+    
+def popshapes(serObj):
+    print('Populating shapely shapes for '+serObj.name+'...'),
+    for section in serObj.sections:
+        for contour in section.contours:
+            contour.popshape()
+    print('DONE')
+    
 
-    return serObj3
+
 main()
 
 
