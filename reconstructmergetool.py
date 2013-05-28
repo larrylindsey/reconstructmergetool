@@ -12,9 +12,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/23/2013
+#  Date Last Modified: 5/28/2013
 #
-# Currently working on: 
+# Currently working on:
+        # Take in path instead of xmltree (series)?
         # Check if identical, two series (ident trans, and norm trans) -> merge 2 to single output
         # Polynomial transforms
         # tospace() fromspace() in transform
@@ -242,64 +243,87 @@ def mergeSeries(serObj1, serObj2, outpath=None):
     popshapes(serObj1)
     popshapes(serObj2)
 
-    # Create list of section pairs
+    # Create list of parallel section pairs
     pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.name.partition('.')[2] == y.name.partition('.')[2]  ]
-         
-    for pair in pairlist:
-        print()
-        print(pair[0].name+' '+pair[1].name) #===
+    
+    for pair in pairlist: # for each pair
+        print(pair[0].name+' '+pair[1].name) # Print parallel section names
+        
         # Build lists of contours
         conts1 = [contour for contour in pair[0].contours]
         conts2 = [contour for contour in pair[1].contours]
-        # Compare contours
-        overlaps = [] # collection of overlap groups
-        for cont in conts1:
-            ovlpGrp = [] # Tuples containing overlapping contours
-            for cont2 in conts2:
-                if boxOverlaps(cont, cont2): #=== If fail, deeper analysis 
-                    if difShape(cont, cont2):
-                        ovlpGrp.append( tuple([cont,cont2]) )
-            overlaps.append(ovlpGrp)
-        #print(overlaps)
+        
+        # Compare contours === img contours ignored for now
+        while len(conts1) != 0 and len(conts2) != 0:
+            overlaps = [conts1.pop()]
+            print('Currently checking: '+overlaps[0].name)
+            for cont in conts2:
+                if cont.name == overlaps[0].name: # Do they have same name?
+                    if boxOverlaps(overlaps[0], cont): # Do the bounding boxes overlap?
+                        if checkShape(overlaps[0], cont): # Are the 
+                            overlaps.append(cont)
+                            conts2.remove(cont)
+            print('Overlaps: ')
+            for elem in overlaps:
+                print(elem.name)
+        print('mergeSeries(): Contour lists empty')
     
 def boxOverlaps(cont1, cont2):
     '''Determines if there is an overlap between the shape bounding boxes.
     Returns True if there is overlap, otherwise false.'''
-    if cont1._shape == None or cont2._shape == None:
-        print('No shape: '+cont1.name+' '+cont2.name)
+    if cont1._shape == None or cont2._shape == None: #===
+        return False
+    elif cont1.img or cont2.img: #=== Ignore images for now
         return False
     elif cont1.box().intersects(cont2.box()) or cont1.box().touches(cont2.box()):
+        print('Bounding box overlap: '+cont1.name+' '+cont2.name)
         return True
     else:
         return False  
     
-def difShape(cont1, cont2):
+def checkShape(cont1, cont2): #===
     '''Handles LineString and Polygons separately.
-    For Polygons: returns True if area of union/area of intersection is >= 1+2**(-17)
-    For LineStrings: returns True if...................................''' #===
+    For Polygons:
+    For LineStrings:
+    '''
+    
     # Closed traces
     if cont1.closed == True and cont2.closed == True:
         AoU = cont1._shape.union(cont2._shape).area # Area of union
         AoI = cont1._shape.intersection(cont2._shape).area # Area of intersection
+        
         # Overlap is near 100%
         if AoI != 0.0 and AoU/AoI < (1+2**(-17)):
-            print('Overlap near 100: '+cont1.name+' '+cont2.name) #===
-            return False
+            print('    Polygon overlap near 100')
+            c = raw_input('Check contours...') #==========================
+            return True
+
         # AoI is zero, no overlap
         elif AoI == 0.0:
-            print('Polygons no overlap, boxes do: '+cont1.name+' '+cont2.name)
-        # Overlap not near 100%
-        else: #=== user input?
-            print('User input req: '+cont1.name+' '+cont2.name) #===
+            print('    Polygons do not overlap')
+            return False
+        
+        # Some overlap
+        elif AoI != 0.0:
+            print('    Overlap exists, not near 100')
+            c = raw_input('Check contours...') #==========================
+            return False
+        
+        #=== Other cases
+        else:
+            print('    unknown error') #===
+            c = raw_input('Check contours...')
             return True
-    
-    # Open traces    
-    elif cont1.closed == False and cont2.closed == False:
-        print('LineString: '+cont1.name+' '+cont2.name) #===
+        
+    # Open traces      
+    elif cont1.closed == False or cont2.closed == False: #===
+        print('    Open trace')  
+#     elif cont1.closed == False and cont2.closed == False:
+#         print('    LineString: '+cont1.name+' '+cont2.name) #===
     
     # Unknown error
     else:
-        print('Error: '+cont1.name+' '+cont2.name)
+        print('Unknown Error')
         
         #=== Compare LineString (open traces)
 #         for i in range(len(open1)):
