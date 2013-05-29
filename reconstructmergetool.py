@@ -12,7 +12,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/28/2013
+#  Date Last Modified: 5/29/2013
 #
 # Currently working on:
         # Take in path instead of xmltree (series)?
@@ -51,7 +51,10 @@ def main():
         getsections(series2, inpath2+ser2)
         #3)Merge series
         series3 = mergeSeries(series, series2)
-#         #3)Output series file
+        #4)Output series file
+        writeseries(series3, '/home/michaelm/Documents/TestVolume/merged/')
+        #5)Output section file(s)
+        writesections(series3, '/home/michaelm/Documents/TestVolume/merged/')
 #         writeseries(series, mergeoutpath)
 #         writeseries(series2, mergeoutpath)
 #         #4)Output section file(s)
@@ -219,7 +222,7 @@ def writesections(series_object, outpath):
     print('\t%d Section(s) output to: '+str(outpath))%count
 
 def setidentzero(serObj):
-    '''Converts points for all sections in a series to identity trans'''
+    '''Converts points for all sections in a series to identity transform'''
     print('Converting sections...'),
     series = serObj
     for sec in series.sections:
@@ -237,45 +240,92 @@ def mergeSeries(serObj1, serObj2, outpath=None):
     if not outpath: #optional output path parameter
         outpath = '/home/michaelm/Documents/TestVolume/merged/'
     
+    # Create output series/sections
     serObj3 = getseries(inpath+ser) #=== copy vals from ser1, later merge vals
-    
+    getsections(serObj3, inpath+ser) #=== copy ser1 section values, fix later
+#     for i in serObj3.sections:
+#         print(i.name)
+#         print([image.src for image in i.imgs])
+#         print([contour.name for contour in i.contours])
+        
     # Populate shapely shapes in all contours
     popshapes(serObj1)
     popshapes(serObj2)
 
-    # Create list of parallel section pairs
+    # Create list of parallel section pairs (Paired only if same section number)
     pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.name.partition('.')[2] == y.name.partition('.')[2]  ]
-    
-    for pair in pairlist: # for each pair
-        print(pair[0].name+' '+pair[1].name) # Print parallel section names
-        
+    count = 0
+    for secPair in pairlist: # for each pair of sections
+        print(secPair[0].name+' '+secPair[1].name) # Print parallel section names
+
         # Build lists of contours
-        conts1 = [contour for contour in pair[0].contours]
-        conts2 = [contour for contour in pair[1].contours]
+        conts1 = [contour for contour in secPair[0].contours]
+        conts2 = [contour for contour in secPair[1].contours]
+
+        outputlist = [] # List of all contours to be output
+        while len(conts1) != 0 and len(conts2) != 0: # Until conts1 or conts2 is empty
+            # For each conts1 contour, find overlapping contours in parallel section
+            for cont in conts1:
+                lst1 = [conts1.pop()]
+#                 print('BEGIN: '+lst1[0].name)
+                # Build list of conts2 contours that overlap the popped cont1 contour
+                lst2 = []
+                for cont2 in conts2: #=== Images ignored in boxOverlaps()
+#                     print('    check against: '+cont2.name)
+                    if cont2.name == lst1[0].name: # Do they have same name?
+                        if boxOverlaps(lst1[0], cont2): # Do the bounding boxes overlap?
+                            lst2.append(cont2) # If so, add to list
+                            conts2.remove(cont2) #=== remove from original list?
+                
+                if len(lst2) == 0: # If no overlaps found, add lst1 to output list
+                    outputlist.append( lst1.pop() )
+                else:
+                    # Check found sec2 contour against other sec1 contours
+                    for cont2 in lst2:
+                        for cont1 in conts1: # Original contour list for sec1
+                            if cont1.name == cont2.name:
+                                if boxOverlaps(cont2, cont1):
+                                    lst1.append(cont1)
+                                    conts1.remove(cont1) #===
+                
+                # Check for polygon overlaps===
+                for elem in lst1:
+                    for elem2 in lst2:
+                        c = checkShape(elem, elem2)
+                        if c == True:
+                            outputlist.append(elem)
+                            lst1.remove(elem)
+                            lst2.remove(elem2)
+                        elif c == 1:
+                            a = raw_input('Choose trace to output: '+'1. sec1\n'+'2, sec2') #===
+                        else:
+                            a = raw_input('check: '+elem.name+' '+elem2.name)
+                print
+                
+        # Add the rest of the contours (non-overlapping) to outputlist
+        print('leftover conts1: '+str([elem.name for elem in conts1]))
+        print('leftover conts2: '+str([elem.name for elem in conts2]))
+        for elem in conts2:
+            outputlist.append(elem)
+            conts2.remove(elem)
+        print('Output: '+str([elem.name for elem in outputlist]))
         
-        # Compare contours === img contours ignored for now
-        while len(conts1) != 0 and len(conts2) != 0:
-            overlaps = [conts1.pop()]
-            print('Currently checking: '+overlaps[0].name)
-            for cont in conts2:
-                if cont.name == overlaps[0].name: # Do they have same name?
-                    if boxOverlaps(overlaps[0], cont): # Do the bounding boxes overlap?
-                        if checkShape(overlaps[0], cont): # Are the 
-                            overlaps.append(cont)
-                            conts2.remove(cont)
-            print('Overlaps: ')
-            for elem in overlaps:
-                print(elem.name)
-        print('mergeSeries(): Contour lists empty')
-    
+        # Change contours for section
+        print('Change section: '+str(serObj3.sections[count].name)+str([cont.name for cont in serObj3.sections[count].contours]))
+        serObj3.sections[count].contours = outputlist
+        print('New '+str(serObj3.sections[count].name)+str([cont.name for cont in serObj3.sections[count].contours]))
+        count += 1 #=== Used to indicate which section in serObj3 to change contours
+    return serObj3
+
 def boxOverlaps(cont1, cont2):
     '''Determines if there is an overlap between the shape bounding boxes.
     Returns True if there is overlap, otherwise false.'''
-    if cont1._shape == None or cont2._shape == None: #===
+    if cont1._shape == None or cont2._shape == None:
         return False
-    elif cont1.img or cont2.img: #=== Ignore images for now
-        return False
-    elif cont1.box().intersects(cont2.box()) or cont1.box().touches(cont2.box()):
+#     elif cont1.img == True or cont2.img == True: #===
+#         print('Image, ignore: '+cont1.name+' '+cont2.name)
+#         return False
+    elif cont1.box().intersects( cont2.box() ) or cont1.box().touches( cont2.box() ):
         print('Bounding box overlap: '+cont1.name+' '+cont2.name)
         return True
     else:
@@ -286,16 +336,14 @@ def checkShape(cont1, cont2): #===
     For Polygons:
     For LineStrings:
     '''
-    
-    # Closed traces
+    # CLOSED TRACES
     if cont1.closed == True and cont2.closed == True:
-        AoU = cont1._shape.union(cont2._shape).area # Area of union
-        AoI = cont1._shape.intersection(cont2._shape).area # Area of intersection
+        AoU = cont1._shape.union( cont2._shape ).area # Area of union
+        AoI = cont1._shape.intersection( cont2._shape ).area # Area of intersection
         
         # Overlap is near 100%
         if AoI != 0.0 and AoU/AoI < (1+2**(-17)):
             print('    Polygon overlap near 100')
-            c = raw_input('Check contours...') #==========================
             return True
 
         # AoI is zero, no overlap
@@ -305,33 +353,19 @@ def checkShape(cont1, cont2): #===
         
         # Some overlap
         elif AoI != 0.0:
-            print('    Overlap exists, not near 100')
-            c = raw_input('Check contours...') #==========================
-            return False
-        
-        #=== Other cases
-        else:
-            print('    unknown error') #===
-            c = raw_input('Check contours...')
-            return True
-        
-    # Open traces      
+            print('    Overlap exists, not near 100 PLACE HOLDER: USER INPUT') #=== Place holder for user input
+            return 1
+
+    # OPEN TRACES     
     elif cont1.closed == False or cont2.closed == False: #===
         print('    Open trace')  
 #     elif cont1.closed == False and cont2.closed == False:
 #         print('    LineString: '+cont1.name+' '+cont2.name) #===
     
-    # Unknown error
+    # UNKNOWN ERROR
     else:
-        print('Unknown Error')
-        
-        #=== Compare LineString (open traces)
-#         for i in range(len(open1)):
-#             if open1[i].length == open2[i].length:
-#                 print('Same length '+str(open1[i].length)) #===
-#             else:
-#                 print(str(open1[i].length)+' '+str(open2[i].length)) #===
-    
+        print('    Unknown Error')
+
 def popshapes(serObj):
     print('Populating shapely shapes for '+serObj.name+'...'),
     for section in serObj.sections:
@@ -339,8 +373,6 @@ def popshapes(serObj):
             contour.popshape()
     print('DONE')
     
-
-
 main()
 
 
