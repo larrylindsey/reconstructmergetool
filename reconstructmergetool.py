@@ -15,11 +15,12 @@
 #  Date Last Modified: 5/29/2013
 #
 # Currently working on:
+        # GUI: KIVY, WX(windows?), GTK, QT
         # Take in path instead of xmltree (series)?
-        # Check if identical, two series (ident trans, and norm trans) -> merge 2 to single output
+        # ability to create empty series/sections
+        # try TC1/TC2 with TC2 ident trans
         # Polynomial transforms
         # tospace() fromspace() in transform
-        # polygon in contour
 
         
 '''Merge two series together'''
@@ -32,10 +33,8 @@ from lxml import etree as ET
 if len(sys.argv) > 1:
     ser = os.path.basename(sys.argv[1]) #Name of series
     ser2 = os.path.basename(sys.argv[2]) 
-    inpath = os.path.dirname(sys.argv[1])+'/' #Directory of series
-    inpath2 = os.path.dirname(sys.argv[2])+'/'
-    outpath = inpath+'rmt/' #=== #Output directory of series
-    outpath2 = inpath2+'rmt2/' #===
+    inpath = os.path.abspath(os.path.dirname(sys.argv[1]))+'/' #Directory of series
+    inpath2 = os.path.abspath(os.path.dirname(sys.argv[2]))+'/'
     mergeoutpath = os.path.dirname(os.path.dirname(inpath))+'/merged/' #===
 
 def main():
@@ -52,14 +51,9 @@ def main():
         #3)Merge series
         series3 = mergeSeries(series, series2)
         #4)Output series file
-        writeseries(series3, '/home/michaelm/Documents/TestVolume/merged/')
+        writeseries(series3, mergeoutpath)
         #5)Output section file(s)
-        writesections(series3, '/home/michaelm/Documents/TestVolume/merged/')
-#         writeseries(series, mergeoutpath)
-#         writeseries(series2, mergeoutpath)
-#         #4)Output section file(s)
-#         writesections(series, mergeoutpath)
-#         writesections(series2, mergeoutpath)
+        writesections(series3, mergeoutpath)
 
 def getseries(path_to_series, name=None):
     print('Creating series object...'),
@@ -243,10 +237,6 @@ def mergeSeries(serObj1, serObj2, outpath=None):
     # Create output series/sections
     serObj3 = getseries(inpath+ser) #=== copy vals from ser1, later merge vals
     getsections(serObj3, inpath+ser) #=== copy ser1 section values, fix later
-#     for i in serObj3.sections:
-#         print(i.name)
-#         print([image.src for image in i.imgs])
-#         print([contour.name for contour in i.contours])
         
     # Populate shapely shapes in all contours
     popshapes(serObj1)
@@ -267,11 +257,11 @@ def mergeSeries(serObj1, serObj2, outpath=None):
             # For each conts1 contour, find overlapping contours in parallel section
             for cont in conts1:
                 lst1 = [conts1.pop()]
-#                 print('BEGIN: '+lst1[0].name)
+                print('BEGIN: '+lst1[0].name)
                 # Build list of conts2 contours that overlap the popped cont1 contour
                 lst2 = []
                 for cont2 in conts2: #=== Images ignored in boxOverlaps()
-#                     print('    check against: '+cont2.name)
+                    print('    check against: '+cont2.name)
                     if cont2.name == lst1[0].name: # Do they have same name?
                         if boxOverlaps(lst1[0], cont2): # Do the bounding boxes overlap?
                             lst2.append(cont2) # If so, add to list
