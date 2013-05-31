@@ -6,11 +6,11 @@ transform (object)'''
     # INITIALIZE
     def __init__(self, node, transform):
         self.tag = 'Image'
-        self.name = node.attrib['src']
-        self.src = node.attrib['src']
-        self.mag = float( node.attrib['mag'] )
-        self.contrast = float( node.attrib['contrast'] )
-        self.brightness = float( node.attrib['brightness'] )
+        self.name = node.attrib['src'] #===
+        self.src = node.attrib['src'] #===
+        self.mag = float( node.attrib['mag'] ) #===
+        self.contrast = float( node.attrib['contrast'] ) #===
+        self.brightness = float( node.attrib['brightness'] ) #===
         self.red = self.popred(node)
         self.green = self.popgreen(node)
         self.blue = self.popblue(node)

@@ -5,8 +5,8 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
     # INITIALIZE
     def __init__(self, node):
         self.tag = 'ZContour'
-        self.name = str( node.attrib['name'] )
-        self.closed = self.s2b(str(node.get('closed')))
+        self.name = str( node.attrib['name'] ) #===
+        self.closed = self.s2b(str(node.get('closed'))) #===
         self.mode = self.popmode(node)
         self.border = self.popborder(node)
         self.fill = self.popfill(node)

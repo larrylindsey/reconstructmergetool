@@ -5,16 +5,16 @@ class Contour:
   Mode \n   Points'''
 # Python Functions
     # INITIALIZE
-    def __init__(self, node, imgflag=False, transform=None):
+    def __init__(self, node=None, imgflag=False, transform=None):
         '''Initializes the Contour object. Two different Contour objects: Image Contours and Contours \
         delineated by the imgflag parameter.'''
         self.tag = 'Contour'
-        self.name = str( node.attrib['name'] )
+        self.name = str( node.attrib['name'] ) #===
         self.img = imgflag
         self.comment = self.popcomment(node)
-        self.hidden = self.s2b(str(node.get('hidden')))
-        self.closed = self.s2b(str(node.get('closed')))
-        self.simplified = self.s2b(str(node.get('simplified')))
+        self.hidden = self.s2b(str(node.get('hidden'))) #===
+        self.closed = self.s2b(str(node.get('closed'))) #===
+        self.simplified = self.s2b(str(node.get('simplified'))) #===
         self.mode = self.popmode(node)
         self.transform = transform
         self.border = self.popborder(node)

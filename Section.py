@@ -13,9 +13,9 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         self.tag = 'Section'
         self.contours = self.poplists(root)[0] # List of contours 
         self.imgs = self.poplists(root)[1] # list of images
-        self.index = int(root.attrib['index'])
-        self.thickness = float(root.attrib['thickness'])
-        self.alignLocked = root.attrib['alignLocked']
+        self.index = int(root.attrib['index']) #===
+        self.thickness = float(root.attrib['thickness']) #===
+        self.alignLocked = root.attrib['alignLocked'] #===
         # Private
         self._attribs = ['index','thickness','alignLocked'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
     # LENGTH

@@ -5,16 +5,16 @@ class Transform:
     '''Transform object containing the following data: \nTag \nDim \nyCoef \nxCoef \ntmatrix'''
 # Python functions
     # INITIALIZE
-    def __init__(self, node): # node is xml tree node
+    def __init__(self, node=None): # node is xml tree node
         '''Initializes the Transform object'''
         # Attributes
         self.tag = 'Transform'
         self.name = 'Transform'
-        self.dim = int(node.get('dim'))
+        self.dim = int(node.get('dim')) #===
         self.ycoef = self.popyxcoef(node)[0]
         self.xcoef = self.popyxcoef(node)[1]
-        self.tospace = ''
-        self.fromspace = ''
+        self.tospace = '' #===
+        self.fromspace = '' #===
         # Private
         self._tform = self.poptform()
         self._attribs = ['dim','xcoef','ycoef'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
@@ -33,7 +33,6 @@ class Transform:
     def imgpts(self, points): #===
         '''Returns imgpts'''
         return
-
     def getycoef(self):
         '''Returns ycoefs'''
         ret = ''
@@ -65,6 +64,9 @@ class Transform:
 # Mutators                
     def poptform(self): # ===
         '''Creates self._tform variable which represents the transform'''
+        if self.xcoef == None or self.ycoef == None or self.dim == None:
+            print('Invalid parameter: None')
+            return None
         a = self.xcoef
         b = self.ycoef
         # Affine transform
@@ -85,6 +87,9 @@ class Transform:
         return tf.AffineTransform(tmatrix)
     def popyxcoef(self, node):
         '''Populates self.ycoef and self.xcoef'''
+        if node == None:
+            print('Invalid parameter: Node')
+            return None
         # digits added as int, everything else float
         y = []
         for elem in node.attrib['ycoef'].split(' '):
