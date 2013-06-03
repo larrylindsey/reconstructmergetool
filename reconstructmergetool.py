@@ -24,7 +24,7 @@
 
         
 '''Merge two series together'''
-import sys, os, re, math
+import sys, os, re, math, time
 from Series import *
 from Section import *
 from lxml import etree as ET
@@ -51,12 +51,15 @@ def main():
         #=== Test s2 ident == 0
         setidentzero(series2)
         #3)Merge series
+        a = time.time()
         series3 = mergeSeries(series, series2)
         #4)Output series file
         writeseries(series3, mergeoutpath)
         #5)Output section file(s)
         writesections(series3, mergeoutpath)
-
+        b = time.time()
+        c = b-a
+        print('Merge complete. Total time: '+str(c))
 def getseries(path_to_series, name=None):
     print('Creating series object...'),
     #Parse series
