@@ -10,7 +10,7 @@ class Transform:
         # Attributes
         self.tag = 'Transform'
         self.name = 'Transform'
-        self.dim = int(node.get('dim')) #===
+        self.dim = self.popdim(node) #int
         self.ycoef = self.popyxcoef(node)[0]
         self.xcoef = self.popyxcoef(node)[1]
         self.tospace = '' #===
@@ -61,12 +61,15 @@ class Transform:
             attributes[keys[count]] = value
             count += 1
         return attributes      
-# Mutators                
+# Mutators              
+    def popdim(self, node):
+        if node == None:
+            return None
+        return int(node.get('dim'))  
     def poptform(self): # ===
         '''Creates self._tform variable which represents the transform'''
-        if self.xcoef == None or self.ycoef == None or self.dim == None:
-            print('Invalid parameter: None')
-            return None
+        if self.xcoef == [] or self.ycoef == [] or self.dim == []:
+            return 'xcoef, ycoef, or dim parameters missing... cannot create tform'
         a = self.xcoef
         b = self.ycoef
         # Affine transform
@@ -88,8 +91,7 @@ class Transform:
     def popyxcoef(self, node):
         '''Populates self.ycoef and self.xcoef'''
         if node == None:
-            print('Invalid parameter: Node')
-            return None
+            return [], []
         # digits added as int, everything else float
         y = []
         for elem in node.attrib['ycoef'].split(' '):

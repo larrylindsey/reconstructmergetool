@@ -9,12 +9,12 @@ class Contour:
         '''Initializes the Contour object. Two different Contour objects: Image Contours and Contours \
         delineated by the imgflag parameter.'''
         self.tag = 'Contour'
-        self.name = str( node.attrib['name'] ) #===
+        self.name = self.popname(node)
         self.img = imgflag
         self.comment = self.popcomment(node)
-        self.hidden = self.s2b(str(node.get('hidden'))) #===
-        self.closed = self.s2b(str(node.get('closed'))) #===
-        self.simplified = self.s2b(str(node.get('simplified'))) #===
+        self.hidden = self.s2b(str(self.pophidden(node)))
+        self.closed = self.s2b(str(self.popclosed(node)))
+        self.simplified = self.s2b(str(self.popsimplified(node)))
         self.mode = self.popmode(node)
         self.transform = transform
         self.border = self.popborder(node)
@@ -35,7 +35,15 @@ class Contour:
 # Helper Functions
     def s2b(self, string):
         '''Converts string to bool'''
-        return string.lower() in ('true')
+        if string == 'None':
+            return None
+        else:
+            return string.lower() in ('true')
+    def popname(self, node):
+        if node == None:
+            return 'Empty Contour'
+        else:
+            return str( node.attrib['name'] )
     def popshape(self):
         '''Adds polygon object (shapely) to self._polygon'''
         if self.closed == True: # Closed trace
@@ -45,7 +53,7 @@ class Contour:
         else:
             print('Invalid shape characteristics: '+self.name)
     def box(self):
-        '''Returns bounding box of shape'''
+        '''Returns bounding box of shape (shapely library)'''
         if self._shape != None:
             minx, miny, maxx, maxy = self._shape.bounds
             return box(minx, miny, maxx, maxy)
@@ -53,48 +61,52 @@ class Contour:
             print('NoneType for shape: '+self.name)
     def popcomment(self, node):
         '''Searches xml node for comments.'''
-        if node.get('comment', None) == None:
+        if node == None:
             return None
         else:
-            return node.attrib['comment']
+            return node.get('comment', None)
     def pophidden(self, node):
         '''Searches xml node for hidden.'''
-        if node.get('hidden', None) == None:
+        if node == None:
             return None
-        elif node.attrib['hidden'].capitalize() == 'True':
+        elif str(node.get('hidden', None)).capitalize() == 'True':
             return True
         else:
             return False
     def popclosed(self, node):
         '''Searches xml node for closed.'''
-        if node.get('closed', None) == None:
+        if node == None:
             return None
-        elif node.attrib['closed'].capitalize() == 'True':
+        elif str(node.get('closed', None)).capitalize() == 'True':
             return True
         else:
             return False
     def popsimplified(self, node):
         '''Searches xml node for closed.'''
-        if node.get('simplified', None) == None:
+        if node == None:
             return None
-        elif node.attrib['simplified'].capitalize() == 'True':
+        elif str(node.get('simplified', None)).capitalize() == 'True':
             return True
         else:
             return False
     def popmode(self, node):
         '''Searches xml node for mode.'''
-        if node.get('mode', None) == None:
+        if node == None:
             return None
         else:
             return int( node.attrib['mode'] )
     def popborder(self, node):
         '''Searches xml node for border. Creates a list of floats.'''
+        if node == None:
+            return []
         bord = []
         for elem in list(node.attrib['border'].split(' ')):
             bord.append(float(elem))
         return bord
     def popfill(self, node):
         '''Searches xml node for fill. Creates a list of floats.'''
+        if node == None:
+            return []
         fill = []
         for elem in list(node.attrib['fill'].split(' ')):
             fill.append(float(elem))
@@ -102,6 +114,8 @@ class Contour:
     def poppoints(self, node):
         '''Searches xml node for points. List of points tuples (x,y), \
         int or float depends on type in the xml node.'''
+        if node == None:
+            return []
         partPoints = list(node.attrib['points'].lstrip(' ').split(','))
         #make a new list of clean points, to be added to object
         ptList = []

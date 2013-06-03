@@ -4,13 +4,13 @@ contrast (float), brightness (float), red (bool), green (bool), blue (bool), and
 transform (object)'''
 # Python functions
     # INITIALIZE
-    def __init__(self, node, transform):
+    def __init__(self, node=None, transform=None):
         self.tag = 'Image'
-        self.name = node.attrib['src'] #===
-        self.src = node.attrib['src'] #===
-        self.mag = float( node.attrib['mag'] ) #===
-        self.contrast = float( node.attrib['contrast'] ) #===
-        self.brightness = float( node.attrib['brightness'] ) #===
+        self.name = self.popname(node)
+        self.src = self.popname(node)
+        self.mag = self.popmag(node) #float
+        self.contrast = self.popcontrast(node) #float 
+        self.brightness = self.popbrightness(node) #float
         self.red = self.popred(node)
         self.green = self.popgreen(node)
         self.blue = self.popblue(node)
@@ -71,7 +71,9 @@ transform (object)'''
 # Mutators
     def popred(self, node):
         '''Searches xml node for red attribute'''
-        if node.get('red', None) == None:
+        if node == None:
+            return None
+        elif node.get('red', None) == None:
             return True
         elif node.attrib['red'].capitalize() == 'True':
             return True
@@ -79,7 +81,9 @@ transform (object)'''
             return False
     def popgreen(self, node):
         '''Searches xml node for green attribute'''
-        if node.get('green', None) == None:
+        if node == None:
+            return None
+        elif node.get('green', None) == None:
             return True
         elif node.attrib['green'].capitalize() == 'True':
             return True
@@ -87,9 +91,27 @@ transform (object)'''
             return False
     def popblue(self, node):
         '''Searches xml node for blue attribute'''
-        if node.get('blue', None) == None:
+        if node == None:
+            return None
+        elif node.get('blue', None) == None:
             return True
         elif node.attrib['blue'].capitalize() == 'True':
             return True
         else:
             return False
+    def popname(self, node):
+        if node == None:
+            return None
+        return node.attrib['src']
+    def popmag(self, node):
+        if node == None:
+            return None
+        return float( node.attrib['mag'] )
+    def popcontrast(self, node):
+        if node == None:
+            return None
+        return float( node.attrib['contrast'] )
+    def popbrightness(self, node):
+        if node == None:
+            return None
+        return float( node.attrib['brightness'] )

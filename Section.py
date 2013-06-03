@@ -13,9 +13,9 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         self.tag = 'Section'
         self.contours = self.poplists(root)[0] # List of contours 
         self.imgs = self.poplists(root)[1] # list of images
-        self.index = int(root.attrib['index']) #===
-        self.thickness = float(root.attrib['thickness']) #===
-        self.alignLocked = root.attrib['alignLocked'] #===
+        self.index = self.popindex(root) #int
+        self.thickness = self.popthickness(root) #float
+        self.alignLocked = self.popalignLocked(root)
         # Private
         self._attribs = ['index','thickness','alignLocked'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
     # LENGTH
@@ -49,7 +49,13 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
     def xgetattribs(self):
         '''Returns attributes in xml output format'''
         return str(self.index), str(self.thickness), str(self.alignLocked).lower()
-# Mutators       
+# Mutators
+    def s2b(self, string):
+        '''Converts string to bool'''
+        if string == 'None':
+            return None
+        else:
+            return string.lower() in ('true')       
     def poplists(self, root):
         '''Populates section object with Contours/Images/etc.'''
         contours = []
@@ -71,3 +77,16 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)
         return contours, images
+    def popindex(self, root):
+        if root == None:
+            return None
+        return int(root.attrib['index'])
+    def popthickness(self, root):
+        if root == None:
+            return None
+        return float(root.attrib['thickness'])
+    def popalignLocked(self, root):
+        if root == None:
+            return None
+        return root.attrib['alignLocked']
+            

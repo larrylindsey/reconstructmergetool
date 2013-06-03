@@ -12,10 +12,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 5/31/2013
+#  Date Last Modified: 6/3/2013
 #
 # Currently working on:
-        # try TC1/TC2 with TC2 ident trans
+        # try merge w/ ident trans
         # Take in path instead of xmltree (series)?
             # ability to create empty series/sections (node or root == None)
         # Polynomial transforms

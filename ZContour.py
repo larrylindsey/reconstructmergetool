@@ -3,10 +3,10 @@ class ZContour:
 a .ser file. Contour and ZContour can be distinguished by tags.'''
 # Python Functions
     # INITIALIZE
-    def __init__(self, node):
+    def __init__(self, node=None):
         self.tag = 'ZContour'
-        self.name = str( node.attrib['name'] ) #===
-        self.closed = self.s2b(str(node.get('closed'))) #===
+        self.name = self.popname(node)
+        self.closed = self.s2b(self.popclosed(node))
         self.mode = self.popmode(node)
         self.border = self.popborder(node)
         self.fill = self.popfill(node)
@@ -63,7 +63,9 @@ separated by a single space)'''
 # Mutators
     def s2b(self, string):
         '''Converts string to bool'''
-        return string.lower() in ('true')
+        if str(string) == 'None':
+            return None
+        return str(string).lower() in ('true')
     def popmode(self, node):
         if node.get('mode', None) == None:
             return None
@@ -101,3 +103,11 @@ separated by a single space)'''
                 #example: ['5.93694 3.75884 156', '5.46795 4.10569 144', '4.82797 4.41347 139',
                 #'4.77912 4.64308 124', '4.63744 4.97528 99']
         return ptList
+    def popname(self, node):
+        if node == None:
+            return None
+        return str( node.attrib['name'] )
+    def popclosed(self, node):
+        if node == None:
+            return None
+        return node.get('closed')
