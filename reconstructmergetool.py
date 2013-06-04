@@ -12,9 +12,11 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/3/2013
+#  Date Last Modified: 6/4/2013
 #
 # Currently working on:
+        # Run tests on volume josef, find problem contours (i.e. less than 3 pts for closed)
+        # sections sorted in computer way (i.e. 12 after 111)
         # try merge w/ ident trans
         # Take in path instead of xmltree (series)?
             # ability to create empty series/sections (node or root == None)
@@ -48,18 +50,17 @@ def main():
         #2)Append sections to series
         getsections(series, inpath+ser)
         getsections(series2, inpath2+ser2)
-        #=== Test s2 ident == 0
-        setidentzero(series2)
         #3)Merge series
-        a = time.time()
+        a = time.time() # Start time
         series3 = mergeSeries(series, series2)
         #4)Output series file
         writeseries(series3, mergeoutpath)
         #5)Output section file(s)
         writesections(series3, mergeoutpath)
-        b = time.time()
-        c = b-a
+        b = time.time() # End time
+        c = b-a # Total time for merge
         print('Merge complete. Total time: '+str(c))
+        
 def getseries(path_to_series, name=None):
     print('Creating series object...'),
     #Parse series
@@ -241,9 +242,11 @@ def setidentzero(serObj):
 def mergeSeries(serObj1, serObj2):
     '''Takes in two series objects and outputs a 3rd series object with merged contours'''
 
-    # Create output series/sections
-    serObj3 = getseries(inpath+ser) #=== copy vals from ser1, later merge vals
-    getsections(serObj3, inpath+ser) #=== copy ser1 section values, fix later
+    # Create output series/sections === copy vals from ser1, later merge vals
+    serObj3 = getseries(inpath+ser)
+    #=== serObj3 = Series()
+    #=== ser3AttList = mergeSerAtt(serObj1, serObj2)
+    getsections(serObj3, inpath+ser) #=== remove?
         
     # Populate shapely shapes in all contours for both series
     popshapes(serObj1)
@@ -274,7 +277,7 @@ def mergeSeries(serObj1, serObj2):
 #                     print('    Check against: '+cont2.name)
                     if cont2.name == lst1[0].name: # Do they have same name?
                         if boxOverlaps(lst1[0], cont2): # Do the bounding boxes overlap?
-#                             print('bO 1')
+#                             print('boxOverlaps() 1')
                             lst2.append(cont2)
                             conts2.remove(cont2)
                 
@@ -287,7 +290,7 @@ def mergeSeries(serObj1, serObj2):
                         for cont1 in conts1: # Original contour list for sec1
                             if cont1.name == contour2.name: # Do they have the same name?
                                 if boxOverlaps(contour2, cont1): # Do the bouding boxes overlap?
-#                                     print('bO 2')
+#                                     print('boxOverlaps() 2')
                                     lst1.append(cont1)
                                     conts1.remove(cont1)
                 
@@ -296,7 +299,7 @@ def mergeSeries(serObj1, serObj2):
                 print([elem.name for elem in lst2])
                 lstcnt = 0 #=== problems with non-exist elems, use indexing/pop instead of remove()
                 for elem in lst1: # Compare lst1 contours...
-                    lstcnt2 = 0 #===
+                    lstcnt2 = 0
                     for elem2 in lst2: # ... to lst2 contours
                         c = checkShape(elem, elem2)
 #                         print('chkshpe')
@@ -306,27 +309,25 @@ def mergeSeries(serObj1, serObj2):
                             print(len(outputlist))
                             lst1.pop(lstcnt)
                             lst2.pop(lstcnt2)
-#                             lst1.remove(elem) # problems with deleting the wrong elem, switched to pop()
-#                             lst2.remove(elem2)
-                        elif c == 1: #=== Different traces with same name
-                            a = raw_input('Choose trace to output: '+'1. sec1\n'+'2, sec2') #===
+            
+                        elif c == 1: # Different traces with same name
+                            a = raw_input('Choose trace to output: '+'1. sec1\n'+'2, sec2') #=== User input or no?
                             if int(a) == 1:
-                                outputlist.append(elem) # copy c == True for now
+                                outputlist.append(elem)
                             if int(a) == 2:
                                 outputlist.append(elem2)
                             else:
                                 print('Invalid option...')  
                                 lst1.pop(lstcnt)
-                                lst2.pop(lstcnt2)  
-#                             lst1.remove(elem)
-#                             lst2.remove(elem2)
-#                         else:
+                                lst2.pop(lstcnt2)
+#===                         else:
 #                             a = raw_input('check: '+elem.name+' '+elem2.name)
-                        lstcnt2+=1 #===
-                    lstcnt+=1 #===
+                        lstcnt2+=1
+                    lstcnt+=1
                 print
                 
-        # Add leftover contours (conts1/conts2) to output list
+        # Add leftover contours (from conts1/conts2) to output list
+        # Left overs mean they have no matching/overlapping contours in parallel section
         print('leftover conts1: '+str([elem.name for elem in conts1]))
         while len(conts1) != 0:
             outputlist.append( conts1.pop() )
@@ -337,9 +338,7 @@ def mergeSeries(serObj1, serObj2):
 
         
         # Add output contours to section.contours list
-#         print('Change section: '+str(serObj3.sections[count].name)+str([cont.name for cont in serObj3.sections[count].contours]))
         serObj3.sections[count].contours = outputlist
-#         print('New '+str(serObj3.sections[count].name)+str([cont.name for cont in serObj3.sections[count].contours]))
         count += 1
         print
     return serObj3
@@ -384,18 +383,17 @@ def checkShape(cont1, cont2): #===
             return 1
 
     # OPEN TRACES===     
-    elif cont1.closed == False or cont2.closed == False: #===
+    elif cont1.closed == False and cont2.closed == False: #===
         print('    Open trace')  
-#     elif cont1.closed == False and cont2.closed == False:
-#         print('    LineString: '+cont1.name+' '+cont2.name) #===
     
     # UNKNOWN ERROR===
     else:
-        print('    Unknown Error')
+        print('    Unknown Trace Type')
 
 def popshapes(serObj):
     print('Populating shapely shapes for '+serObj.name+'...'),
     for section in serObj.sections:
+        print('==================================='+section.name+'====================================')
         for contour in section.contours:
             contour.popshape()
     print('DONE')

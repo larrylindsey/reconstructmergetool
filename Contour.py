@@ -45,15 +45,17 @@ class Contour:
         else:
             return str( node.attrib['name'] )
     def popshape(self):
-        '''Adds polygon object (shapely) to self._polygon'''
+        '''Adds polygon object (shapely) to self._shape'''
         if self.closed == True: # Closed trace
+            print(self.name) #===
             self._shape = Polygon(self.transform.worldpts(self.points))
         elif self.closed == False and len(self.points)>1: # Open trace
+            print(self.name) #===
             self._shape = LineString(self.transform.worldpts(self.points))
         else:
             print('Invalid shape characteristics: '+self.name)
     def box(self):
-        '''Returns bounding box of shape (shapely library)'''
+        '''Returns bounding box of shape (shapely) library'''
         if self._shape != None:
             minx, miny, maxx, maxy = self._shape.bounds
             return box(minx, miny, maxx, maxy)
