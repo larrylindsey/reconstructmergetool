@@ -17,7 +17,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
         self.index = self.popindex(root)
         self.viewport = self.popviewport(root)
         self.units = self.popunits(root)
-        self.autoSaveSeries = self.popautoSaveSeries
+        self.autoSaveSeries = self.s2b(self.popautoSaveSeries(root))
         self.autoSaveSection =  self.s2b(self.popautoSaveSection(root))
         self.warnSaveSection = self.s2b(self.popwarnSaveSection(root))
         self.beepDeleting = self.s2b(self.popbeepDeleting(root))

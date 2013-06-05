@@ -196,7 +196,7 @@ def writesections(series_object, outpath):
                     curT.append(subelem)
                     root.append(curT)
 
-# === Problems with setidentzero() function
+# === Problems with setidentzero() function & grouping under same transform
 #                 else:
 #                     print(elem.name),
 #                     print(elem.transform.output()) #===
@@ -239,15 +239,12 @@ def setidentzero(serObj):
     else:
         return 'Abort...'
     
-def mergeSeries(serObj1, serObj2):
+def mergeSeries(serObj1, serObj2): #===
     '''Takes in two series objects and outputs a 3rd series object with merged contours'''
 
-    # Create output series/sections === copy vals from ser1, later merge vals
-    serObj3 = getseries(inpath+ser)
-    #=== serObj3 = Series()
-    #=== ser3AttList = mergeSerAtt(serObj1, serObj2)
-    getsections(serObj3, inpath+ser) #=== remove?
-        
+    # Create output series object with merged attributes
+    serObj3 = mergeSerAtts(serObj1, serObj2, serObj1.name) #=== Same name as 1st series
+    
     # Populate shapely shapes in all contours for both series
     popshapes(serObj1)
     popshapes(serObj2)
@@ -393,11 +390,47 @@ def checkShape(cont1, cont2): #===
 def popshapes(serObj):
     print('Populating shapely shapes for '+serObj.name+'...'),
     for section in serObj.sections:
-        print('==================================='+section.name+'====================================')
+#         print('==================================='+section.name+'====================================')
         for contour in section.contours:
             contour.popshape()
     print('DONE')
+#             print(self.name) #===
     
+def mergeSerAtts(ser1Obj, ser2Obj, ser3name):#===
+    ser1atts = ser1Obj.output()[0]
+    ser2atts = ser2Obj.output()[0]
+    ser3atts = {}
+    
+    # Compare attributes
+    for att in ser1atts:
+        if ser1atts[att] == ser2atts[att]:
+            ser3atts[att] = ser1atts[att]
+        else:
+            print('error: '+str(att))
+            print(ser1atts[att]+' '+ser2atts[att])
+            a = int(raw_input('Choose attribute to pass to output series... 1 or 2: '))
+            if a == 1:
+                ser3atts[att] = ser1atts[att]
+                print
+            elif a == 2:
+                ser3atts[att] = ser2atts[att]
+                print
+            else:
+                print('Invalid choice. Please enter 1 or 2')
+                print
+    
+    # Create series object
+    elem = ET.Element('Series')
+    for att in ser3atts:
+        elem.set( str(att), ser3atts[att] ) 
+    series = Series(elem, ser3name)
+    
+    # Compare section attributes
+    if len(ser1Obj.sections) == len(ser2Obj.sections):
+        for i in range(len(ser1Obj.sections)):
+            s = Section # Imgs? ===
+    
+    return series
 main()
 
 

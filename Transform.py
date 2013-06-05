@@ -77,11 +77,11 @@ class Transform:
             tmatrix = np.array([1,0,0,0,1,0,0,0,1]).reshape((3,3))
         elif self.dim == 1:
             tmatrix = np.array([1,0,a[0],0,1,b[0],0,0,1]).reshape((3,3))
-        elif self.dim == 2: # Special case, swap b[1] and b[2]
+        elif self.dim == 2: # Special case, swap b[1] and b[2] (look at original Reconstruct code)
             tmatrix = np.array([a[1],0,a[0],0,b[1],b[0],0,0,1]).reshape((3,3))
         elif self.dim == 3:
             tmatrix = np.array([a[1],a[2],a[0],b[1],b[2],b[0],0,0,1]).reshape((3,3))
-        # Polynomial transform
+        #=== Polynomial transform
 #         elif self.dim == 4:
 #         elif self.dim == 5:
 #         elif self.dim == 6:
