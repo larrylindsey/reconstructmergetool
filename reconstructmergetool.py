@@ -12,13 +12,14 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/4/2013
+#  Date Last Modified: 6/6/2013
 #
 # Currently working on:
         # Run tests on volume josef, find problem contours (i.e. less than 3 pts for closed)
+        # Series contours in mergeSerAtts, 
         # sections sorted in computer way (i.e. 12 after 111)
         # try merge w/ ident trans
-        # Take in path instead of xmltree (series)?
+        # Take in path or dictionary? instead of xmltree (series)?
             # ability to create empty series/sections (node or root == None)
         # Polynomial transforms
         # GUI: KIVY, WX(windows?), GTK, QT
@@ -224,7 +225,7 @@ def writesections(series_object, outpath):
 def setidentzero(serObj):
     '''Converts points for all sections in a series to identity transform'''
     i = raw_input('setidentzero() will PERMANENTLY alter data in '+serObj.name+'... Continue? y/n  ')
-    if i in ['y', 'Y', 'yes', 'Yes']:
+    if i.lower() in ['y', 'yes']:
         print('Converting sections...'),
         series = serObj
         for sec in series.sections:
@@ -239,11 +240,15 @@ def setidentzero(serObj):
     else:
         return 'Abort...'
     
-def mergeSeries(serObj1, serObj2): #===
+def mergeSeries(serObj1, serObj2, name=None): #===
     '''Takes in two series objects and outputs a 3rd series object with merged contours'''
-
+    if name == None: # If not specified...
+        name = serObj1.name #... output series will have same name as serObj1
+        
     # Create output series object with merged attributes
-    serObj3 = mergeSerAtts(serObj1, serObj2, serObj1.name) #=== Same name as 1st series
+    serObj3 = mergeSerAtts(serObj1, serObj2, name) # Merge series class attributes
+    serObj3.contours = mergeSerConts(serObj1, serObj2, name) # Merge series contours===
+    serObj3.sections = mergeSerSecAtts(serObj1, serObj2, name) # Merge section attributes (not contours) ===
     
     # Populate shapely shapes in all contours for both series
     popshapes(serObj1)
@@ -281,7 +286,9 @@ def mergeSeries(serObj1, serObj2): #===
                 # If no overlaps found, add lst1 contour to output list
                 if len(lst2) == 0: 
                     outputlist.append( lst1.pop() )
-                # For each cont in lst2 (overlaps in sec2), find overlaps in conts1 (unpopped sec1 contours)
+                    
+                # For each cont in lst2 (sec2 conts that overlap lst1 cont), ...
+                # ...find overlaps in conts1 (unpopped [non lst1] sec1 contours)
                 else:
                     for contour2 in lst2:
                         for cont1 in conts1: # Original contour list for sec1
@@ -317,8 +324,6 @@ def mergeSeries(serObj1, serObj2): #===
                                 print('Invalid option...')  
                                 lst1.pop(lstcnt)
                                 lst2.pop(lstcnt2)
-#===                         else:
-#                             a = raw_input('check: '+elem.name+' '+elem2.name)
                         lstcnt2+=1
                     lstcnt+=1
                 print
@@ -397,18 +402,17 @@ def popshapes(serObj):
 #             print(self.name) #===
     
 def mergeSerAtts(ser1Obj, ser2Obj, ser3name):#===
+    # Compare and merge series attributes from ser1Obj/ser2Obj
     ser1atts = ser1Obj.output()[0]
     ser2atts = ser2Obj.output()[0]
     ser3atts = {}
-    
-    # Compare attributes
     for att in ser1atts:
         if ser1atts[att] == ser2atts[att]:
             ser3atts[att] = ser1atts[att]
         else:
-            print('error: '+str(att))
+            print('Series attributes do not match: '+str(att))
             print(ser1atts[att]+' '+ser2atts[att])
-            a = int(raw_input('Choose attribute to pass to output series... 1 or 2: '))
+            a = int( raw_input('Choose attribute to pass to output series... 1 or 2: ') )
             if a == 1:
                 ser3atts[att] = ser1atts[att]
                 print
@@ -419,18 +423,38 @@ def mergeSerAtts(ser1Obj, ser2Obj, ser3name):#===
                 print('Invalid choice. Please enter 1 or 2')
                 print
     
-    # Create series object
+    # Create series object with merged attributes
     elem = ET.Element('Series')
     for att in ser3atts:
         elem.set( str(att), ser3atts[att] ) 
     series = Series(elem, ser3name)
+    return series
+
+def mergeSerConts(ser1Obj, ser2Obj, ser3name):   
+    # Compare and merge series contours to new series ===
+    ser1conts = ser1Obj.contours
+    ser2conts = ser2Obj.contours
+    #=== assume same if same name?
+    #=== 
     
     # Compare section attributes
-    if len(ser1Obj.sections) == len(ser2Obj.sections):
-        for i in range(len(ser1Obj.sections)):
-            s = Section # Imgs? ===
+    ser1secs = [(x,y) for x in ser1Obj.sections for y in ser2Obj.sections if x.name.partition('.')[2] == y.name.partition('.')[2]]
     
-    return series
+    for sec1 in ser1Obj.sections: #===
+        for sec2 in ser2Obj.sections:
+            if sec1.output() == sec2.output():
+                elem = ET.Element(ser3name)
+                
+    print(len(ser1secs))
+    print(len(ser2secs))
+#     if len(ser1Obj.sections) == len(ser2Obj.sections):
+#         for i in range(len(ser1Obj.sections)):
+#             s = Section # Imgs? ===
+    
+    return contours
+
+def mergeSerSecAtts(ser1Obj, ser2Obj, ser3name): #===
+    return sections
 main()
 
 

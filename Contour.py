@@ -21,7 +21,7 @@ class Contour:
         self.fill = self.popfill(node)
         self.points = self.poppoints(node)
         # Private
-        self._shape = None
+        self._shape = None # Shapely. Populated when necessary for computation (e.g. reconstructmergetool.mergeSeries())
         self._attribs = ['name','comment','hidden','closed','simplified','mode','border','fill','points'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
 
     # print(<Contour>) function output

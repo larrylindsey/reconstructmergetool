@@ -73,7 +73,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
                     C = Contour(child, imgflag, Transform(transform))
                     contours.append(C)
                     imgflag = False
-                elif child.tag == 'ZContour':
+                elif child.tag == 'ZContour': # No ZContours in Sections?
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)
         return contours, images
