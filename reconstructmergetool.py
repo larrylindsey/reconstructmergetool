@@ -12,16 +12,12 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/6/2013
+#  Date Last Modified: 6/7/2013
 #
 # Currently working on:
-        # Run tests on volume josef, find problem contours (i.e. less than 3 pts for closed)
+        # worldpts() needs dif for affine/polynomial
         # Series contours in mergeSerAtts, 
         # sections sorted in computer way (i.e. 12 after 111)
-        # try merge w/ ident trans
-        # Take in path or dictionary? instead of xmltree (series)?
-            # ability to create empty series/sections (node or root == None)
-        # Polynomial transforms
         # GUI: KIVY, WX(windows?), GTK, QT
         # tospace() fromspace() in transform
 
@@ -52,15 +48,11 @@ def main():
         getsections(series, inpath+ser)
         getsections(series2, inpath2+ser2)
         #3)Merge series
-        a = time.time() # Start time
         series3 = mergeSeries(series, series2)
         #4)Output series file
         writeseries(series3, mergeoutpath)
         #5)Output section file(s)
         writesections(series3, mergeoutpath)
-        b = time.time() # End time
-        c = b-a # Total time for merge
-        print('Merge complete. Total time: '+str(c))
         
 def getseries(path_to_series, name=None):
     print('Creating series object...'),
@@ -241,108 +233,27 @@ def setidentzero(serObj):
         return 'Abort...'
     
 def mergeSeries(serObj1, serObj2, name=None): #===
-    '''Takes in two series objects and outputs a 3rd series object with merged contours'''
+    '''Takes in two series objects and returns a 3rd, merged series object'''
     if name == None: # If not specified...
         name = serObj1.name #... output series will have same name as serObj1
         
     # Create output series object with merged attributes
-    serObj3 = mergeSerAtts(serObj1, serObj2, name) # Merge series class attributes
-    serObj3.contours = mergeSerConts(serObj1, serObj2, name) # Merge series contours===
-    serObj3.sections = mergeSerSecAtts(serObj1, serObj2, name) # Merge section attributes (not contours) ===
-    
+    serObj3 = mergeSerAtts(serObj1, serObj2, name) # Merge series attributes
+    serObj3.contours = mergeSerConts(serObj1, serObj2) # Merge series contours===
+
     # Populate shapely shapes in all contours for both series
     popshapes(serObj1)
     popshapes(serObj2)
-
+    print('Done 3')
+    
     # Create list of parallel section pairs (paired by section name)
     pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.name.partition('.')[2] == y.name.partition('.')[2]  ]
     
-    count = 0 # Keep track of current section
-    for secPair in pairlist: # For each section pair
-        print(secPair[0].name+' '+secPair[1].name) # Print parallel section names
+    # Merge sections
+    for (x,y) in pairlist:
+        print(x.name+' '+y.name)
+        serObj3.sections.append( mergeSections(x,y,name) )
 
-        # Build lists of contours for both sections
-        conts1 = [contour for contour in secPair[0].contours]
-        conts2 = [contour for contour in secPair[1].contours]
-
-        outputlist = [] # List of all contours to be output into 3rd series
-        
-        # Find overlapping contours
-        while len(conts1) != 0 and len(conts2) != 0: # Continue until either list is empty
-            # Find overlaps in conts2 for each contour in conts1
-            for cont in conts1:
-                lst1 = [conts1.pop()] # Conts1 contour
-                print('Checking: '+lst1[0].name)
-                # Find overlaps in conts2
-                lst2 = [] # All the conts2 contours that overlap with the lst1 contour
-                for cont2 in conts2:
-#                     print('    Check against: '+cont2.name)
-                    if cont2.name == lst1[0].name: # Do they have same name?
-                        if boxOverlaps(lst1[0], cont2): # Do the bounding boxes overlap?
-#                             print('boxOverlaps() 1')
-                            lst2.append(cont2)
-                            conts2.remove(cont2)
-                
-                # If no overlaps found, add lst1 contour to output list
-                if len(lst2) == 0: 
-                    outputlist.append( lst1.pop() )
-                    
-                # For each cont in lst2 (sec2 conts that overlap lst1 cont), ...
-                # ...find overlaps in conts1 (unpopped [non lst1] sec1 contours)
-                else:
-                    for contour2 in lst2:
-                        for cont1 in conts1: # Original contour list for sec1
-                            if cont1.name == contour2.name: # Do they have the same name?
-                                if boxOverlaps(contour2, cont1): # Do the bouding boxes overlap?
-#                                     print('boxOverlaps() 2')
-                                    lst1.append(cont1)
-                                    conts1.remove(cont1)
-                
-                # Bounding box overlaps have been found, now check actual polygons
-                print([elem.name for elem in lst1])
-                print([elem.name for elem in lst2])
-                lstcnt = 0 #=== problems with non-exist elems, use indexing/pop instead of remove()
-                for elem in lst1: # Compare lst1 contours...
-                    lstcnt2 = 0
-                    for elem2 in lst2: # ... to lst2 contours
-                        c = checkShape(elem, elem2)
-#                         print('chkshpe')
-                        if c == True: # Most likely to be same object
-                            print(len(outputlist))
-                            outputlist.append(elem)
-                            print(len(outputlist))
-                            lst1.pop(lstcnt)
-                            lst2.pop(lstcnt2)
-            
-                        elif c == 1: # Different traces with same name
-                            a = raw_input('Choose trace to output: '+'1. sec1\n'+'2, sec2') #=== User input or no?
-                            if int(a) == 1:
-                                outputlist.append(elem)
-                            if int(a) == 2:
-                                outputlist.append(elem2)
-                            else:
-                                print('Invalid option...')  
-                                lst1.pop(lstcnt)
-                                lst2.pop(lstcnt2)
-                        lstcnt2+=1
-                    lstcnt+=1
-                print
-                
-        # Add leftover contours (from conts1/conts2) to output list
-        # Left overs mean they have no matching/overlapping contours in parallel section
-        print('leftover conts1: '+str([elem.name for elem in conts1]))
-        while len(conts1) != 0:
-            outputlist.append( conts1.pop() )
-        print('leftover conts2: '+str([elem.name for elem in conts2]))
-        while len(conts2) != 0:
-            outputlist.append( conts2.pop() )
-        print('Output: '+str([elem.name for elem in outputlist]))
-
-        
-        # Add output contours to section.contours list
-        serObj3.sections[count].contours = outputlist
-        count += 1
-        print
     return serObj3
 
 def boxOverlaps(cont1, cont2):
@@ -401,28 +312,28 @@ def popshapes(serObj):
     print('DONE')
 #             print(self.name) #===
     
-def mergeSerAtts(ser1Obj, ser2Obj, ser3name):#===
+def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
+    print('Mergeseratts')
     # Compare and merge series attributes from ser1Obj/ser2Obj
     ser1atts = ser1Obj.output()[0]
     ser2atts = ser2Obj.output()[0]
     ser3atts = {}
     for att in ser1atts:
+        print(att)
         if ser1atts[att] == ser2atts[att]:
             ser3atts[att] = ser1atts[att]
         else:
             print('Series attributes do not match: '+str(att))
             print(ser1atts[att]+' '+ser2atts[att])
-            a = int( raw_input('Choose attribute to pass to output series... 1 or 2: ') )
-            if a == 1:
-                ser3atts[att] = ser1atts[att]
-                print
-            elif a == 2:
-                ser3atts[att] = ser2atts[att]
-                print
-            else:
-                print('Invalid choice. Please enter 1 or 2')
-                print
-    
+            a = 3
+            while a not in [1,2]:
+                a = int( raw_input('Choose attribute to pass to output series... 1 or 2: ') )
+                if a == 1:
+                    ser3atts[att] = ser1atts[att]
+                elif a == 2:
+                    ser3atts[att] = ser2atts[att]
+                else:
+                    print('Invalid choice. Please enter 1 or 2')
     # Create series object with merged attributes
     elem = ET.Element('Series')
     for att in ser3atts:
@@ -430,31 +341,154 @@ def mergeSerAtts(ser1Obj, ser2Obj, ser3name):#===
     series = Series(elem, ser3name)
     return series
 
-def mergeSerConts(ser1Obj, ser2Obj, ser3name):   
+def mergeSerConts(ser1Obj, ser2Obj): #=== 
+    print('Mergeserconts')
     # Compare and merge series contours to new series ===
     ser1conts = ser1Obj.contours
     ser2conts = ser2Obj.contours
-    #=== assume same if same name?
+    ser3conts = ser1conts #=== TeMPORARY
+    #=== compare all, present as choice
     #=== 
     
-    # Compare section attributes
-    ser1secs = [(x,y) for x in ser1Obj.sections for y in ser2Obj.sections if x.name.partition('.')[2] == y.name.partition('.')[2]]
-    
-    for sec1 in ser1Obj.sections: #===
-        for sec2 in ser2Obj.sections:
-            if sec1.output() == sec2.output():
-                elem = ET.Element(ser3name)
-                
-    print(len(ser1secs))
-    print(len(ser2secs))
 #     if len(ser1Obj.sections) == len(ser2Obj.sections):
 #         for i in range(len(ser1Obj.sections)):
 #             s = Section # Imgs? ===
     
-    return contours
+    return ser3conts
 
-def mergeSerSecAtts(ser1Obj, ser2Obj, ser3name): #===
-    return sections
+def mergeSections(sec1, sec2, ser3name): #===
+    '''compares and merges the attributes associated with Sections (except contours).
+    i.e. imgs, index, thickness, alignLocked'''
+    sec3 = Section()
+    # Check index
+    if sec1.index == sec2.index:
+        sec3.index = sec1.index
+        sec3.name = ser3name+'.'+str(sec3.index)
+    # Check imgs
+    if len(sec1.imgs) == len(sec1.imgs) and len(sec1.imgs) == 1: # If only 1 image and same name...
+        if sec1.imgs[0].name == sec2.imgs[0].name:
+            sec3.imgs = sec1.imgs
+    elif len(sec1.imgs) != len(sec2.imgs) or len(sec1.imgs) != 1 or len(sec2.imgs) != 1: # If different # of imgs
+        imgs1 = [image.src for image in sec1.imgs]
+        imgs2 = [image.src for image in sec2.imgs]
+        print('Different images present: '+'1.'+imgs1+' 2.'+imgs2)
+        a = 3
+        while a not in [1,2]:
+            a = int(raw_input('Please pick which set of images to add to the merged section. 1 or 2: '))
+            if a == 1:
+                sec3.imgs = sec1.imgs
+            elif a == 2:
+                sec3.imgs = sec1.imgs
+            else:
+                print('Invalid choice. Please enter 1 or 2')
+                a = int(raw_input('Please pick which set of images to add to the merged section. 1 or 2: '))
+    # Check thickness
+    if sec1.thickness == sec2.thickness:
+        sec3.thickness = sec1.thickness
+    elif sec1.thickness != sec2.thickness:
+        print('Different thicknesses: '+'1.'+sec1.thickness+' 2.'+sec2.thickness)
+        a = 3
+        while a not in [1,2]:
+            a = int(raw_input('Please pick which thickness to set to the merged section. 1 or 2: '))
+            if a == 1:
+                sec3.thickness = sec1.thickness
+            elif a == 2:
+                sec3.thickness = sec1.thickness
+            else:
+                print('Invalid choice. Please enter 1 or 2')
+                a = int(raw_input('Please pick which thickness to set to the merged section. 1 or 2: '))
+    # Check alignLocked
+    if sec1.alignLocked == sec2.alignLocked:
+        sec3.alignLocked = sec1.alignLocked
+    elif sec1.alignLocked != sec2.alignLocked:
+        print('Different thicknesses: '+'1.'+sec1.alignLocked+' 2.'+sec2.alignLocked)
+        a = 3
+        while a not in [1,2]:
+            a = int(raw_input('Please pick which alignLocked to set to the merged section. 1 or 2: '))
+            if a == 1:
+                sec3.alignLocked = sec1.alignLocked
+            elif a == 2:
+                sec3.alignLocked = sec1.alignLocked
+            else:
+                print('Invalid choice. Please enter 1 or 2')
+                a = int(raw_input('Please pick which alignLocked to set to the merged section. 1 or 2: '))
+                
+    #======================================================            
+    # Build lists of contours for both sections
+    conts1 = [contour for contour in sec1.contours]
+    conts2 = [contour for contour in sec2.contours]
+
+    outputlist = [] # List of all contours to be output into 3rd series
+    
+    # Find overlapping contours
+    while len(conts1) != 0 and len(conts2) != 0: # Continue until either list is empty
+        # Find overlaps in conts2 for each contour in conts1
+        for cont in conts1:
+            lst1 = [conts1.pop()] # Conts1 contour
+            print('Checking: '+lst1[0].name)
+            # Find overlaps in conts2
+            lst2 = [] # All the conts2 contours that overlap with the lst1 contour
+            for cont2 in conts2:
+                if cont2.name == lst1[0].name: # Do they have same name?
+                    if boxOverlaps(lst1[0], cont2): # Do the bounding boxes overlap?
+                        lst2.append(cont2)
+                        conts2.remove(cont2)
+            
+            # If no overlaps found, add lst1 contour to output list
+            if len(lst2) == 0: 
+                outputlist.append( lst1.pop() )
+                
+            # For each cont in lst2 (sec2 conts that overlap lst1 cont), ...
+            # ...find overlaps in conts1 (unpopped [non lst1] sec1 contours)
+            else:
+                for contour2 in lst2:
+                    for cont1 in conts1: # Original contour list for sec1
+                        if cont1.name == contour2.name: # Do they have the same name?
+                            if boxOverlaps(contour2, cont1): # Do the bouding boxes overlap?
+                                lst1.append(cont1)
+                                conts1.remove(cont1)
+            
+            # Bounding box overlaps have been found, now check actual polygons
+            print([elem.name for elem in lst1])
+            print([elem.name for elem in lst2])
+            lstcnt = 0 # Problems with non-exist elems, use indexing/pop instead of remove()
+            for elem in lst1: # Compare lst1 contours...
+                lstcnt2 = 0
+                for elem2 in lst2: # ... to lst2 contours
+                    c = checkShape(elem, elem2)
+                    if c == True: # Most likely to be same object
+                        outputlist.append(elem)
+                        lst1.pop(lstcnt)
+                        lst2.pop(lstcnt2)
+        
+                    elif c == 1: # Different traces with same name
+                        a = raw_input('Choose trace to output: '+'1. sec1\n'+'2, sec2') #=== User input or no?
+                        if int(a) == 1:
+                            outputlist.append(elem)
+                        if int(a) == 2:
+                            outputlist.append(elem2)
+                        else:
+                            print('Invalid option...')  
+                            lst1.pop(lstcnt)
+                            lst2.pop(lstcnt2)
+                    lstcnt2+=1
+                lstcnt+=1
+            print
+            
+    # Add leftover contours (from conts1/conts2) to output list
+    # Left overs mean they have no matching/overlapping contours in parallel section
+    print('leftover conts1: '+str([elem.name for elem in conts1]))
+    while len(conts1) != 0:
+        outputlist.append( conts1.pop() )
+    print('leftover conts2: '+str([elem.name for elem in conts2]))
+    while len(conts2) != 0:
+        outputlist.append( conts2.pop() )
+    print('Output: '+str([elem.name for elem in outputlist]))
+
+    # Add output contours to section.contours list
+    sec3.contours = outputlist
+
+    return sec3
 main()
 
 

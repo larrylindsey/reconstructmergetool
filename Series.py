@@ -130,7 +130,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
         return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
 
 # Accessors
-    def output(self): #==
+    def output(self):
         '''Returns a dictionary of attributes and a list of contours for building .ser xml file'''
         attributes = {}
         keys = self._attribs
@@ -257,7 +257,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
         else:
             return root.tag
     def popcontours(self, root):
-        #self.contours
         if root == None:
             return None
         ret = []
@@ -270,7 +269,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
                 ret.append(Z)
         return ret
     def popviewport(self, root):
-        # viewport
         if root == None:
             return None
         rawList = list(root.attrib['viewport'].split(' '))
@@ -279,7 +277,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
             tmpList.append( float(elem) )
         return tmpList
     def popdefborder(self, root):
-        #defaultBorder
         if root == None:
             return None
         rawList = list(root.attrib['defaultBorder'].split(' '))
@@ -288,7 +285,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
             tmpList.append( float(elem) )
         return tmpList
     def popdeffill(self, root):
-        #defaultFill
         if root == None:
             return None
         rawList = list(root.attrib['defaultFill'].split(' '))
@@ -333,7 +329,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popoffset3D(self, root):
         if root == None:
             return None
-        #offset3D
         rawList = list(root.attrib['offset3D'].split(' '))
         tmpList = []
         for elem in rawList:
@@ -342,7 +337,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popdim3D(self, root):
         if root == None:
             return None
-        #dim3D
         rawList = list(root.attrib['dim3D'].split(' '))
         tmpList = []
         for elem in rawList:
@@ -351,7 +345,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popgridsize(self, root):
         if root == None:
             return None
-        #gridSize
         rawList = list(root.attrib['gridSize'].split(' '))
         tmpList = []
         for elem in rawList: #===
@@ -360,7 +353,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popgriddistance(self, root):
         if root == None:
             return None
-        #gridDistance
         rawList = list(root.attrib['gridDistance'].split(' '))
         tmpList = []
         for elem in rawList:
@@ -369,7 +361,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popgridnumber(self, root):
         if root == None:
             return None
-        #gridNumber
         rawList = list(root.attrib['gridNumber'].split(' '))
         tmpList = []
         for elem in rawList:
@@ -378,7 +369,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popmvmtincrement(self, root):
         if root == None:
             return None
-        #mvmtIncrement
         rawList = list(root.attrib['mvmtIncrement'].split(' '))
         tmpList = []
         for elem in rawList:
@@ -387,7 +377,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popctrlincrement(self, root):
         if root == None:
             return None
-        #ctrlIncrement
         rawList = list(root.attrib['ctrlIncrement'].split(' '))
         tmpList = []
         for elem in rawList:
@@ -396,7 +385,6 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popshiftincrement(self, root):
         if root == None:
             return None
-        #shiftIncrement
         rawList = list(root.attrib['shiftIncrement'].split(' '))
         tmpList = []
         for elem in rawList:
