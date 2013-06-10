@@ -26,10 +26,10 @@ class Transform:
 
 # Accessors
     def worldpts(self, points): #=== /usr/local/lib/python2.7/dist-packages/skimage/transform/_geometric.py
-        newpts = []
-        for pt in points:
-            newpts.append( tuple(self._tform.inverse(pt)[0]) )
+        '''Returns worldpts'''
+        newpts = self._tform.inverse(np.asarray(points))
         return newpts
+    
     def imgpts(self, points): #===
         '''Returns imgpts'''
         return
@@ -86,24 +86,23 @@ class Transform:
             return tf.AffineTransform(tmatrix)
         # Polynomial transform
         elif self.dim in range(4,7):
-            if self.dim == 4:
-                tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6)) # or 6,2? ===
-            elif self.dim == 5:
-                tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6)) # or 6,2? ===
-            elif self.dim == 6:
-                tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6)) # or 6,2? ===
+            # 4-6 all have same tmatrix?===
+            tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6)) # or 6,2? ===
+            # create matrix of coefficients 
             tforward = tf.PolynomialTransform(tmatrix)
+            # create empty grid for .estimate
             x = np.array(range(0,11))
             y = np.array(range(0,11))
             xx, yy = np.meshgrid(x,y)
+            # create src and dst for .estimate
             src = np.concatenate( (xx.reshape(1,xx.size),yy.reshape(1,yy.size)) )
-            dst = tforward(src)
+            dst = tforward(src) #?=== tforward is coefficients not coordinates
             treverse = tf.PolynomialTransform()
-            treverse.estimate(dst,src,order=2)
+            treverse.estimate(dst,src,order=2) #swapped src/dst
             def trevfun(pts): #=== /usr/local/lib/python2.7/dist-packages/skimage/transform/_geometric.py
                 return treverse(pts)
             tforward.inverse = trevfun
-            return tforward
+            return tforward    
         else:
             print('Problem with transform.poptform(), check code')
         

@@ -47,10 +47,8 @@ class Contour:
     def popshape(self):
         '''Adds polygon object (shapely) to self._shape'''
         if self.closed == True: # Closed trace
-#             print(self.name) #===
             self._shape = Polygon(self.transform.worldpts(self.points))
         elif self.closed == False and len(self.points)>1: # Open trace
-#             print(self.name) #===
             self._shape = LineString(self.transform.worldpts(self.points))
         else:
             print('Invalid shape characteristics: '+self.name)
@@ -156,7 +154,13 @@ class Contour:
         return self.points
     def getworldpts(self):
         '''Returns world space coordinates as [ (x,y), ... ]'''
-        return self.transform.worldpts(self.points)
+        raw = self.transform.worldpts(self.points) # In the form of nparray
+        print('Raw: '+str(raw)) #===
+        ptlist = []
+        for elem in raw:
+            ptlist.append(tuple(elem))
+        print(ptlist) #===
+        return ptlist
     def getiamgepts(self): 
         '''Returns pixel space coordinates as [ (x,y), ... ]'''
         return self.transform.imgpts() 

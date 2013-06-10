@@ -12,10 +12,11 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/7/2013
+#  Date Last Modified: 6/10/2013
 #
 # Currently working on:
-        # worldpts() needs dif for affine/polynomial
+        # Test VJ halves with new Transform stuff
+        # Image transforms not altered by setidentzero?
         # Series contours in mergeSerAtts, 
         # sections sorted in computer way (i.e. 12 after 111)
         # GUI: KIVY, WX(windows?), GTK, QT
@@ -47,6 +48,7 @@ def main():
         #2)Append sections to series
         getsections(series, inpath+ser)
         getsections(series2, inpath2+ser2)
+#         setidentzero(series2) #=================
         #3)Merge series
         series3 = mergeSeries(series, series2)
         #4)Output series file
@@ -244,7 +246,6 @@ def mergeSeries(serObj1, serObj2, name=None): #===
     # Populate shapely shapes in all contours for both series
     popshapes(serObj1)
     popshapes(serObj2)
-    print('Done 3')
     
     # Create list of parallel section pairs (paired by section name)
     pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.name.partition('.')[2] == y.name.partition('.')[2]  ]
@@ -292,7 +293,7 @@ def checkShape(cont1, cont2): #===
         
         # Some overlap
         elif AoI != 0.0:
-            print('    Overlap exists, not near 100 PLACE HOLDER: USER INPUT') #=== Place holder for user input
+            print('    Overlap exists, not near 100')
             return 1
 
     # OPEN TRACES===     
@@ -306,47 +307,44 @@ def checkShape(cont1, cont2): #===
 def popshapes(serObj):
     print('Populating shapely shapes for '+serObj.name+'...'),
     for section in serObj.sections:
-#         print('==================================='+section.name+'====================================')
         for contour in section.contours:
             contour.popshape()
     print('DONE')
-#             print(self.name) #===
     
 def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
-    print('Mergeseratts')
     # Compare and merge series attributes from ser1Obj/ser2Obj
-    ser1atts = ser1Obj.output()[0]
-    ser2atts = ser2Obj.output()[0]
+    ser1atts = ser1Obj.output()[0] # Dictionary of attributes
+    ser2atts = ser2Obj.output()[0] # "
     ser3atts = {}
     for att in ser1atts:
-        print(att)
         if ser1atts[att] == ser2atts[att]:
             ser3atts[att] = ser1atts[att]
         else:
             print('Series attributes do not match: '+str(att))
-            print(ser1atts[att]+' '+ser2atts[att])
+            print('1: '+ser1atts[att]+'\n'+'2: '+ser2atts[att])
             a = 3
             while a not in [1,2]:
-                a = int( raw_input('Choose attribute to pass to output series... 1 or 2: ') )
+                a = int(raw_input('Choose attribute to pass to output series... 1 or 2: '))
                 if a == 1:
                     ser3atts[att] = ser1atts[att]
                 elif a == 2:
                     ser3atts[att] = ser2atts[att]
                 else:
                     print('Invalid choice. Please enter 1 or 2')
+            print
     # Create series object with merged attributes
     elem = ET.Element('Series')
     for att in ser3atts:
-        elem.set( str(att), ser3atts[att] ) 
+        elem.set( str(att), ser3atts[att] )
     series = Series(elem, ser3name)
     return series
 
 def mergeSerConts(ser1Obj, ser2Obj): #=== 
-    print('Mergeserconts')
+    print('Mergeserconts===============================')
     # Compare and merge series contours to new series ===
     ser1conts = ser1Obj.contours
     ser2conts = ser2Obj.contours
-    ser3conts = ser1conts #=== TeMPORARY
+    ser3conts = ser1conts #=== TEMPORARY
     #=== compare all, present as choice
     #=== 
     
@@ -365,10 +363,12 @@ def mergeSections(sec1, sec2, ser3name): #===
         sec3.index = sec1.index
         sec3.name = ser3name+'.'+str(sec3.index)
     # Check imgs
-    if len(sec1.imgs) == len(sec1.imgs) and len(sec1.imgs) == 1: # If only 1 image and same name...
+        # If only 1 image and same name...
+    if len(sec1.imgs) == len(sec1.imgs) and len(sec1.imgs) == 1: 
         if sec1.imgs[0].name == sec2.imgs[0].name:
             sec3.imgs = sec1.imgs
-    elif len(sec1.imgs) != len(sec2.imgs) or len(sec1.imgs) != 1 or len(sec2.imgs) != 1: # If different # of imgs
+        # If different # of imgs or more than 1 image in an image list
+    elif len(sec1.imgs) != len(sec2.imgs) or len(sec1.imgs) != 1 or len(sec2.imgs) != 1:
         imgs1 = [image.src for image in sec1.imgs]
         imgs2 = [image.src for image in sec2.imgs]
         print('Different images present: '+'1.'+imgs1+' 2.'+imgs2)
@@ -412,8 +412,7 @@ def mergeSections(sec1, sec2, ser3name): #===
             else:
                 print('Invalid choice. Please enter 1 or 2')
                 a = int(raw_input('Please pick which alignLocked to set to the merged section. 1 or 2: '))
-                
-    #======================================================            
+                          
     # Build lists of contours for both sections
     conts1 = [contour for contour in sec1.contours]
     conts2 = [contour for contour in sec2.contours]
