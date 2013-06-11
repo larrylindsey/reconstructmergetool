@@ -25,7 +25,7 @@ class Transform:
                +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())
 
 # Accessors
-    def worldpts(self, points): #=== /usr/local/lib/python2.7/dist-packages/skimage/transform/_geometric.py
+    def worldpts(self, points):
         '''Returns worldpts'''
         newpts = self._tform.inverse(np.asarray(points))
         return newpts
@@ -87,24 +87,26 @@ class Transform:
         # Polynomial transform
         elif self.dim in range(4,7):
             # 4-6 all have same tmatrix?===
-            tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6)) # or 6,2? ===
+            tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6))
             # create matrix of coefficients 
             tforward = tf.PolynomialTransform(tmatrix)
-            # create empty grid for .estimate
-            x = np.array(range(0,11))
-            y = np.array(range(0,11))
-            xx, yy = np.meshgrid(x,y)
-            # create src and dst for .estimate
-            src = np.concatenate( (xx.reshape(1,xx.size),yy.reshape(1,yy.size)) )
-            dst = tforward(src) #?=== tforward is coefficients not coordinates
-            treverse = tf.PolynomialTransform()
-            treverse.estimate(dst,src,order=2) #swapped src/dst
-            def trevfun(pts): #=== /usr/local/lib/python2.7/dist-packages/skimage/transform/_geometric.py
+            
+            def trevfun(pts): # pts are a np.array
+                x = np.array(np.linspace( min(np.nditer(pts[:,0])), max(np.nditer(pts[:,0])), 10 ))
+                y = np.array(np.linspace( min(np.nditer(pts[:,1])), max(np.nditer(pts[:,1])), 10 ))
+                # create empty grid for .estimate
+                xx, yy = np.meshgrid(x,y)
+                # create src and dst for .estimate
+                src = np.concatenate( (xx.reshape(1,xx.size),yy.reshape(1,yy.size)) ).transpose()
+                print('src: '+str(src))
+                dst = tforward(src)
+                print('dst: '+str(dst))
+                treverse = tf.PolynomialTransform()
+                treverse.estimate(dst,src,order=2) #swapped src/dst
                 return treverse(pts)
+            
             tforward.inverse = trevfun
-            return tforward    
-        else:
-            print('Problem with transform.poptform(), check code')
+            return tforward
         
     def popyxcoef(self, node):
         '''Populates self.ycoef and self.xcoef'''

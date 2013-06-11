@@ -12,10 +12,12 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/10/2013
+#  Date Last Modified: 6/11/2013
 #
 # Currently working on:
+        # some stupid crap where inverting the transform outputs an extra pt...
         # Test VJ halves with new Transform stuff
+            # Problems with transforming domains with >dim3
         # Image transforms not altered by setidentzero?
         # Series contours in mergeSerAtts, 
         # sections sorted in computer way (i.e. 12 after 111)
@@ -252,7 +254,7 @@ def mergeSeries(serObj1, serObj2, name=None): #===
     
     # Merge sections
     for (x,y) in pairlist:
-        print(x.name+' '+y.name)
+        print('========'+x.name+' '+y.name+'========')
         serObj3.sections.append( mergeSections(x,y,name) )
 
     return serObj3
@@ -272,12 +274,16 @@ def boxOverlaps(cont1, cont2):
         return False  
     
 def checkShape(cont1, cont2): #===
-    '''Handles LineString and Polygons separately.
-    For Polygons:
-    For LineStrings:
-    '''
+    '''Performs shape comparisons between contour shapes using shapely.
+    Handles LineString and Polygons separately.'''
     # CLOSED TRACES
     if cont1.closed == True and cont2.closed == True:
+        print(cont1.points)
+        print(list(cont1._shape.exterior.coords))
+        
+        print(cont2.points)
+        print(list(cont2._shape.exterior.coords))
+
         AoU = cont1._shape.union( cont2._shape ).area # Area of union
         AoI = cont1._shape.intersection( cont2._shape ).area # Area of intersection
         
@@ -308,10 +314,11 @@ def popshapes(serObj):
     print('Populating shapely shapes for '+serObj.name+'...'),
     for section in serObj.sections:
         for contour in section.contours:
-            contour.popshape()
+            contour.popshape() # Uses worldpts to create shapely shapes
     print('DONE')
     
 def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
+    print('MergeSerAtts===================================')
     # Compare and merge series attributes from ser1Obj/ser2Obj
     ser1atts = ser1Obj.output()[0] # Dictionary of attributes
     ser2atts = ser2Obj.output()[0] # "
@@ -339,7 +346,7 @@ def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
     series = Series(elem, ser3name)
     return series
 
-def mergeSerConts(ser1Obj, ser2Obj): #=== 
+def mergeSerConts(ser1Obj, ser2Obj): #===
     print('Mergeserconts===============================')
     # Compare and merge series contours to new series ===
     ser1conts = ser1Obj.contours
@@ -357,6 +364,7 @@ def mergeSerConts(ser1Obj, ser2Obj): #===
 def mergeSections(sec1, sec2, ser3name): #===
     '''compares and merges the attributes associated with Sections (except contours).
     i.e. imgs, index, thickness, alignLocked'''
+    print('mergeSections=======================================')
     sec3 = Section()
     # Check index
     if sec1.index == sec2.index:
