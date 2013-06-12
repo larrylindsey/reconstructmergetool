@@ -82,29 +82,25 @@ class Transform:
             elif self.dim == 2: # Special case, swap b[1] and b[2] (look at original Reconstruct code: nform.cpp)
                 tmatrix = np.array( [a[1],0,a[0],0,b[1],b[0],0,0,1] ).reshape((3,3))
             elif self.dim == 3:
-                tmatrix = np.array( [a[1],a[2],a[0],b[1],b[2],b[0],0,0,1]).reshape((3,3))
+                tmatrix = np.array( [a[1],a[2],a[0],b[1],b[2],b[0],0,0,1] ).reshape((3,3))
             return tf.AffineTransform(tmatrix)
         # Polynomial transform
         elif self.dim in range(4,7):
-            # 4-6 all have same tmatrix?===
             tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6))
             # create matrix of coefficients 
             tforward = tf.PolynomialTransform(tmatrix)
-            
             def trevfun(pts): # pts are a np.array
                 x = np.array(np.linspace( min(np.nditer(pts[:,0])), max(np.nditer(pts[:,0])), 10 ))
                 y = np.array(np.linspace( min(np.nditer(pts[:,1])), max(np.nditer(pts[:,1])), 10 ))
+                #==========================================
                 # create empty grid for .estimate
                 xx, yy = np.meshgrid(x,y)
                 # create src and dst for .estimate
                 src = np.concatenate( (xx.reshape(1,xx.size),yy.reshape(1,yy.size)) ).transpose()
-                print('src: '+str(src))
                 dst = tforward(src)
-                print('dst: '+str(dst))
-                treverse = tf.PolynomialTransform()
-                treverse.estimate(dst,src,order=2) #swapped src/dst
+                treverse = tf.PiecewiseAffineTransform()
+                treverse.estimate(dst,src,) #swapped src/dst
                 return treverse(pts)
-            
             tforward.inverse = trevfun
             return tforward
         
