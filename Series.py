@@ -246,11 +246,11 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popindex(self, root):
         if root == None:
             return None
-        return int(root.attrib['index'])
+        return int(root.get('index'))
     def popunits(self, root):
         if root == None:
             return None
-        return str(root.attrib['units'])
+        return str(root.get('units'))
     def poptag(self, root):
         if root == None:
             return None
@@ -271,7 +271,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popviewport(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['viewport'].split(' '))
+        rawList = list(root.get('viewport').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -279,7 +279,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popdefborder(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['defaultBorder'].split(' '))
+        rawList = list(root.get('defaultBorder').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -287,7 +287,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popdeffill(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['defaultFill'].split(' '))
+        rawList = list(root.get('defaultFill').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -296,7 +296,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
         if root == None:
             return None
             #Split up string into a list of strings containing 3 float points 
-        splitList = root.attrib['borderColors'].replace(',','').split('   ')
+        splitList = root.get('borderColors').replace(',','').split('   ')
             #Make a list of lists containing floating points
         refinedList = []
         for elem in splitList:
@@ -313,7 +313,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
         if root == None:
             return None
             #Split up string into a list of strings containing 3 float points 
-        splitList = root.attrib['fillColors'].replace(',','').split('   ')
+        splitList = root.get('fillColors').replace(',','').split('   ')
             #Make a list of lists containing floating points
         refinedList = []
         for elem in splitList:
@@ -329,7 +329,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popoffset3D(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['offset3D'].split(' '))
+        rawList = list(root.get('offset3D').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -337,7 +337,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popdim3D(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['dim3D'].split(' '))
+        rawList = list(root.get('dim3D').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -345,7 +345,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popgridsize(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['gridSize'].split(' '))
+        rawList = list(root.get('gridSize').split(' '))
         tmpList = []
         for elem in rawList: #===
             tmpList.append( float(elem) )
@@ -353,7 +353,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popgriddistance(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['gridDistance'].split(' '))
+        rawList = list(root.get('gridDistance').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( int(elem) )
@@ -361,7 +361,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popgridnumber(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['gridNumber'].split(' '))
+        rawList = list(root.get('gridNumber').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( int(elem) )
@@ -369,7 +369,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popmvmtincrement(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['mvmtIncrement'].split(' '))
+        rawList = list(root.get('mvmtIncrement').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -377,7 +377,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popctrlincrement(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['ctrlIncrement'].split(' '))
+        rawList = list(root.get('ctrlIncrement').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -385,7 +385,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popshiftincrement(self, root):
         if root == None:
             return None
-        rawList = list(root.attrib['shiftIncrement'].split(' '))
+        rawList = list(root.get('shiftIncrement').split(' '))
         tmpList = []
         for elem in rawList:
             tmpList.append( float(elem) )
@@ -393,284 +393,284 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popautoSaveSeries(self, root):
         if root == None:
             return None
-        return root.attrib['autoSaveSeries']
+        return root.get('autoSaveSeries')
     def popautoSaveSection(self, root):
         if root == None:
             return None
-        return root.attrib['autoSaveSection']
+        return root.get('autoSaveSection')
     def popwarnSaveSection(self, root):
         if root == None:
             return None
-        return root.attrib['warnSaveSection']
+        return root.get('warnSaveSection')
     def popbeepDeleting(self, root):
         if root == None:
             return None
-        return root.attrib['beepDeleting']
+        return root.get('beepDeleting')
     def popbeepPaging(self, root):
         if root == None:
             return None
-        return root.attrib['beepPaging']
+        return root.get('beepPaging')
     def pophideTraces(self, root):
         if root == None:
             return None
-        return root.attrib['hideTraces']
+        return root.get('hideTraces')
     def popunhideTraces(self, root):
         if root == None:
             return None
-        return root.attrib['unhideTraces']
+        return root.get('unhideTraces')
     def pophideDomains(self, root):
         if root == None:
             return None
-        return root.attrib['hideDomains']
+        return root.get('hideDomains')
     def popunhideDomains(self, root):
         if root == None:
             return None
-        return root.attrib['unhideDomains']
+        return root.get('unhideDomains')
     def popuseAbsolutePaths(self, root):
         if root == None:
             return None
-        return root.attrib['useAbsolutePaths']
+        return root.get('useAbsolutePaths')
     def popdefaultThickness(self, root):
         if root == None:
             return None
-        return root.attrib['defaultThickness']
+        return root.get('defaultThickness')
     def popzMidSection(self, root):
         if root == None:
             return None
-        return root.attrib['zMidSection']
+        return root.get('zMidSection')
     def popthumbWidth(self, root):
         if root == None:
             return None
-        return float(root.attrib['thumbWidth'])
+        return float(root.get('thumbWidth'))
     def popthumbHeight(self, root):
         if root == None:
             return None
-        return int(root.attrib['thumbHeight'])
+        return int(root.get('thumbHeight'))
     def popfitThumbSections(self, root):
         if root == None:
             return None
-        return root.attrib['fitThumbSections']
+        return root.get('fitThumbSections')
     def popfirstThumbSection(self, root):
         if root == None:
             return None
-        return int(root.attrib['firstThumbSection'])
+        return int(root.get('firstThumbSection'))
     def poplastThumbSection(self, root):
         if root == None:
             return None
-        return int(root.attrib['lastThumbSection'])
+        return int(root.get('lastThumbSection'))
     def popskipSections(self, root):
         if root == None:
             return None
-        return int(root.attrib['skipSections'])
+        return int(root.get('skipSections'))
     def popdisplayThumbContours(self, root):
         if root == None:
             return None
-        return root.attrib['displayThumbContours']
+        return root.get('displayThumbContours')
     def popuseFlipbookStyle(self, root):
         if root == None:
             return None
-        return root.attrib['useFlipbookStyle']
+        return root.get('useFlipbookStyle')
     def popflipRate(self, root):
         if root == None:
             return None
-        return int(root.attrib['flipRate'])
+        return int(root.get('flipRate'))
     def popuseProxies(self, root):
         if root == None:
             return None
-        return root.attrib['useProxies']
+        return root.get('useProxies')
     def popwidthUseProxies(self, root):
         if root == None:
             return None
-        return root.attrib['widthUseProxies']
+        return root.get('widthUseProxies')
     def popheightUseProxies(self, root):
         if root == None:
             return None
-        return int(root.attrib['heightUseProxies'])
+        return int(root.get('heightUseProxies'))
     def popscaleProxies(self, root):
         if root == None:
             return None
-        return float(root.attrib['scaleProxies'])
+        return float(root.get('scaleProxies'))
     def popsignificantDigits(self, root):
         if root == None:
             return None
-        return int(root.attrib['significantDigits'])
+        return int(root.get('significantDigits'))
     def popdefaultMode(self, root):
         if root == None:
             return None
-        return int(root.attrib['defaultMode'])
+        return int(root.get('defaultMode'))
     def popdefaultName(self, root):
         if root == None:
             return None
-        return root.attrib['defaultName']
+        return root.get('defaultName')
     def popdefaultComment(self, root):
         if root == None:
             return None
-        return root.attrib['defaultComment']
+        return root.get('defaultComment')
     def poplistSectionThickness(self, root):
         if root == None:
             return None
-        return root.attrib['listSectionThickness']
+        return root.get('listSectionThickness')
     def poplistDomainSource(self, root):
         if root == None:
             return None
-        return root.attrib['listDomainSource']
+        return root.get('listDomainSource')
     def poplistDomainPixelsize(self, root):
         if root == None:
             return None
-        return root.attrib['listDomainPixelsize']
+        return root.get('listDomainPixelsize')
     def poplistDomainLength(self, root):
         if root == None:
             return None
-        return root.attrib['listDomainLength']
+        return root.get('listDomainLength')
     def poplistDomainArea(self, root):
         if root == None:
             return None
-        return root.attrib['listDomainArea']
+        return root.get('listDomainArea')
     def poplistDomainMidpoint(self, root):
         if root == None:
             return None
-        return root.attrib['listDomainMidpoint']
+        return root.get('listDomainMidpoint')
     def poplistTraceComment(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceComment']
+        return root.get('listTraceComment')
     def poplistTraceLength(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceLength']
+        return root.get('listTraceLength')
     def poplistTraceArea(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceArea']
+        return root.get('listTraceArea')
     def poplistTraceCentroid(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceCentroid']
+        return root.get('listTraceCentroid')
     def poplistTraceExtent(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceExtent']
+        return root.get('listTraceExtent')
     def poplistTraceZ(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceZ']
+        return root.get('listTraceZ')
     def poplistTraceThickness(self, root):
         if root == None:
             return None
-        return root.attrib['listTraceThickness']
+        return root.get('listTraceThickness')
     def poplistObjectRange(self, root):
         if root == None:
             return None
-        return root.attrib['listObjectRange']
+        return root.get('listObjectRange')
     def poplistObjectCount(self, root):
         if root == None:
             return None
-        return root.attrib['listObjectCount']
+        return root.get('listObjectCount')
     def poplistObjectSurfarea(self, root):
         if root == None:
             return None
-        return root.attrib['listObjectSurfarea']
+        return root.get('listObjectSurfarea')
     def poplistObjectFlatarea(self, root):
         if root == None:
             return None
-        return root.attrib['listObjectFlatarea']
+        return root.get('listObjectFlatarea')
     def poplistObjectVolume(self, root):
         if root == None:
             return None
-        return root.attrib['listObjectVolume']
+        return root.get('listObjectVolume')
     def poplistZTraceNote(self, root):
         if root == None:
             return None
-        return root.attrib['listZTraceNote']
+        return root.get('listZTraceNote')
     def poplistZTraceRange(self, root):
         if root == None:
             return None
-        return root.attrib['listZTraceRange']
+        return root.get('listZTraceRange')
     def poplistZTraceLength(self, root):
         if root == None:
             return None
-        return root.attrib['listZTraceLength']
+        return root.get('listZTraceLength')
     def poptype3Dobject(self, root):
         if root == None:
             return None
-        return int(root.attrib['type3Dobject'])
+        return int(root.get('type3Dobject'))
     def popfirst3Dsection(self, root):
         if root == None:
             return None
-        return int(root.attrib['first3Dsection'])
+        return int(root.get('first3Dsection'))
     def poplast3Dsection(self, root):
         if root == None:
             return None
-        return int(root.attrib['last3Dsection'])
+        return int(root.get('last3Dsection'))
     def popmax3Dconnection(self, root):
         if root == None:
             return None
-        return int(root.attrib['max3Dconnection'])
+        return int(root.get('max3Dconnection'))
     def popupper3Dfaces(self, root):
         if root == None:
             return None
-        return root.attrib['upper3Dfaces']
+        return root.get('upper3Dfaces')
     def poplower3Dfaces(self, root):
         if root == None:
             return None
-        return root.attrib['lower3Dfaces']
+        return root.get('lower3Dfaces')
     def popfaceNormals(self, root):
         if root == None:
             return None
-        return root.attrib['faceNormals']
+        return root.get('faceNormals')
     def popvertexNormals(self, root):
         if root == None:
             return None
-        return root.attrib['vertexNormals']
+        return root.get('vertexNormals')
     def popfacets3D(self, root):
         if root == None:
             return None
-        return int(root.attrib['facets3D'])
+        return int(root.get('facets3D'))
     def popgridType(self, root):
         if root == None:
             return None
-        return int(root.attrib['gridType'])
+        return int(root.get('gridType'))
     def pophueStopWhen(self, root):
         if root == None:
             return None
-        return int(root.attrib['hueStopWhen'])
+        return int(root.get('hueStopWhen'))
     def pophueStopValue(self, root):
         if root == None:
             return None
-        return int(root.attrib['hueStopValue'])
+        return int(root.get('hueStopValue'))
     def popsatStopWhen(self, root):
         if root == None:
             return None
-        return int(root.attrib['satStopWhen'])
+        return int(root.get('satStopWhen'))
     def popsatStopValue(self, root):
         if root == None:
             return None
-        return int(root.attrib['satStopValue'])
+        return int(root.get('satStopValue'))
     def popbrightStopWhen(self, root):
         if root == None:
             return None
-        return int(root.attrib['brightStopWhen'])
+        return int(root.get('brightStopWhen'))
     def popbrightStopValue(self, root):
         if root == None:
             return None
-        return int(root.attrib['brightStopValue'])
+        return int(root.get('brightStopValue'))
     def poptracesStopWhen(self, root):
         if root == None:
             return None
-        return root.attrib['tracesStopWhen']
+        return root.get('tracesStopWhen')
     def popareaStopPercent(self, root):
         if root == None:
             return None
-        return int(root.attrib['areaStopPercent'])
+        return int(root.get('areaStopPercent'))
     def popareaStopSize(self, root):
         if root == None:
             return None
-        return int(root.attrib['areaStopSize'])
+        return int(root.get('areaStopSize'))
     def popContourMaskWidth(self, root):
         if root == None:
             return None
-        return int(root.attrib['ContourMaskWidth'])
+        return int(root.get('ContourMaskWidth'))
     def popsmoothingLength(self, root):
         if root == None:
             return None
-        return int(root.attrib['smoothingLength'])
+        return int(root.get('smoothingLength'))

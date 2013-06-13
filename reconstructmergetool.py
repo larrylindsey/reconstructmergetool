@@ -15,6 +15,7 @@
 #  Date Last Modified: 6/13/2013
 #
 # Currently working on:
+        # replace .attrib with .get for image and zcontour
         # Image trans with dim >3 doesnt output; debug in Transform
         # Image transforms not altered by setidentzero?
         # Series contours in mergeSerAtts

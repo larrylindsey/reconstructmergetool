@@ -132,28 +132,27 @@ class Transform:
                 return newpts
             tforward.inverse = getrevt
             # ============ DEBUG HERE
-            testarr = np.asarray([(0, 0), (4096, 0), (4096, 4096), (0, 4096)])
-            print('ptarray:\n'+str(testarr))
-            print('tf(tfinvers(pts)):\n'+str(tforward(tforward.inverse( testarr ))))
-            print('tfinvers(tf(pts)):\n'+str(tforward.inverse(tforward( testarr ))))
-            quit()
+#             testarr = np.asarray([(0, 0), (4096, 0), (4096, 4096), (0, 4096)])
+#             print('ptarray:\n'+str(testarr))
+#             print('tf(tfinvers(pts)):\n'+str(tforward(tforward.inverse( testarr ))))
+#             print('tfinvers(tf(pts)):\n'+str(tforward.inverse(tforward( testarr ))))
+#             quit()
             
             return tforward
             
-        
     def popyxcoef(self, node):
         '''Populates self.ycoef and self.xcoef'''
         if node == None:
             return [], []
         # digits added as int, everything else float
         y = []
-        for elem in node.attrib['ycoef'].split(' '):
+        for elem in node.get('ycoef').split(' '):
             if elem.isdigit():
                 y.append( int(elem) )
             elif elem != '':
                 y.append( float(elem) )
         x = []
-        for elem in node.attrib['xcoef'].split(' '):
+        for elem in node.get('xcoef').split(' '):
             if elem.isdigit(): 
                 x.append( int(elem) )
             elif elem != '':

@@ -80,13 +80,13 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
     def popindex(self, root):
         if root == None:
             return None
-        return int(root.attrib['index'])
+        return int(root.get('index'))
     def popthickness(self, root):
         if root == None:
             return None
-        return float(root.attrib['thickness'])
+        return float(root.get('thickness'))
     def popalignLocked(self, root):
         if root == None:
             return None
-        return root.attrib['alignLocked']
+        return root.get('alignLocked')
             

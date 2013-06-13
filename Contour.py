@@ -43,7 +43,7 @@ class Contour:
         if node == None:
             return 'Empty Contour'
         else:
-            return str( node.attrib['name'] )
+            return str( node.get('name') )
     def popshape(self):
         '''Adds polygon object (shapely) to self._shape'''
         if self.closed == True: # Closed trace
@@ -94,13 +94,13 @@ class Contour:
         if node == None:
             return None
         else:
-            return int( node.attrib['mode'] )
+            return int( node.get('mode') )
     def popborder(self, node):
         '''Searches xml node for border. Creates a list of floats.'''
         if node == None:
             return []
         bord = []
-        for elem in list(node.attrib['border'].split(' ')):
+        for elem in list(node.get('border').split(' ')):
             bord.append(float(elem))
         return bord
     def popfill(self, node):
@@ -108,7 +108,7 @@ class Contour:
         if node == None:
             return []
         fill = []
-        for elem in list(node.attrib['fill'].split(' ')):
+        for elem in list(node.get('fill').split(' ')):
             fill.append(float(elem))
         return fill
     def poppoints(self, node):
@@ -116,7 +116,7 @@ class Contour:
         int or float depends on type in the xml node.'''
         if node == None:
             return []
-        partPoints = list(node.attrib['points'].lstrip(' ').split(','))
+        partPoints = list(node.get('points').lstrip(' ').split(','))
         #make a new list of clean points, to be added to object
         ptList = []
         for i in range( len(partPoints) ):
