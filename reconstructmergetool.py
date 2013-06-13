@@ -12,12 +12,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/12/2013
+#  Date Last Modified: 6/13/2013
 #
 # Currently working on:
-        # Image trans with dim >3 doesnt output; implement nform.cpp code
-        # Test VJ halves with new Transform stuff
-            # Problems with transforming domains with >dim3
+        # Image trans with dim >3 doesnt output; debug in Transform
         # Image transforms not altered by setidentzero?
         # Series contours in mergeSerAtts
         # sections sorted in computer way (i.e. 12 after 111)
@@ -217,7 +215,7 @@ def writesections(series_object, outpath):
     print('DONE')
     print('\t%d Section(s) output to: '+str(outpath))%count
 
-def setidentzero(serObj):
+def setidentzero(serObj): #===
     '''Converts points for all sections in a series to identity transform'''
     i = raw_input('setidentzero() will PERMANENTLY alter data in '+serObj.name+'... Continue? y/n  ')
     if i.lower() in ['y', 'yes']:
@@ -225,7 +223,7 @@ def setidentzero(serObj):
         series = serObj
         for sec in series.sections:
             for c in sec.contours:
-                if not c.img:
+                if not c.img: # ===
                     c.points = c.transform.worldpts(c.points)
                     c.transform.dim = 0
                     c.transform.ycoef = [0,0,1,0,0,0]
@@ -263,9 +261,6 @@ def boxOverlaps(cont1, cont2):
     Returns True if there is overlap, otherwise false.'''
     if cont1._shape == None or cont2._shape == None:
         return False
-#     elif cont1.img == True or cont2.img == True: #===
-#         print('Image, ignore: '+cont1.name+' '+cont2.name)
-#         return False
     elif cont1.box().intersects( cont2.box() ) or cont1.box().touches( cont2.box() ):
         print('Bounding box overlap: '+cont1.name+' '+cont2.name)
         return True
