@@ -70,7 +70,7 @@ class Transform:
     def poptform(self):
         '''Creates self._tform variable which represents the transform'''
         if self.xcoef == [] or self.ycoef == [] or self.dim == []:
-            print( 'xcoef, ycoef, or dim parameters missing... cannot create tform' )
+            print( 'Empty tform: no xcoef, ycoef, or dim' )
             return
         a = self.xcoef
         b = self.ycoef
@@ -87,7 +87,7 @@ class Transform:
             return tf.AffineTransform(tmatrix)
         # Polynomial transform
         elif self.dim in range(4,7):
-            tmatrix = np.array( [a[0],a[1],a[2],a[3],a[4],a[5],b[0],b[1],b[2],b[3],b[4],b[5]] ).reshape((2,6))
+            tmatrix = np.array( [a[0],a[1],a[2],a[4],a[3],a[5],b[0],b[1],b[2],b[4],b[3],b[5]] ).reshape((2,6))
             # create matrix of coefficients 
             tforward = tf.PolynomialTransform(tmatrix)
             
@@ -102,29 +102,31 @@ class Transform:
                     x0, y0 = 0.0, 0.0
                     # get forward tform of initial guess
                     u0, v0 = tforward(np.asarray([(x0,y0)]))[:,0][0],tforward(np.asarray([(x0,y0)]))[:,1][0]
-                    for i in range(10):
-                        e = 1.0 # reduce error to this limit 
-                        epsilon = 5e-10
-                        while e > epsilon and i<10:
-                            i+=1
-                            # compute Jacobian
-                            l = a[1] + a[3]*y0 + 2.0*a[4]*x0
-                            m = a[2] + a[3]*x0 + 2.0*a[5]*y0
-                            n = b[1] + b[3]*y0 + 2.0*b[4]*x0
-                            o = b[2] + b[3]*x0 + 2.0*b[5]*y0
-                            p = l*o - m*n # determinant for inverse
-                            if math.fabs(p) > epsilon:
-                                # increment x0,y0 by inverse of Jacobian
-                                x0 = x0 + ((o*(u-u0) - m*(v-v0))/p)
-                                y0 = y0 + ((l*(v-v0) - n*(u-u0))/p)
-                            else:
-                                # try Jacobian transpose instead
-                                x0 = x0 + (l*(u-u0) + n*(v-v0))        
-                                y0 = y0 + (m*(u-u0) + o*(v-v0))
-                            # get forward tform of current guess            
-                            u0, v0 = tforward(np.asarray([(x0,y0)]))[:,0][0],tforward(np.asarray([(x0,y0)]))[:,1][0]
-                            # compute closeness to goal
-                            e = math.fabs(u-u0) + math.fabs(v-v0)
+                    e = 1.0 # reduce error to this limit 
+                    epsilon = 5e-10
+                    i = 0
+                    while e > epsilon and i < 100: #=== 10 -> 100
+                        i+=1
+                        # compute Jacobian
+                        l = a[1] + a[3]*y0 + 2.0*a[4]*x0
+                        m = a[2] + a[3]*x0 + 2.0*a[5]*y0
+                        n = b[1] + b[3]*y0 + 2.0*b[4]*x0
+                        o = b[2] + b[3]*x0 + 2.0*b[5]*y0
+                        p = l*o - m*n # determinant for inverse
+                        if math.fabs(p) > epsilon:
+                            # increment x0,y0 by inverse of Jacobian
+                            x0 = x0 + ((o*(u-u0) - m*(v-v0))/p)
+                            y0 = y0 + ((l*(v-v0) - n*(u-u0))/p)
+                        else:
+                            # try Jacobian transpose instead
+                            x0 = x0 + (l*(u-u0) + n*(v-v0))        
+                            y0 = y0 + (m*(u-u0) + o*(v-v0))
+                        # get forward tform of current guess            
+                        u0, v0 = tforward(np.asarray([(x0,y0)]))[:,0][0],tforward(np.asarray([(x0,y0)]))[:,1][0]
+                        # compute closeness to goal
+                        e = math.fabs(u-u0) + math.fabs(v-v0)
+                        print(e) #===
+                    print('====================') #===
                     # append final estimate of (x,y) to newpts list
                     newpts.append((x0,y0))     
                 newpts = np.asarray(newpts)    

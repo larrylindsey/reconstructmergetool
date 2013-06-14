@@ -3,7 +3,7 @@ from ZContour import *
 # Recent changes: popgridSize int -> float
 class Series:
     '''<Series> is an object with attributes: name \
-as well as a list containing all of the <Sections> objects associated with
+as well as a list containing all of the <Sections> objects associated within
 it'''
 # Python functions
     # INITIALIZE

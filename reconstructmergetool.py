@@ -12,7 +12,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/13/2013
+#  Date Last Modified: 6/14/2013
 #
 # Currently working on:
         # replace .attrib with .get for image and zcontour
@@ -264,6 +264,7 @@ def boxOverlaps(cont1, cont2):
         return False
     elif cont1.box().intersects( cont2.box() ) or cont1.box().touches( cont2.box() ):
         print('Bounding box overlap: '+cont1.name+' '+cont2.name)
+        print('Shapes: '+str(cont1._shape)+' '+str(cont2._shape))
         return True
     else:
         return False
