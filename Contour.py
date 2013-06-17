@@ -99,17 +99,13 @@ class Contour:
         '''Searches xml node for border. Creates a list of floats.'''
         if node == None:
             return []
-        bord = []
-        for elem in list(node.get('border').split(' ')):
-            bord.append(float(elem))
+        bord = [float(elem) for elem in list(node.get('border').split(' '))]
         return bord
     def popfill(self, node):
         '''Searches xml node for fill. Creates a list of floats.'''
         if node == None:
             return []
-        fill = []
-        for elem in list(node.get('fill').split(' ')):
-            fill.append(float(elem))
+        fill = [float(elem) for elem in list(node.get('fill').split(' '))]
         return fill
     def poppoints(self, node):
         '''Searches xml node for points. List of points tuples (x,y), \
@@ -153,10 +149,8 @@ class Contour:
         return self.points
     def getworldpts(self):
         '''Returns world space coordinates as [ (x,y), ... ]'''
-        raw = self.transform.worldpts(self.points) # In the form of nparray
-        ptlist = []
-        for elem in raw:
-            ptlist.append(tuple(elem))
+        # transform.worlpts(pts) is in the form of nparray
+        ptlist = [tuple(elem) for elem in self.transform.worldpts(self.points)]
         return ptlist # List of tuples
     def getiamgepts(self): 
         '''Returns pixel space coordinates as [ (x,y), ... ]'''

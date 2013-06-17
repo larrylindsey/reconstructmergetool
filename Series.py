@@ -279,18 +279,12 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popdefborder(self, root):
         if root == None:
             return None
-        rawList = list(root.get('defaultBorder').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('defaultBorder').split(' '))]
         return tmpList
     def popdeffill(self, root):
         if root == None:
             return None
-        rawList = list(root.get('defaultFill').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('defaultFill').split(' '))]
         return tmpList
     def popbordcolors(self, root): #===
         if root == None:
@@ -329,66 +323,42 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def popoffset3D(self, root):
         if root == None:
             return None
-        rawList = list(root.get('offset3D').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('offset3D').split(' '))]
         return tmpList
     def popdim3D(self, root):
         if root == None:
             return None
-        rawList = list(root.get('dim3D').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('dim3D').split(' '))]
         return tmpList
     def popgridsize(self, root):
         if root == None:
             return None
-        rawList = list(root.get('gridSize').split(' '))
-        tmpList = []
-        for elem in rawList: #===
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('gridSize').split(' '))]
         return tmpList
     def popgriddistance(self, root):
         if root == None:
             return None
-        rawList = list(root.get('gridDistance').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( int(elem) )
+        tmpList = [int(elem) for elem in list(root.get('gridDistance').split(' '))]
         return tmpList
     def popgridnumber(self, root):
         if root == None:
             return None
-        rawList = list(root.get('gridNumber').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( int(elem) )
+        tmpList = [int(elem) for elem in list(root.get('gridNumber').split(' '))]
         return tmpList
     def popmvmtincrement(self, root):
         if root == None:
             return None
-        rawList = list(root.get('mvmtIncrement').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('mvmtIncrement').split(' '))]
         return tmpList
     def popctrlincrement(self, root):
         if root == None:
             return None
-        rawList = list(root.get('ctrlIncrement').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('ctrlIncrement').split(' '))]
         return tmpList
     def popshiftincrement(self, root):
         if root == None:
             return None
-        rawList = list(root.get('shiftIncrement').split(' '))
-        tmpList = []
-        for elem in rawList:
-            tmpList.append( float(elem) )
+        tmpList = [float(elem) for elem in list(root.get('shiftIncrement').split(' '))]
         return tmpList
     def popautoSaveSeries(self, root):
         if root == None:

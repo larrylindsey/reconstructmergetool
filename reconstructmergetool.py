@@ -178,9 +178,7 @@ def writesections(series_object, outpath):
             curT = ET.Element('Transform', elem.transform.output())
             
             #build list of transforms in root; check if transform already exists
-            tlist=[]
-            for trnsfrm in root.getchildren():
-                tlist.append(trnsfrm.attrib)
+            tlist= [trnsfrm.attrib for trnsfrm in root.getchildren()]
 
             # Image/Image contour transform
             if elem.img: # Make transform from image

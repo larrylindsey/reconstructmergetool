@@ -73,30 +73,26 @@ separated by a single space)'''
             return int( node.attrib['mode'] )
     def popborder(self, node):
         '''Populates self.border'''
-        bord = []
-        for elem in list(node.attrib['border'].split(' ')):
-            bord.append(float(elem))
+        bord = [float(elem) for elem in list(node.attrib['border'].split(' '))]
         return bord
     def popfill(self, node):
         '''Populates self.fill'''
-        fill = []
-        for elem in list(node.attrib['fill'].split(' ')):
-            fill.append(float(elem))
+        fill = [float(elem) for elem in list(node.attrib['fill'].split(' '))]
         return fill
     def poppts(self, node):
-            #partition points into a list of messy crap
+        #partition points into a list of messy crap
         partPoints = list(node.attrib['points'].lstrip(' ').split(','))
             #example: ['5.93694 3.75884 156', '  5.46795 4.10569 144',
             #'  4.82797 4.41347 139', '  4.77912 4.64308 124', '  4.63744 4.97528 99', '  ']
 
-            #make a new list of clean points, to be added to object
+        #make a new list of clean points, to be added to object
         ptList = []
         for i in range( len(partPoints) ):
             ptList.append( partPoints[i].strip() )
                 #example: ['5.93694 3.75884 156', '5.46795 4.10569 144', '4.82797 4.41347 139',
                 #'4.77912 4.64308 124', '4.63744 4.97528 99', '']
 
-            #remove empty points
+        #remove empty points
         for i in range( len(ptList) ):
             if ptList[i] == '':
                 ptList.remove('')

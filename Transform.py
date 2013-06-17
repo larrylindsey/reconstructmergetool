@@ -27,7 +27,7 @@ class Transform:
 
 # Accessors
     def worldpts(self, points):
-        '''Returns worldpts'''
+        '''Returns inverse points'''
         newpts = self._tform.inverse(np.asarray(points))
         return newpts
     
@@ -37,20 +37,20 @@ class Transform:
     def getycoef(self):
         '''Returns ycoefs'''
         ret = ''
-        for int in self.ycoef:
-            ret += ' '+str(int)
+        for elem in self.ycoef:
+            ret += ' '+str(elem)
         return ret
     def getxcoef(self):
         '''Returns xcoefs'''
         ret = ''
-        for int in self.xcoef:
-            ret += ' '+str(int)
+        for elem in self.xcoef:
+            ret += ' '+str(elem)
         return ret
     def getattribs(self):
-        '''Returns Dim, xcoefs, and ycoefs'''
+        '''Returns Dim, xcoefs, and ycoefs as they are stored in memory'''
         return self.dim, self.xcoef, self.ycoef
     def xgetattribs(self):
-        '''Returns dim, xcoefs, and ycoefs as strings for XML formatting'''
+        '''Returns dim, xcoefs, and ycoefs as strings (for XML generation)'''
         return str(self.dim), str(self.getxcoef()), str(self.getycoef())
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building xml'''
@@ -58,8 +58,8 @@ class Transform:
         keys = self._attribs
         values = list(self.xgetattribs())
         count = 0
-        for value in values:
-            attributes[keys[count]] = value
+        for val in values:
+            attributes[keys[count]] = val
             count += 1
         return attributes      
 # Mutators              
