@@ -1,6 +1,5 @@
 import numpy as np
 from skimage import transform as tf
-import math
 
 class Transform:
     '''Transform object containing the following data: \nTag \nDim \nyCoef \nxCoef \ntmatrix'''
@@ -90,18 +89,18 @@ class Transform:
             tmatrix = np.array( [a[0],a[1],a[2],a[4],a[3],a[5],b[0],b[1],b[2],b[4],b[3],b[5]] ).reshape((2,6))
             # create matrix of coefficients 
             tforward = tf.PolynomialTransform(tmatrix)
-            
             def getrevt(pts): # pts are a np.array
-                tfpts = tforward(pts) # nparray of pts after forward transform
                 newpts = [] # list of final estimates of (x,y)
-                for i in range( len(tfpts) ):
+                for i in range( len(pts) ):
                     # (u,v) for which we want (x,y)
-                    u, v = pts[i,0], pts[i,1]
-#                     print('Current pt: '+str(u)+','+str(v))
+                    u, v = pts[i,0], pts[i,1] # input pts
+#                     print('orig: '+str(u)+' '+str(v))
                     # initial guess of (x,y)
                     x0, y0 = 0.0, 0.0
                     # get forward tform of initial guess
-                    u0, v0 = tforward(np.asarray([(x0,y0)]))[:,0][0],tforward(np.asarray([(x0,y0)]))[:,1][0]
+                    uv0 = tforward(np.array([x0,y0]).reshape([1, 2]))[0]
+                    u0 = uv0[0]
+                    v0 = uv0[1]
                     e = 1.0 # reduce error to this limit 
                     epsilon = 5e-10
                     i = 0
@@ -113,7 +112,7 @@ class Transform:
                         n = b[1] + b[3]*y0 + 2.0*b[4]*x0
                         o = b[2] + b[3]*x0 + 2.0*b[5]*y0
                         p = l*o - m*n # determinant for inverse
-                        if math.fabs(p) > epsilon:
+                        if abs(p) > epsilon:
                             # increment x0,y0 by inverse of Jacobian
                             x0 = x0 + ((o*(u-u0) - m*(v-v0))/p)
                             y0 = y0 + ((l*(v-v0) - n*(u-u0))/p)
@@ -121,24 +120,23 @@ class Transform:
                             # try Jacobian transpose instead
                             x0 = x0 + (l*(u-u0) + n*(v-v0))        
                             y0 = y0 + (m*(u-u0) + o*(v-v0))
-                        # get forward tform of current guess            
-                        u0, v0 = tforward(np.asarray([(x0,y0)]))[:,0][0],tforward(np.asarray([(x0,y0)]))[:,1][0]
+                        # get forward tform of current guess       
+                        uv0 = tforward(np.array([x0,y0]).reshape([1, 2]))[0]
+                        u0 = uv0[0]
+                        v0 = uv0[1]
                         # compute closeness to goal
-                        e = math.fabs(u-u0) + math.fabs(v-v0)
-                        print(e) #===
-                    print('====================') #===
+                        e = abs(u-u0) + abs(v-v0)
+#                         print('x0, y0: '+str(x0)+', '+str(y0))
+#                         print('u0, v0: '+str(u0)+', '+str(v0))
+#                         print('u, v  : '+str(u)+', '+str(v))
+#                         print('e(%d): '+str(e))%i #===
+#                     print('====================') #===
                     # append final estimate of (x,y) to newpts list
                     newpts.append((x0,y0))     
                 newpts = np.asarray(newpts)    
-#                 print('Newpts:\n'+str(newpts))               
+#                 print('Newpts:\n'+str(newpts))           
                 return newpts
             tforward.inverse = getrevt
-            # ============ DEBUG HERE
-#             testarr = np.asarray([(0, 0), (4096, 0), (4096, 4096), (0, 4096)])
-#             print('ptarray:\n'+str(testarr))
-#             print('tf(tfinvers(pts)):\n'+str(tforward(tforward.inverse( testarr ))))
-#             print('tfinvers(tf(pts)):\n'+str(tforward.inverse(tforward( testarr ))))
-#             quit()
             
             return tforward
             

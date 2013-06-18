@@ -1,11 +1,12 @@
 from shapely.geometry import Polygon, LineString, Point, box
+import numpy as np
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
   Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
   Mode \n   Points'''
 # Python Functions
     # INITIALIZE
-    def __init__(self, node=None, imgflag=False, transform=None):
+    def __init__(self, node=None, imgflag=None, transform=None):
         '''Initializes the Contour object. Two different Contour objects: Image Contours and Contours \
         delineated by the imgflag parameter.'''
         self.tag = 'Contour'
@@ -47,7 +48,15 @@ class Contour:
     def popshape(self):
         '''Adds polygon object (shapely) to self._shape'''
         if self.closed == True: # Closed trace
-            self._shape = Polygon( self.transform.worldpts(self.points) )
+            # If image contour, multiply pts by mag before inverting transform
+            if self.img != None:
+                mag = self.img.mag
+                xvals = [pt[0]*mag for pt in self.points]
+                yvals = [pt[1]*mag for pt in self.points]
+                pts = zip(xvals,yvals)
+            else:
+                pts = self.points
+            self._shape = Polygon( self.transform.worldpts(pts) )
         elif self.closed == False and len(self.points)>1: # Open trace
             self._shape = LineString( self.transform.worldpts(self.points) )
         else:

@@ -63,7 +63,7 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         if root == None:
             return contours, images
         for transform in root:
-            imgflag = False
+            imgflag = None
             for child in transform:
                 if child.tag == 'Image':
                     imgflag = True
@@ -71,8 +71,10 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
                     images.append(I)
                 elif child.tag == 'Contour':
                     C = Contour(child, imgflag, Transform(transform))
+                    if imgflag: #===
+                        C.img = I
                     contours.append(C)
-                    imgflag = False
+                    imgflag = None
                 elif child.tag == 'ZContour': # No ZContours in Sections?
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)

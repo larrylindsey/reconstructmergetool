@@ -181,7 +181,7 @@ def writesections(series_object, outpath):
             tlist= [trnsfrm.attrib for trnsfrm in root.getchildren()]
 
             # Image/Image contour transform
-            if elem.img: # Make transform from image
+            if elem.img != None: # Make transform from image
                 if elem.transform.output() == section.imgs[0].transform.output():
                     subelem = ET.Element('Image', section.imgs[0].output())
                     curT.append(subelem)
@@ -222,7 +222,7 @@ def setidentzero(serObj): #===
         series = serObj
         for sec in series.sections:
             for c in sec.contours:
-                if not c.img: # ===
+                if c.img == None: # ===
                     c.points = c.transform.worldpts(c.points)
                     c.transform.dim = 0
                     c.transform.ycoef = [0,0,1,0,0,0]
@@ -272,11 +272,11 @@ def checkShape(cont1, cont2): #===
     Handles LineString and Polygons separately.'''
     # CLOSED TRACES
     if cont1.closed == True and cont2.closed == True:
-        print(cont1.points)
-        print(list(cont1._shape.exterior.coords))
-#         
-        print(cont2.points)
-        print(list(cont2._shape.exterior.coords))
+#         print(cont1.points)
+#         print(list(cont1._shape.exterior.coords))
+     
+#         print(cont2.points)
+#         print(list(cont2._shape.exterior.coords))
 
         AoU = cont1._shape.union( cont2._shape ).area # Area of union
         AoI = cont1._shape.intersection( cont2._shape ).area # Area of intersection
@@ -307,9 +307,9 @@ def checkShape(cont1, cont2): #===
 def popshapes(serObj):
     print('Populating shapely shapes for '+serObj.name+'...'),
     for section in serObj.sections:
-        print('========='+section.name+'=========')
+#         print('========='+section.name+'=========')
         for contour in section.contours:
-            print(contour.name)
+#             print(contour.name)
             contour.popshape() # Uses worldpts to create shapely shapes
     print('DONE')
     
@@ -357,7 +357,7 @@ def mergeSerConts(ser1Obj, ser2Obj): #===
     
     return ser3conts
 
-def mergeSections(sec1, sec2, ser3name): #===
+def mergeSections(sec1, sec2, ser3name):
     '''compares and merges the attributes associated with Sections (except contours).
     i.e. imgs, index, thickness, alignLocked'''
     print('mergeSections=======================================')
@@ -428,7 +428,7 @@ def mergeSections(sec1, sec2, ser3name): #===
         # Find overlaps in conts2 for each contour in conts1
         for cont in conts1:
             lst1 = [conts1.pop()] # Conts1 contour
-            print('Checking: '+lst1[0].name)
+#             print('Checking: '+lst1[0].name)
             # Find overlaps in conts2
             lst2 = [] # All the conts2 contours that overlap with the lst1 contour
             for cont2 in conts2:
@@ -460,7 +460,7 @@ def mergeSections(sec1, sec2, ser3name): #===
                 for elem2 in lst2: # ... to lst2 contours
                     c = checkShape(elem, elem2)
                     if c == True: # AoU/AoI determines most likely same object
-                        print('\tOutput ser1Obj contour')
+#                         print('\tOutput ser1Obj contour')
                         outputlist.append(elem)
 #                         lst1.pop(lstcnt)
 #                         lst2.pop(lstcnt2)
@@ -472,10 +472,10 @@ def mergeSections(sec1, sec2, ser3name): #===
                             choice = raw_input('Choose trace to output: '+elem.name+'\n'+'1. ser1\n'+'2. ser2\n')
                             if int(choice) == 1:
                                 outputlist.append(elem)
-                                print('\tOutput ser1Obj contour')
+#                                 print('\tOutput ser1Obj contour')
                             elif int(choice) == 2:
                                 outputlist.append(elem2)
-                                print('\tOutput ser2Obj contour')
+#                                 print('\tOutput ser2Obj contour')
                     lstcnt2+=1
                 lstcnt+=1
             print
