@@ -75,7 +75,7 @@ transform (object)'''
             return None
         elif node.get('red', None) == None:
             return True
-        elif node.attrib['red'].capitalize() == 'True':
+        elif node.get('red').capitalize() == 'True':
             return True
         else:
             return False
@@ -85,7 +85,7 @@ transform (object)'''
             return None
         elif node.get('green', None) == None:
             return True
-        elif node.attrib['green'].capitalize() == 'True':
+        elif node.get('green').capitalize() == 'True':
             return True
         else:
             return False
@@ -95,23 +95,23 @@ transform (object)'''
             return None
         elif node.get('blue', None) == None:
             return True
-        elif node.attrib['blue'].capitalize() == 'True':
+        elif node.get('blue').capitalize() == 'True':
             return True
         else:
             return False
     def popname(self, node):
         if node == None:
             return None
-        return node.attrib['src']
+        return node.get('src')
     def popmag(self, node):
         if node == None:
             return None
-        return float( node.attrib['mag'] )
+        return float( node.get('mag') )
     def popcontrast(self, node):
         if node == None:
             return None
-        return float( node.attrib['contrast'] )
+        return float( node.get('contrast') )
     def popbrightness(self, node):
         if node == None:
             return None
-        return float( node.attrib['brightness'] )
+        return float( node.get('brightness') )

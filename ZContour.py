@@ -70,18 +70,18 @@ separated by a single space)'''
         if node.get('mode', None) == None:
             return None
         else:
-            return int( node.attrib['mode'] )
+            return int( node.get('mode') )
     def popborder(self, node):
         '''Populates self.border'''
-        bord = [float(elem) for elem in list(node.attrib['border'].split(' '))]
+        bord = [float(elem) for elem in list(node.get('border').split(' '))]
         return bord
     def popfill(self, node):
         '''Populates self.fill'''
-        fill = [float(elem) for elem in list(node.attrib['fill'].split(' '))]
+        fill = [float(elem) for elem in list(node.get('fill').split(' '))]
         return fill
     def poppts(self, node):
         #partition points into a list of messy crap
-        partPoints = list(node.attrib['points'].lstrip(' ').split(','))
+        partPoints = list(node.get('points').lstrip(' ').split(','))
             #example: ['5.93694 3.75884 156', '  5.46795 4.10569 144',
             #'  4.82797 4.41347 139', '  4.77912 4.64308 124', '  4.63744 4.97528 99', '  ']
 
@@ -102,7 +102,7 @@ separated by a single space)'''
     def popname(self, node):
         if node == None:
             return None
-        return str( node.attrib['name'] )
+        return str( node.get('name') )
     def popclosed(self, node):
         if node == None:
             return None
