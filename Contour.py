@@ -47,7 +47,8 @@ class Contour:
             return str( node.get('name') )
     def popshape(self):
         '''Adds polygon object (shapely) to self._shape'''
-        if self.closed == True: # Closed trace
+        # Closed trace
+        if self.closed == True:
             # If image contour, multiply pts by mag before inverting transform
             if self.img != None:
                 mag = self.img.mag
@@ -57,10 +58,12 @@ class Contour:
             else:
                 pts = self.points
             self._shape = Polygon( self.transform.worldpts(pts) )
-        elif self.closed == False and len(self.points)>1: # Open trace
+        # Open trace
+        elif self.closed == False and len(self.points)>1:
             self._shape = LineString( self.transform.worldpts(self.points) )
         else:
-            print('Invalid shape characteristics: '+self.name)
+            print('\nInvalid shape characteristics: '+self.name)
+            quit() # for dbugging
     def box(self):
         '''Returns bounding box of shape (shapely) library'''
         if self._shape != None:
