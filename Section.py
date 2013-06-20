@@ -11,8 +11,10 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         # Create <section>
         self.name = name
         self.tag = 'Section'
+        # Contours/Images
         self.contours = self.poplists(root)[0] # List of contours 
         self.imgs = self.poplists(root)[1] # list of images
+        # Attributes
         self.index = self.popindex(root) #int
         self.thickness = self.popthickness(root) #float
         self.alignLocked = self.popalignLocked(root)

@@ -4,7 +4,7 @@
 #  Required Python libraries:
 #        shapely, lxml, numpy, skimage
 #  Other required libraries:
-#        
+#        libgeo_c? 
 #
 #  Description: Driver for reconstructmergetool
 #
@@ -15,10 +15,10 @@
 #  Date Last Modified: 6/19/2013
 #
 # Currently working on:
-        # replace .attrib with .get for image and zcontour
+        # Make list of conflicts
         # Series contours in mergeSerAtts
         # sections sorted in computer way(? lol) (i.e. 12 after 111)
-        # GUI: KIVY, WX(windows?), GTK, QT
+        # GUI: PySide
         # tospace() fromspace() in transform
 
         
@@ -253,19 +253,8 @@ def mergeSeries(serObj1, serObj2, name=None):
     print('DONE')
     return serObj3
 
-def boxOverlaps(cont1, cont2):
-    '''Determines if there is an overlap between the shape bounding boxes.
-    Returns True if there is overlap, otherwise false.'''
-    if cont1._shape == None or cont2._shape == None:
-        return False
-    elif cont1.box().intersects( cont2.box() ) or cont1.box().touches( cont2.box() ):
-#         print('Bounding box overlap: '+cont1.name+' '+cont2.name)
-#         print('Shapes: '+str(cont1._shape)+' '+str(cont2._shape))
-        return True
-    else:
-        return False
     
-def checkShape(cont1, cont2): #===
+def chkShape(cont1, cont2): #===
     '''Performs shape comparisons between contour shapes using shapely.
     Handles LineString and Polygons separately.'''
     # CLOSED TRACES
@@ -313,7 +302,7 @@ def checkShape(cont1, cont2): #===
                     continue
                 else:
                     print('False')
-                    quit() # for dbugging
+                    quit() # for dbugging===
                     return 2
             return True # same trace -> outputs ser1obj contour
         return False
@@ -380,132 +369,130 @@ def mergeSerConts(ser1Obj, ser2Obj): #===
     print('DONE')
     return ser3conts
 
+def chkSecAtts(sec1, sec2): #===
+    '''Returns a list of booleans signifying whether attributes of sec1 and sec2 are the same'''
+    chkList = []
+    # chk attributes
+    s1atts = sec1.output()
+    s2atts = sec2.output()
+    for att in s1atts:
+        chkList.append( s1atts[att] == s2atts[att] )
+    return chkList
+
+def chkSecImgs(s1, s2): #===
+    '''Returns a boolean signifying whether s1 and s2 section objects have the same images'''
+    if len(s1.imgs) != len(s2.imgs):
+        return False
+    for i in range( len(sec1.imgs) ):
+        if s1.imgs[i].output() != s2.imgs[i].output():
+            return False
+    return True
+
+def chkOvlp(c1,c2):
+    '''Returns True if:
+        (for closed contours): bounding box overlaps and intersection > 0
+        (for open contours): same # pts and distance btwn them < threshold'''
+    threshold = (1+2**(-17))
+    print('=chkOvlp')
+    # Closed
+    if c1.closed == True and c2.closed == True and c1.name == c2.name:
+        print('==Closed:\n'+c1.name+', '+c2.name)
+        def boxOvlps(c1, c2):
+            '''True if overlap between bounding boxes'''
+            if c1._shape == None or c2._shape == None:
+                print('INVALID SHAPE')
+                quit() #=== dbug
+                return False
+            return c1.box().intersects( c2.box() ) or c1.box().touches( c2.box() )
+        AoI = c1._shape.intersection( c2._shape ).area
+        return boxOvlps(c1,c2) and AoI > 0
+    # Open
+    elif c1.closed == False and c2.closed == False and c1.name == c2.name:
+        print('==Open:\n'+c1.name+', '+c2.name)
+        if len(c1.points) != len(c2.points):
+            return False
+        # Lists of wrld coords to compare
+        a = c1.transform.worldpts(c1.points)
+        b = c2.transform.worldpts(c2.points)
+        def distance(pt1, pt2):
+            return math.sqrt((pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2)
+        distlist = [distance(a[i],b[i]) for i in range(len(cont1.points))] 
+        for elem in distlist:
+            if elem > threshold:
+                return False
+        return True
+    return False
+    
+def chkContOvlps(s1, s2): #===
+    # Lists of all contours in parallel sections
+    conts1 = s1.contours
+    conts2 = s2.contours
+    conts3 = []
+    while len(conts1) != 0 and len(conts2) != 0:
+        ovlp1 = [conts1.pop()]
+        ovlp2 = []
+        # Check sec2 for conts that ovlp with ovlp1
+        for cont in conts2:
+            if chkOvlp(ovlp1[0], cont):
+                ovlp2.append(cont)
+                conts2.remove(cont)
+        # If no ovlps found, output contour to s3
+        if not len(ovlp2):
+            conts3.append(ovlp1[0])
+        # Now find overlaps in s1 that ovlp with ovlp2 conts
+        for cont in ovlp2:
+            for cont2 in ovlp1:
+                if chkOvlp(cont, cont2):
+                    ovlp1.append(cont1)
+                    conts1.remove(cont1)
+        for elem in chkCollision(ovlp1, ovlp2):
+            conts3.append(elem)                       
+    print( 'conts3:\n'+str([cont.name for cont in conts3]) )    
+    return conts3
+
+
 def mergeSections(sec1, sec2, ser3name):
     '''compares and merges the attributes associated with Sections (except contours).
     i.e. imgs, index, thickness, alignLocked'''
     
     sec3 = Section()
-    # Check index
-    if sec1.index == sec2.index:
-        sec3.index = sec1.index
-        sec3.name = ser3name+'.'+str(sec3.index)
-    # Check imgs
-        # If only 1 image and same name...
-    if len(sec1.imgs) == len(sec1.imgs) and len(sec1.imgs) == 1:
-        if sec1.imgs[0].name == sec2.imgs[0].name:
-            sec3.imgs = sec1.imgs
-        # If different # of imgs or more than 1 image in an image list
-    elif len(sec1.imgs) != len(sec2.imgs) or len(sec1.imgs) != 1 or len(sec2.imgs) != 1:
-        imgs1 = [image.src for image in sec1.imgs]
-        imgs2 = [image.src for image in sec2.imgs]
-        print('Different images present: '+'1.'+imgs1+' 2.'+imgs2)
-        a = 3
-        while a not in [1,2]:
-            a = int(raw_input('Please pick which set of images to add to the merged section. 1 or 2: '))
-            if a == 1:
-                sec3.imgs = sec1.imgs
-            elif a == 2:
-                sec3.imgs = sec1.imgs
-            else:
-                print('Invalid choice. Please enter 1 or 2')
-                a = int(raw_input('Please pick which set of images to add to the merged section. 1 or 2: '))
-    # Check thickness
-    if sec1.thickness == sec2.thickness:
-        sec3.thickness = sec1.thickness
-    elif sec1.thickness != sec2.thickness:
-        print('Different thicknesses: '+'1.'+sec1.thickness+' 2.'+sec2.thickness)
-        a = 3
-        while a not in [1,2]:
-            a = int(raw_input('Please pick which thickness to set to the merged section. 1 or 2: '))
-            if a == 1:
-                sec3.thickness = sec1.thickness
-            elif a == 2:
-                sec3.thickness = sec1.thickness
-            else:
-                print('Invalid choice. Please enter 1 or 2')
-                a = int(raw_input('Please pick which thickness to set to the merged section. 1 or 2: '))
-    # Check alignLocked
-    if sec1.alignLocked == sec2.alignLocked:
-        sec3.alignLocked = sec1.alignLocked
-    elif sec1.alignLocked != sec2.alignLocked:
-        print('Different thicknesses: '+'1.'+sec1.alignLocked+' 2.'+sec2.alignLocked)
-        a = 3
-        while a not in [1,2]:
-            a = int(raw_input('Please pick which alignLocked to set to the merged section. 1 or 2: '))
-            if a == 1:
-                sec3.alignLocked = sec1.alignLocked
-            elif a == 2:
-                sec3.alignLocked = sec1.alignLocked
-            else:
-                print('Invalid choice. Please enter 1 or 2')
-                a = int(raw_input('Please pick which alignLocked to set to the merged section. 1 or 2: '))
-                          
-    # Build lists of contours for both sections
-    conts1 = [contour for contour in sec1.contours]
-    conts2 = [contour for contour in sec2.contours]
-
+    
     outputlist = [] # List of all contours to be output into 3rd series
     
-    # Find overlapping contours
-    while len(conts1) != 0 and len(conts2) != 0: # Continue until either list is empty
-        # Find overlaps in conts2 for each contour in conts1
-        for cont in conts1:
-            lst1 = [conts1.pop()] # Conts1 contour
-#             print('Checking: '+lst1[0].name)
-            # Find overlaps in conts2
-            lst2 = [] # All the conts2 contours that overlap with the lst1 contour
-            for cont2 in conts2:
-                if cont2.name == lst1[0].name: # Do they have same name?
-                    if boxOverlaps(lst1[0], cont2): # Do the bounding boxes overlap?
-                        lst2.append(cont2)
-                        conts2.remove(cont2)
+    
             
-            # If no overlaps found, add lst1 contour to output list
-            if len(lst2) == 0: 
-                outputlist.append( lst1.pop() )
-                
-            # For each cont in lst2 (sec2 conts that overlap lst1 cont), ...
-            # ...find overlaps in conts1 (unpopped [non lst1] sec1 contours)
-            else:
-                for contour2 in lst2:
-                    for cont1 in conts1: # Original contour list for sec1
-                        if cont1.name == contour2.name: # Do they have the same name?
-                            if boxOverlaps(contour2, cont1): # Do the bouding boxes overlap?
-                                lst1.append(cont1)
-                                conts1.remove(cont1)
-            
-            # Bounding box overlaps have been found, now check actual polygons
-#            print([elem.name for elem in lst1])
-#            print([elem.name for elem in lst2])
-            lstcnt = 0 # Problems with non-exist elems, use indexing/pop instead of remove()
-            for elem in lst1: # Compare lst1 contours...
-                lstcnt2 = 0
-                for elem2 in lst2: # ... to lst2 contours
-                    c = checkShape(elem, elem2)
-                    if c == True: # AoU/AoI determines most likely same object
-#                         print('\tOutput ser1Obj contour')
-                        outputlist.append(elem)
-#                         lst1.pop(lstcnt)
-#                         lst2.pop(lstcnt2)
-                    else:
-                        outputlist.append(elem)
-                        outputlist.append(elem2)
-#                     elif c == 2: # (slightly?) Different traces with same name ======================
-#                         choice = 4 
-#                         while int(choice) not in [1,2,3]:
-#                             print
-#                             choice = raw_input('Choose trace to output: '+elem.name+'\n'+'1. ser1\n'+'2. ser2\n'+'3. both\n')
-#                             if int(choice) == 1:
-#                                 outputlist.append(elem)
-# #                                 print('\tOutput ser1Obj contour')
-#                             elif int(choice) == 2:
-#                                 outputlist.append(elem2)
-# #                                 print('\tOutput ser2Obj contour')
-#                             elif int(choice) == 3:
-#                                 outputlist.append(elem)
-#                                 outputlist.append(elem2)
-                    lstcnt2+=1
-                lstcnt+=1
+#             # Bounding box overlaps have been found, now check actual polygons
+# #            print([elem.name for elem in lst1])
+# #            print([elem.name for elem in lst2])
+#             lstcnt = 0 # Problems with non-exist elems, use indexing/pop instead of remove()
+#             for elem in lst1: # Compare lst1 contours...
+#                 lstcnt2 = 0
+#                 for elem2 in lst2: # ... to lst2 contours
+#                     c = checkShape(elem, elem2)
+#                     if c == True: # AoU/AoI determines most likely same object
+# #                         print('\tOutput ser1Obj contour')
+#                         outputlist.append(elem)
+# #                         lst1.pop(lstcnt)
+# #                         ovlp2.pop(lstcnt2)
+#                     else:
+#                         outputlist.append(elem)
+#                         outputlist.append(elem2)
+# #                     elif c == 2: # (slightly?) Different traces with same name ======================
+# #                         choice = 4 
+# #                         while int(choice) not in [1,2,3]:
+# #                             print
+# #                             choice = raw_input('Choose trace to output: '+elem.name+'\n'+'1. ser1\n'+'2. ser2\n'+'3. both\n')
+# #                             if int(choice) == 1:
+# #                                 outputlist.append(elem)
+# # #                                 print('\tOutput ser1Obj contour')
+# #                             elif int(choice) == 2:
+# #                                 outputlist.append(elem2)
+# # #                                 print('\tOutput ser2Obj contour')
+# #                             elif int(choice) == 3:
+# #                                 outputlist.append(elem)
+# #                                 outputlist.append(elem2)
+#                     lstcnt2+=1
+#                 lstcnt+=1
             
     # Add leftover contours (from conts1/conts2) to output list
     # Left overs mean they have no matching/overlapping contours in parallel section
