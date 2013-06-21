@@ -1,4 +1,5 @@
 from shapely.geometry import Polygon, LineString, Point, box
+import math
 import numpy as np
 class Contour:
     '''Contour object containing the following data: \n   Tag \n   Name \n \
@@ -34,6 +35,44 @@ class Contour:
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
                +'\n-points: '+str(self.points)+'\n'
 # Helper Functions
+    def overlaps(self, other):
+        # Check bounding box
+        if not self.box().intersects( other.box() ) and not self.box().touches( other.box() ):
+            print('ovlpscheck 1')
+            return 0
+        # Check if both same class of contours
+        if self.closed != other.closed:
+            print('ovlpscheck 2')
+            return 0
+        threshold = (1+2**(-17))    
+        # Closed contours
+        if self.closed:
+            AoU = self._shape.union( other._shape ).area
+            AoI = self._shape.intersection( other._shape ).area
+            if AoI == 0:
+                print('ovlpscheck 2.5')
+                return 0
+            elif AoU/AoI > threshold:
+                print('ovlpscheck 3')
+                return AoU/AoI
+            elif AoU/AoI < threshold:
+                print('ovlpscheck 4')
+                return 1
+        # Open contours
+        if len( self.points ) != len( other.points ):
+            print('ovlpscheck 5')
+            return 0
+        # Lists of world coords to compare
+        a = self.transform.worldpts(self.points)
+        b = other.transform.worldpts(other.points)
+        distlist = [distance(a[i],b[i]) for i in range(len(c1.points))] 
+        for elem in distlist:
+            if elem > threshold:
+                print('ovlpscheck 6')
+                return 0
+        return 1
+    def distance(pt0, pt1):
+        return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
     def s2b(self, string):
         '''Converts string to bool'''
         if string == 'None':

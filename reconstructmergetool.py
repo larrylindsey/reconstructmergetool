@@ -306,37 +306,37 @@ def mergeSerConts(ser1Obj, ser2Obj): #=== currently copies ser1Obj.contours
 #             s = Section # Imgs? ===
     print('DONE')
     return ser3conts
-def chkCollision(lst1, lst2): #=== in dev, overlap outputs both
-    '''Takes in two lists of contours, returns 1 list of contours'''
-    threshold = (1+2**(-17))
-    outlist = []
-    for elem1 in lst1:
-        for elem2 in lst2:
-            # Closed traces
-            if elem1.closed and elem2.closed:
-                AoU = elem1._shape.union( elem2._shape ).area # Area of union
-                AoI = elem1._shape.intersection( elem2._shape ).area # Area of intersection
-                # Overlap is near 100%
-                if AoU/AoI < threshold: # most likely the same object
-                    outlist.append(elem1)
-                    lst1.remove(elem1)
-                    lst2.remove(elem2)
-                # Some overlap
-                elif AoI != 0.0: # require user input === output both for now
-                    print(elem1.name +' '+elem2.name)
-                    outlist.append(elem1)
-                    outlist.append(elem2)
-                    lst1.remove(elem1)
-                    lst2.remove(elem2)
-                    a = raw_input('chkCollision dbug')
-
-            # Open traces
-            elif not elem1.closed and not elem2.closed:
-                # equivalency established in chkOvlp() ===
-                outlist.append(elem1)
-                lst1.remove(elem1)
-                lst2.remove(elem2)
-    return outlist
+# def chkCollision(lst1, lst2): #=== in dev, overlap outputs both
+#     '''Takes in two lists of contours, returns 1 list of contours'''
+#     threshold = (1+2**(-17))
+#     outlist = []
+#     for elem1 in lst1:
+#         for elem2 in lst2:
+#             # Closed traces
+#             if elem1.closed and elem2.closed:
+#                 AoU = elem1._shape.union( elem2._shape ).area # Area of union
+#                 AoI = elem1._shape.intersection( elem2._shape ).area # Area of intersection
+#                 # Overlap is near 100%
+#                 if AoU/AoI < threshold: # most likely the same object
+#                     outlist.append(elem1)
+#                     lst1.remove(elem1)
+#                     lst2.remove(elem2)
+#                 # Some overlap
+#                 elif AoI != 0.0: # require user input === output both for now
+#                     print(elem1.name +' '+elem2.name)
+#                     outlist.append(elem1)
+#                     outlist.append(elem2)
+#                     lst1.remove(elem1)
+#                     lst2.remove(elem2)
+#                     a = raw_input('chkCollision dbug')
+# 
+#             # Open traces
+#             elif not elem1.closed and not elem2.closed:
+#                 # equivalency established in chkOvlp() ===
+#                 outlist.append(elem1)
+#                 lst1.remove(elem1)
+#                 lst2.remove(elem2)
+#     return outlist
 
 def mergeSections(sec1, sec2, ser3name):
     '''compares and merges the attributes associated with Sections (except contours).
@@ -346,7 +346,7 @@ def mergeSections(sec1, sec2, ser3name):
     # check section images
     sec3.imgs = chkSecImgs(sec1,sec2)
     # chkContOvlps
-    sec3.contours = chkContOvlps(sec1, sec2)
+    sec3.contours = mergeSecConts(sec1, sec2)
     return sec3
 def chkSecAtts(sec1, sec2):
     '''Returns a list of booleans signifying whether attributes of sec1 and sec2 are the same'''
@@ -385,77 +385,66 @@ def chkSecImgs(s1, s2): #===
     return s1.imgs
 def mergeSecImgs(s1,s2): #=== currently copies s1.imgs
     return s1.imgs
-def chkContOvlps(s1, s2): #===
-    '''Returns list of contours to be added to a merged section'''
+def mergeSecConts(s1,s2):
+    '''Returns merged contours between two sections'''
     # Lists of all contours in parallel sections
     conts1 = [cont for cont in s1.contours]
-    conts2 = [cont for cont in s2.contours]
+    conts2 = [cont for cont in s2.contours] 
     conts3 = []
-    
     while len(conts1) != 0 and len(conts2) != 0:
-        ovlp1 = [conts1.pop()]
-        ovlp2 = []
-        # Check sec2 for conts that ovlp with ovlp1
-        print('1st pass:')
-        print('Check: '+ovlp1[0].name)
-        for cont in conts2:
-            print(cont.name)
-            if chkOvlp(ovlp1[0], cont):
-                ovlp2.append(cont)
-                conts2.remove(cont)
-        # If no ovlps found, output contour to s3
-        if not len(ovlp2):
-            conts3.append(ovlp1[0])
-        # Now find overlaps in s1 that ovlp with ovlp2 conts
-        for cont in ovlp2:
-            for cont2 in conts1:
-                if chkOvlp(cont, cont2):
-                    ovlp1.append(cont2)
-                    conts1.remove(cont2)
-        # Further collision analysis (merge, output both, output 1, etc?)
-        for elem in chkCollision(ovlp1, ovlp2): #===
-            conts3.append(elem)
-    # add left over contours to merged list
+        for elem in mergeOvlpConts( *retOvlpConts(conts1, conts2) ): # * expands tuple
+            conts3.append( elem )
+    # Append leftover, non-overlapping contours
     while len(conts1) != 0:
-        conts3.append(conts1.pop())
+        conts3.append( conts1.pop() )
+    print('final conts1: '+str([cont.name for cont in conts1]))
     while len(conts2) != 0:
-        conts3.append(conts2.pop())                              
-    print( 'conts3:\n'+str([cont.name for cont in conts3]) )    
+        conts3.append( conts2.pop() )
+    print('final conts2: '+str([cont.name for cont in conts2]))
+    print('conts3: '+str([cont.name for cont in conts3]))
     return conts3
 
-def boxOvlps(c1, c2): #=== being moved into contour class
-    '''True if overlap between bounding boxes'''
-    if c1._shape == None or c2._shape == None:
-        print('INVALID SHAPE')
-        quit() #=== dbug
-        return False
-    return c1.box().intersects( c2.box() ) or c1.box().touches( c2.box() )
-def chkOvlp(c1,c2):
-    '''Returns True if:
-        (for closed contours): same name, bounding box overlaps and area of intersection > 0
-        (for open contours): same name, same # pts and distance btwn them < threshold'''
-    threshold = (1+2**(-17))
-    # Closed traces
-    if c1.closed and c2.closed and c1.name == c2.name:
-        AoI = c1._shape.intersection( c2._shape ).area # area of intersection
-        return boxOvlps(c1,c2) and AoI > 0 
-    
-    # Open traces
-    elif not c1.closed and not c2.closed and c1.name == c2.name:
-        if len(c1.points) != len(c2.points):
-            return False
-        # Lists of world coords to compare
-        a = c1.transform.worldpts(c1.points)
-        b = c2.transform.worldpts(c2.points)
-        distlist = [distance(a[i],b[i]) for i in range(len(c1.points))] 
-        for elem in distlist:
-            if elem > threshold:
-                return False
-        return True
-    return False
+def retOvlpConts(conts1, conts2): #===
+    '''Returns lists of mutually overlapping contours'''
+    ovlp1 = [conts1.pop()]
+    ovlp2 = []
+    # Check sec2 for conts that ovlp with ovlp1
+    for cont in conts2:
+        if ovlp1[0].overlaps(cont) != 0:
+            ovlp2.append(cont)
+            conts2.remove(cont)
+            print('current conts2: '+str([cont.name for cont in conts2])) #== Problem with removing conts from conts2
+    # Now find overlaps in s1 that ovlp with ovlp2 conts
+    for cont in ovlp2:
+        for cont2 in conts1:
+            if cont.overlaps(cont2) != 0:
+                ovlp1.append(cont2)
+                conts1.remove(cont2)
+                print('current conts1: '+str([cont.name for cont in conts1]))
+                
+    return ovlp1, ovlp2
 
-def distance(pt0, pt1):
-    return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
+def mergeOvlpConts(ovlp1, ovlp2):
+    '''Handles lists of overlapping contours, returns list of handled contours'''
+    output = []
+    if len(ovlp2) == 0:
+        output.append(ovlp1.pop())
+    for elem in ovlp1:
+        for elem2 in ovlp2:
+            if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
+                output.append(elem)
+            else: # If contours overlap, but not 100% -> user input
+                a = raw_input('CONFLICT NEEDS RESOLVING')
+                if a == 1:
+                    output.append(elem)
+                elif a == 2:
+                    output.append(elem2)
+                else:
+                    output.append(elem)
+                    output.append(elem2)
+    return output
+
+
 
 
 
