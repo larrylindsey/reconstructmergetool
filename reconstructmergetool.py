@@ -12,7 +12,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/19/2013
+#  Date Last Modified: 6/24/2013
 #
 # Currently working on:
         # Make list of conflicts
@@ -23,16 +23,15 @@
 
         
 '''Merge two series together'''
-import sys, os, re, math, time
+import sys, os, re
 from Series import *
-from Section import *
 from lxml import etree as ET
 import PyQt4
 
 if len(sys.argv) > 1:
-    ser = os.path.basename(sys.argv[1]) #Name of series
+    ser = os.path.basename(sys.argv[1]) # Name of series
     ser2 = os.path.basename(sys.argv[2]) 
-    inpath = os.path.abspath(os.path.dirname(sys.argv[1]))+'/' #Directory of series
+    inpath = os.path.abspath(os.path.dirname(sys.argv[1]))+'/' # Directory of series
     inpath2 = os.path.abspath(os.path.dirname(sys.argv[2]))+'/'
     mergeoutpath = os.path.dirname(os.path.dirname(inpath))+'/merged/' #===
 
@@ -42,19 +41,20 @@ def main():
         return
     if len(sys.argv) > 1:
         #1)Create series object
-        series = getseries(inpath+ser)
-        series2 = getseries(inpath2+ser2)
+        series = getSeriesXML( inpath+ser )
+        series2 = getSeriesXML( inpath2+ser2 )
         #2)Append sections to series
-        getsections(series, inpath+ser)
-        getsections(series2, inpath2+ser2)
+        series.getSectionsXML( inpath+ser )
+        series2.getSectionsXML( inpath2+ser2 )
         #3)Merge series
-        series3 = mergeSeries(series, series2)
+        series3 = mergeSeries( series, series2 )
         #4)Output series file
-        writeseries(series3, mergeoutpath)
+        series3.writeseries( mergeoutpath )
         #5)Output section file(s)
-        writesections(series3, mergeoutpath)
+        series3.writesections( mergeoutpath )
         
-def getseries(path_to_series, name=None):
+def getSeriesXML(path_to_series, name=None):
+    '''Creates a series object representation from a .ser XML file in path_to_series'''
     print('Creating series object...'),
     #Parse series
     ser = os.path.basename(path_to_series)
@@ -70,195 +70,27 @@ def getseries(path_to_series, name=None):
     print('\tSeries: '+series.name)
     return series
 
-def writeseries(series_object, outpath):
-    series = series_object
-    print('Creating output directory...'),
-    if not os.path.exists(outpath):
-        os.makedirs(outpath)
-    print('DONE')
-    print('\tCreated: '+outpath)
-    print('Writing series file...'),
-    seriesoutpath = outpath+series.name+'.ser'
-    #Build series root element
-    attdict, contours = series.output()
-    root = ET.Element(series.tag, attdict)
-    #Build contour elements and append to root
-    for contour in contours:
-        root.append( ET.Element(contour.tag,contour.output()) )
-
-    strlist = ET.tostringlist(root)
-    # Needs to be in order: hideTraces/unhideTraces/hideDomains/unhideDomains
-        # Fix order:
-    strlist = strlist[0].split(' ') # Separate single string into multple strings for each elem
-    count = 0
-    for elem in strlist:
-        if 'hideTraces' in elem and 'unhideTraces' not in elem:
-            strlist.insert(1, strlist.pop(count))
-        count += 1
-    count = 0
-    for elem in strlist:
-        if 'unhideTraces' in elem:
-            strlist.insert(2, strlist.pop(count))
-        count += 1
-    count = 0
-    for elem in strlist:
-        if 'hideDomains' in elem and 'unhideDomains' not in elem:
-            strlist.insert(3, strlist.pop(count))
-        count += 1
-    count = 0
-    for elem in strlist:
-        if 'unhideDomains' in elem:
-            strlist.insert(4, strlist.pop(count))
-        count += 1
-        # Recombine into list of single str
-    tempstr = ''
-    for elem in strlist:
-        tempstr += elem + ' '
-    strlist = []
-    strlist.append( tempstr.rstrip(' ') ) # Removes last blank space
-
-    # Write to .ser file
-    f = open(seriesoutpath, 'w')
-    f.write('<?xml version="1.0"?>\n')
-    f.write('<!DOCTYPE Section SYSTEM "series.dtd">\n\n')
-    for elem in strlist:
-        if '>' not in elem:
-            f.write(elem),
-        else:
-            elem = elem+'\n'
-            f.write(elem)
-            if '/' in elem:
-                f.write('\n')        
-        
-#!!!!!!!!! ===    Removed for keeping hide/unhide traces/domains in order
-#     #Xml tree wrapper
-#     elemtree = ET.ElementTree(root)
-#     elemtree.write(seriesoutpath, pretty_print = True, xml_declaration=True, encoding="UTF-8")
-    print('DONE')
-    print('\tSeries output to: '+str(outpath+series.name+'.ser'))
-
-def getsections(series, path_to_series):
-    #Build list of paths to sections
-    print('Finding sections...'),
-    ser = os.path.basename(path_to_series)
-    inpath = os.path.dirname(path_to_series)+'/'
-    serfixer = re.compile(re.escape('.ser'), re.IGNORECASE)
-    sername = serfixer.sub('', ser)
-    # look for files with 'seriesname'+'.'+'number'
-    p = re.compile('^'+sername+'[.][0-9]*$')
-    pathlist = [f for f in os.listdir(inpath) if p.match(f)] #list of paths to sections
-    print('DONE')
-    print('\t%d section(s) found in %s'%(len(pathlist),inpath))
-    #Create and add section objects to series
-    print('Creating section objects...'),
-    for sec in pathlist:
-        secpath = inpath + sec
-        tree = ET.parse(secpath)
-        root = tree.getroot() #Section
-        section = Section(root,sec)
-        series.addsection(section)
-    series.sections = sorted(series.sections, key=lambda Section: Section.name) #sort by name
-    print('DONE')
-
-def writesections(series_object, outpath):
-    series = series_object
-    print('Writing section file(s)...'),
-    
-    count = 0
-    for section in series.sections:
-        sectionoutpath = outpath+section.name
-        count += 1
-        #Build section root element
-        attdict = section.output()
-        root = ET.Element(section.tag, attdict)
-        
-        for elem in section.contours:
-            curT = ET.Element('Transform', elem.transform.output())
-            
-            #build list of transforms in root; check if transform already exists
-            tlist= [trnsfrm.attrib for trnsfrm in root.getchildren()]
-
-            # Image/Image contour transform
-            if elem.img != None: # Make transform from image
-                if elem.transform.output() == section.imgs[0].transform.output():
-                    subelem = ET.Element('Image', section.imgs[0].output())
-                    curT.append(subelem)
-                    subelem = ET.Element(elem.tag, elem.output())
-                    curT.append(subelem)
-                    root.append(curT)
-
-# === Problems with setidentzero() function & grouping under same transform
-#                 else:
-#                     print(elem.name),
-#                     print(elem.transform.output()) #===
-#                     
-#                     print( section.imgs[0].transform.output() ) #===
-#                     print('Error: Image transform does not match contour transform '+'('+str(section.name)+')')
-                
-            # Transform already exist === Issues grouping under img transform
-            #elif curT.attrib in tlist:
-            #    for trnsfrm in root.getchildren():
-            #        if curT.attrib == trnsfrm.attrib:
-            #            subelem = ET.Element(elem.tag, elem.output())
-            #            trnsfrm.append(subelem)
-            # New transform   
-            else:
-                subelem = ET.Element(elem.tag, elem.output())
-                curT.append(subelem)
-                root.append(curT)
-        
-        elemtree = ET.ElementTree(root)
-        elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
-    print('DONE')
-    print('\t%d Section(s) output to: '+str(outpath))%count
-
-def setidentzero(serObj):
-    '''Converts points for all sections in a series to identity transform'''
-    i = raw_input('setidentzero() will PERMANENTLY alter data in '+serObj.name+'... Continue? y/n  ')
-    if i.lower() in ['y', 'yes']:
-        print('Converting sections...'),
-        series = serObj
-        for sec in series.sections:
-            for c in sec.contours:
-                c.points = c.transform.worldpts(c.points)
-                c.transform.dim = 0
-                c.transform.ycoef = [0,0,1,0,0,0]
-                c.transform.xcoef = [0,1,0,0,0,0]
-                c._tform = c.transform.poptform()
-        print('DONE')
-    else:
-        return 'Abort...'
+# Series stuff
 def mergeSeries(serObj1, serObj2, name=None):
     '''Takes in two series objects and returns a 3rd, merged series object'''
     if name == None: # If not specified...
         name = serObj1.name #... output series will have same name as serObj1
         
-    # Create output series object with merged attributes
-    serObj3 = mergeSerAtts(serObj1, serObj2, name) # Merge series attributes
-    serObj3.contours = mergeSerConts(serObj1, serObj2) # Merge series contours===
-
-    # Populate shapely shapes in all contours for both series
-    popshapes(serObj1)
-    popshapes(serObj2)
+    # Make series object and merge attributes
+    serObj3 = mergeSerAtts(serObj1, serObj2, name)
+    # Merge series contours===
+    serObj3.contours = mergeSerConts(serObj1, serObj2) 
     
     # Create list of parallel section pairs (paired by section name)
     pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.name.partition('.')[2] == y.name.partition('.')[2]  ]
     
     # Merge sections
-    print('Merging Sections...'),
+    print('Merging Sections...')
     for (x,y) in pairlist:
-#         print('========'+x.name+' '+y.name+'========')
+        print(x.name+' '+y.name)
         serObj3.sections.append( mergeSections(x,y,name) )
-    print('DONE')
+    print('...DONE')
     return serObj3
-def popshapes(serObj):
-    print('Populating shapely shapes for '+serObj.name+'...'),
-    for section in serObj.sections:
-#         print('========='+section.name+'=========')
-        for contour in section.contours:
-#             print(contour.name)
-            contour.popshape() # Uses worldpts to create shapely shapes
-    print('DONE') 
 def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
     print('Merging Series Attributes...'),
     # Compare and merge series attributes from ser1Obj/ser2Obj
@@ -266,10 +98,6 @@ def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
     ser2atts = ser2Obj.output()[0] # "
     ser3atts = {}
     for att in ser1atts:
-#         if att == 'viewport':
-#             ser3atts[att] = '0.0 0.0 0.0'
-#         elif att == 'index':
-#             ser3atts[att] = '1'
         if ser1atts[att] == ser2atts[att]:
             ser3atts[att] = ser1atts[att]
         else:
@@ -294,62 +122,34 @@ def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
     return series
 def mergeSerConts(ser1Obj, ser2Obj): #=== currently copies ser1Obj.contours
     print('Merging Series Contours...'),
-    # Compare and merge series contours to new series ===
+    # Compare and merge series contours to new series ===       
     ser1conts = ser1Obj.contours
     ser2conts = ser2Obj.contours
     ser3conts = ser1conts #=== TEMPORARY
     #=== compare all, present as choice
-    #=== 
-    
-#     if len(ser1Obj.sections) == len(ser2Obj.sections):
-#         for i in range(len(ser1Obj.sections)):
-#             s = Section # Imgs? ===
     print('DONE')
     return ser3conts
-# def chkCollision(lst1, lst2): #=== in dev, overlap outputs both
-#     '''Takes in two lists of contours, returns 1 list of contours'''
-#     threshold = (1+2**(-17))
-#     outlist = []
-#     for elem1 in lst1:
-#         for elem2 in lst2:
-#             # Closed traces
-#             if elem1.closed and elem2.closed:
-#                 AoU = elem1._shape.union( elem2._shape ).area # Area of union
-#                 AoI = elem1._shape.intersection( elem2._shape ).area # Area of intersection
-#                 # Overlap is near 100%
-#                 if AoU/AoI < threshold: # most likely the same object
-#                     outlist.append(elem1)
-#                     lst1.remove(elem1)
-#                     lst2.remove(elem2)
-#                 # Some overlap
-#                 elif AoI != 0.0: # require user input === output both for now
-#                     print(elem1.name +' '+elem2.name)
-#                     outlist.append(elem1)
-#                     outlist.append(elem2)
-#                     lst1.remove(elem1)
-#                     lst2.remove(elem2)
-#                     a = raw_input('chkCollision dbug')
-# 
-#             # Open traces
-#             elif not elem1.closed and not elem2.closed:
-#                 # equivalency established in chkOvlp() ===
-#                 outlist.append(elem1)
-#                 lst1.remove(elem1)
-#                 lst2.remove(elem2)
-#     return outlist
 
+
+
+# Section stuff
 def mergeSections(sec1, sec2, ser3name):
     '''compares and merges the attributes associated with Sections (except contours).
     i.e. imgs, index, thickness, alignLocked'''
+    # Populate shapely polygons
+    for contour in sec1.contours:
+        contour.popshape()
+    for contour in sec2.contours:
+        contour.popshape()    
     # create section for merge
-    sec3 = mergeSecAtts(sec1, sec2, chkSecAtts(sec1,sec2)) #===
+    sec3 = mergeSecAtts(sec1, sec2, chkSecAtts(sec1,sec2))
     # check section images
     sec3.imgs = chkSecImgs(sec1,sec2)
     # chkContOvlps
     sec3.contours = mergeSecConts(sec1, sec2)
     return sec3
 def chkSecAtts(sec1, sec2):
-    '''Returns a list of booleans signifying whether attributes of sec1 and sec2 are the same'''
+    '''Returns dictionary of True/False for each attribute, describing if they are the same between both sections'''
     chkDict = {}
     # chk attributes
     s1atts = sec1.output()
@@ -357,13 +157,14 @@ def chkSecAtts(sec1, sec2):
     for att in s1atts:
         chkDict[att] = (s1atts[att] == s2atts[att])
     return chkDict
-def mergeSecAtts(sec1, sec2, chkDict): #=== currently copies sec1.output()
+def mergeSecAtts(sec1, sec2, chkDict):
+    '''Takes in two sections and a chkDict from chkSecAtts, returns merged section attributes (non-Contour/images)'''
     s1atts = sec1.output()
     s2atts = sec2.output()
     s3atts = {}
     for att in chkDict:
         if not chkDict[att]:
-            a = raw_input('CONFLICT: mergeSecAtts') #===
+            a = raw_input('CONFLICT: mergeSecAtts')
             if a == 1:
                 s3atts[att] = s1atts[att]
             else:
@@ -377,11 +178,14 @@ def mergeSecAtts(sec1, sec2, chkDict): #=== currently copies sec1.output()
     return sec3
 def chkSecImgs(s1, s2): #===
     '''Returns imgs to be addeded to new section'''
+    # Do they have the same number of images?
     if len(s1.imgs) != len(s2.imgs):
         return mergeSecImgs(s1,s2)
+    # Do the images contain the same data?
     for i in range( len(s1.imgs) ):
         if s1.imgs[i].output() != s2.imgs[i].output():
             return mergeSecImgs(s1,s2)
+    # If all the same, just copy 1st series' images
     return s1.imgs
 def mergeSecImgs(s1,s2): #=== currently copies s1.imgs
     return s1.imgs
@@ -397,58 +201,46 @@ def mergeSecConts(s1,s2):
     # Append leftover, non-overlapping contours
     while len(conts1) != 0:
         conts3.append( conts1.pop() )
-    print('final conts1: '+str([cont.name for cont in conts1]))
     while len(conts2) != 0:
         conts3.append( conts2.pop() )
-    print('final conts2: '+str([cont.name for cont in conts2]))
-    print('conts3: '+str([cont.name for cont in conts3]))
     return conts3
 
-def retOvlpConts(conts1, conts2): #===
+def retOvlpConts(conts1, conts2):
     '''Returns lists of mutually overlapping contours'''
     ovlp1 = [conts1.pop()]
     ovlp2 = []
     # Check sec2 for conts that ovlp with ovlp1
     for cont in conts2:
-        if ovlp1[0].overlaps(cont) != 0:
+        if ovlp1[0].overlaps(cont) != 0 and ovlp1[0].name == cont.name:
             ovlp2.append(cont)
             conts2.remove(cont)
-            print('current conts2: '+str([cont.name for cont in conts2])) #== Problem with removing conts from conts2
     # Now find overlaps in s1 that ovlp with ovlp2 conts
     for cont in ovlp2:
         for cont2 in conts1:
-            if cont.overlaps(cont2) != 0:
+            if cont.overlaps(cont2) != 0 and cont.name == cont2.name:
                 ovlp1.append(cont2)
                 conts1.remove(cont2)
-                print('current conts1: '+str([cont.name for cont in conts1]))
-                
     return ovlp1, ovlp2
-
 def mergeOvlpConts(ovlp1, ovlp2):
     '''Handles lists of overlapping contours, returns list of handled contours'''
     output = []
     if len(ovlp2) == 0:
         output.append(ovlp1.pop())
-    for elem in ovlp1:
-        for elem2 in ovlp2:
-            if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
-                output.append(elem)
-            else: # If contours overlap, but not 100% -> user input
-                a = raw_input('CONFLICT NEEDS RESOLVING')
-                if a == 1:
+    else:
+        for elem in ovlp1:
+            for elem2 in ovlp2:
+                if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
                     output.append(elem)
-                elif a == 2:
-                    output.append(elem2)
-                else:
-                    output.append(elem)
-                    output.append(elem2)
+                else: # If contours overlap, but not 100% -> user input
+                    a = raw_input('CONFLICT NEEDS RESOLVING '+elem.name+' '+elem2.name)
+                    if a == 1:
+                        output.append(elem)
+                    elif a == 2:
+                        output.append(elem2)
+                    else:
+                        output.append(elem)
+                        output.append(elem2)
     return output
-
-
-
-
-
-
 
 main()
 

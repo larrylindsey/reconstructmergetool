@@ -1,5 +1,8 @@
 from Contour import *
 from ZContour import *
+from Section import *
+from lxml import etree as ET
+import os, re
 # Recent changes: popgridSize int -> float
 class Series:
     '''<Series> is an object with attributes: name \
@@ -240,6 +243,136 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
             return None
         else:
             return string.lower() in ('true')
+    def writeseries(self, outpath):
+        print('Creating output directory...'),
+        if not os.path.exists(outpath):
+            os.makedirs(outpath)
+        print('DONE')
+        print('\tCreated: '+outpath)
+        print('Writing series file...'),
+        seriesoutpath = outpath+self.name+'.ser'
+        #Build series root element
+        attdict, contours = self.output()
+        root = ET.Element(self.tag, attdict)
+        #Build contour elements and append to root
+        for contour in contours:
+            root.append( ET.Element(contour.tag,contour.output()) )
+    
+        strlist = ET.tostringlist(root)
+        # Needs to be in order: hideTraces/unhideTraces/hideDomains/unhideDomains
+            # Fix order:
+        strlist = strlist[0].split(' ') # Separate single string into multple strings for each elem
+        count = 0
+        for elem in strlist:
+            if 'hideTraces' in elem and 'unhideTraces' not in elem:
+                strlist.insert(1, strlist.pop(count))
+            count += 1
+        count = 0
+        for elem in strlist:
+            if 'unhideTraces' in elem:
+                strlist.insert(2, strlist.pop(count))
+            count += 1
+        count = 0
+        for elem in strlist:
+            if 'hideDomains' in elem and 'unhideDomains' not in elem:
+                strlist.insert(3, strlist.pop(count))
+            count += 1
+        count = 0
+        for elem in strlist:
+            if 'unhideDomains' in elem:
+                strlist.insert(4, strlist.pop(count))
+            count += 1
+            # Recombine into list of single str
+        tempstr = ''
+        for elem in strlist:
+            tempstr += elem + ' '
+        strlist = []
+        strlist.append( tempstr.rstrip(' ') ) # Removes last blank space
+    
+        # Write to .ser file
+        f = open(seriesoutpath, 'w')
+        f.write('<?xml version="1.0"?>\n')
+        f.write('<!DOCTYPE Section SYSTEM "series.dtd">\n\n')
+        for elem in strlist:
+            if '>' not in elem:
+                f.write(elem),
+            else:
+                elem = elem+'\n'
+                f.write(elem)
+                if '/' in elem:
+                    f.write('\n')        
+        print('DONE')
+        print('\tSeries output to: '+str(outpath+self.name+'.ser'))
+    def writesections(self, outpath):
+        print('Writing section file(s)...'),
+        count = 0
+        for section in self.sections:
+            sectionoutpath = outpath+section.name
+            count += 1
+            #Build section root element
+            attdict = section.output()
+            root = ET.Element(section.tag, attdict)
+            
+            for elem in section.contours:
+                curT = ET.Element('Transform', elem.transform.output())
+                
+                #build list of transforms in root; check if transform already exists
+                tlist= [trnsfrm.attrib for trnsfrm in root.getchildren()]
+    
+                # Image/Image contour transform
+                if elem.img != None: # Make transform from image
+                    if elem.transform.output() == section.imgs[0].transform.output():
+                        subelem = ET.Element('Image', section.imgs[0].output())
+                        curT.append(subelem)
+                        subelem = ET.Element(elem.tag, elem.output())
+                        curT.append(subelem)
+                        root.append(curT)
+                else:
+                    subelem = ET.Element(elem.tag, elem.output())
+                    curT.append(subelem)
+                    root.append(curT)
+            
+            elemtree = ET.ElementTree(root)
+            elemtree.write(sectionoutpath, pretty_print=True, xml_declaration=True, encoding="UTF-8")
+        print('DONE')
+        print('\t%d Section(s) output to: '+str(outpath))%count
+    def getSectionsXML(self, path_to_series):
+        #Build list of paths to sections
+        print('Finding sections...'),
+        ser = os.path.basename(path_to_series)
+        inpath = os.path.dirname(path_to_series)+'/'
+        serfixer = re.compile(re.escape('.ser'), re.IGNORECASE)
+        sername = serfixer.sub('', ser)
+        # look for files with 'seriesname'+'.'+'number'
+        p = re.compile('^'+sername+'[.][0-9]*$')
+        pathlist = [f for f in os.listdir(inpath) if p.match(f)] #list of paths to sections
+        print('DONE')
+        print('\t%d section(s) found in %s'%(len(pathlist),inpath))
+        #Create and add section objects to series
+        print('Creating section objects...'),
+        for sec in pathlist:
+            secpath = inpath + sec
+            tree = ET.parse(secpath)
+            root = tree.getroot() #Section
+            section = Section(root,sec)
+            self.addsection(section)
+        self.sections = sorted(self.sections, key=lambda Section: Section.index) #sort by name
+        print('DONE')
+    def zeroIdentity(self):
+        '''Converts points for all sections in a series to identity transform'''
+        i = raw_input('setidentzero() will PERMANENTLY alter data in '+self.name+'... Continue? y/n  ')
+        if i.lower() in ['y', 'yes']:
+            print('Converting sections...'),
+            for sec in self.sections:
+                for c in sec.contours:
+                    c.points = c.transform.worldpts(c.points)
+                    c.transform.dim = 0
+                    c.transform.ycoef = [0,0,1,0,0,0]
+                    c.transform.xcoef = [0,1,0,0,0,0]
+                    c._tform = c.transform.poptform()
+            print('DONE')
+        else:
+            return 'Abort...'
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
         self.sections.append(section)
@@ -286,7 +419,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
             return None
         tmpList = [float(elem) for elem in list(root.get('defaultFill').split(' '))]
         return tmpList
-    def popbordcolors(self, root): #===
+    def popbordcolors(self, root):
         if root == None:
             return None
             #Split up string into a list of strings containing 3 float points 
