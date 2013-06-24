@@ -20,7 +20,12 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
                +str(self.closed)+'\n-mode: '+str(self.mode) \
                +'\n-border: '+str(self.border)+'\n-fill: '+str(self.fill) \
                +'\n-points: '+str(self.points)+'\n'
-
+    def __eq__(self, other):
+        '''Allows use of == between multiple objects'''
+        return self.output() == other.output()
+    def __ne__(self, other):
+        '''Allows use of != between multiple objects'''
+        return self.output() != other.output()
 # Accessors
     def getpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \

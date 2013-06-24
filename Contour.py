@@ -34,15 +34,23 @@ class Contour:
                +'\n-simplified: '+str(self.getsimp())+'\n-mode: '+str(self.getmode()) \
                +'\n-border: '+str(self.getbord())+'\n-fill: '+str(self.getfill()) \
                +'\n-points: '+str(self.points)+'\n'
+    def __eq__(self, other):
+        '''Allows use of == between multiple contours.'''
+        return self.output() == other.output()
+    def __ne__(self, other):
+        '''Allows use of != between multiple contours.'''
+        return self.output() != other.output()
 # Helper Functions
     def overlaps(self, other):
+        '''Return 0 if no overlap.
+        For closed traces: return 1 if AoU/AoI < threshold, return AoU/AoI if not < threshold
+        For open traces: return 0 if # pts differs or distance between parallel pts > threshold
+                         return 1 otherwise'''
         # Check bounding box
         if not self.box().intersects( other.box() ) and not self.box().touches( other.box() ):
-#             print('ovlpscheck 1') #===
             return 0
         # Check if both same class of contours
         if self.closed != other.closed:
-#             print('ovlpscheck 2') #===
             return 0
         threshold = (1+2**(-17))    
         # Closed contours
@@ -50,17 +58,13 @@ class Contour:
             AoU = self._shape.union( other._shape ).area
             AoI = self._shape.intersection( other._shape ).area
             if AoI == 0:
-#                 print('ovlpscheck 2.5') #===
                 return 0
             elif AoU/AoI > threshold:
-#                 print('ovlpscheck 3') #===
                 return AoU/AoI
             elif AoU/AoI < threshold:
-#                 print('ovlpscheck 4') #===
                 return 1
         # Open contours
         if len( self.points ) != len( other.points ):
-#             print('ovlpscheck 5') #===
             return 0
         def distance(pt0, pt1):
             return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
@@ -70,7 +74,6 @@ class Contour:
         distlist = [distance(a[i],b[i]) for i in range(len(self.points))] 
         for elem in distlist:
             if elem > threshold:
-#                 print('ovlpscheck 6') #===
                 return 0
         return 1
     def s2b(self, string):
@@ -102,6 +105,7 @@ class Contour:
             self._shape = LineString( self.transform.worldpts(self.points) )
         else:
             print('\nInvalid shape characteristics: '+self.name)
+            print('Quit for debug')
             quit() # for dbugging
     def box(self):
         '''Returns bounding box of shape (shapely) library'''

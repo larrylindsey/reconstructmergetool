@@ -131,7 +131,12 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
     def __str__(self):
         '''Allows use of print(<Series>) function.'''
         return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
-
+    def __eq__(self, other):
+        '''Allows use of == between multiple objects'''
+        return self.output()[0] == other.output()[0] and self.output()[1] == other.output()[1]
+    def __ne__(self, other):
+        '''Allows use of != between multiple objects'''
+        return self.output()[0] != other.output()[0] and self.output()[1] != other.output()[1]
 # Accessors
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building .ser xml file'''
@@ -356,7 +361,7 @@ of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZCon
             root = tree.getroot() #Section
             section = Section(root,sec)
             self.addsection(section)
-        self.sections = sorted(self.sections, key=lambda Section: Section.index) #sort by name
+        self.sections = sorted(self.sections, key=lambda Section: Section.index) #sort by index
         print('DONE')
     def zeroIdentity(self):
         '''Converts points for all sections in a series to identity transform'''

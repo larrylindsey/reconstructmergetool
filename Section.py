@@ -33,7 +33,13 @@ Attributes printed with print(<Section>) objects in list printed with print(<Sec
         '''Allows use of print(<section>) function.'''
         return 'Index: %d\nThickness: %f\nAlign Locked: %s'%(self.index, \
                                                                  self.thickness, \
-                                                                 self.alignLocked)     
+                                                                 self.alignLocked)   
+    def __eq__(self, other):
+        '''Allows use of == between multiple objects'''
+        return self.output() == other.output()
+    def __ne__(self, other):
+        '''Allows use of != between multiple objects'''
+        return self.output() != other.output() 
 # Accessors
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building xml'''

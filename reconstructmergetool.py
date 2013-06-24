@@ -23,7 +23,7 @@
 
         
 '''Merge two series together'''
-import sys, os, re
+import sys, os
 from Series import *
 from lxml import etree as ET
 import PyQt4
@@ -120,18 +120,51 @@ def mergeSerAtts(ser1Obj, ser2Obj, ser3name):
     series = Series(elem, ser3name)
     print('DONE')
     return series
-def mergeSerConts(ser1Obj, ser2Obj): #=== currently copies ser1Obj.contours
+def mergeSerConts(ser1Obj, ser2Obj):
     print('Merging Series Contours...'),
     # Compare and merge series contours to new series ===       
-    ser1conts = ser1Obj.contours
-    ser2conts = ser2Obj.contours
-    ser3conts = ser1conts #=== TEMPORARY
-    #=== compare all, present as choice
+    ser1conts = [cont for cont in ser1Obj.contours if cont.tag == 'Contour']
+    ser2conts = [cont for cont in ser2Obj.contours if cont.tag == 'Contour']
+    ser3conts = []
+    ser1zconts = [cont for cont in ser1Obj.contours if cont.tag == 'ZContour']
+    ser2zconts = [cont for cont in ser2Obj.contours if cont.tag == 'ZContour']
+    ser3zconts = []
+    
+    # Contours
+    for elem in ser1conts:
+        for elem2 in ser2conts:
+            if elem == elem2: # Merge same contours
+                ser3conts.append(elem)
+                ser1conts.remove(elem)
+                ser2conts.remove(elem2)
+    # add unique contours to ser3conts
+    ser3conts.extend(ser1conts)
+    ser3conts.extend(ser2conts)
+    if len(ser3conts) > 20:
+        ser3conts = handleSerConts(ser3conts) # reduce # of contours to max of 20
+    
+    # ZContours
+    for elem in ser1zconts:
+        for elem2 in ser2zconts:
+            if elem == elem2: # Merge same zcontours
+                ser3zconts.append(elem)
+                ser1zconts.remove(elem)
+                ser2zconts.remove(elem2)
+    # add unique zcontours to ser3zconts === handle overlaps?
+    ser3zconts.extend(ser1zconts)
+    ser3zconts.extend(ser2zconts)
+    
+    # Merge all contours for output
+    ser3conts.extend(ser3zconts)
     print('DONE')
     return ser3conts
-
-
-
+def handleSerConts(contlist):
+    while len(contlist) > 20:
+        print('Current length: '+str(len(contlist)))
+        a = raw_input('Too many series contours to output, enter index of contour to delete\n'+str([cont.name for cont in contlist]))
+        contlist.pop( int(a) )
+        print('\n')
+    return contlist
 # Section stuff
 def mergeSections(sec1, sec2, ser3name):
     '''compares and merges the attributes associated with Sections (except contours).
@@ -176,14 +209,14 @@ def mergeSecAtts(sec1, sec2, chkDict):
         elem.set(str(att), s3atts[att])
     sec3 = Section(elem, sec1.name) #=== sec1 name?
     return sec3
-def chkSecImgs(s1, s2): #===
+def chkSecImgs(s1, s2):
     '''Returns imgs to be addeded to new section'''
     # Do they have the same number of images?
     if len(s1.imgs) != len(s2.imgs):
         return mergeSecImgs(s1,s2)
     # Do the images contain the same data?
     for i in range( len(s1.imgs) ):
-        if s1.imgs[i].output() != s2.imgs[i].output():
+        if not s1.imgs[i] == s2.imgs[i]:
             return mergeSecImgs(s1,s2)
     # If all the same, just copy 1st series' images
     return s1.imgs
@@ -199,10 +232,8 @@ def mergeSecConts(s1,s2):
         for elem in mergeOvlpConts( *retOvlpConts(conts1, conts2) ): # * expands tuple
             conts3.append( elem )
     # Append leftover, non-overlapping contours
-    while len(conts1) != 0:
-        conts3.append( conts1.pop() )
-    while len(conts2) != 0:
-        conts3.append( conts2.pop() )
+    conts3.extend(conts1)
+    conts3.extend(conts2)
     return conts3
 
 def retOvlpConts(conts1, conts2):

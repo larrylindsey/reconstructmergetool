@@ -22,7 +22,16 @@ transform (object)'''
         '''Allows print( <image> ) function. Returns attributes as string.'''
         return '\nImage Object:\n-src: %s\n-mag: %f\n-contrast: %f\n-brightness: %f\n\
 -red: %s\n-green: %s\n-blue: %s'%(self.getattribs())
-
+    def __eq__(self, other):
+        '''Allows use of == between multiple objects'''
+        if other == None:
+            return False
+        return self.output() == other.output()
+    def __ne__(self, other):
+        '''Allows use of != between multiple objects'''
+        if other == None:
+            return True
+        return self.output() != other.output()
 # Accessors
     def output(self):
         '''Returns a dictionary of attributes'''

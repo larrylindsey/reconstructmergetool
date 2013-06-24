@@ -23,7 +23,12 @@ class Transform:
         '''Allows user to use print( <Transform> ) function'''
         return 'Transform object:\n-dim: '+str(self.dim)+'\n-ycoef: ' \
                +str(self.getycoef())+'\n-xcoef: '+str(self.getxcoef())
-
+    def __eq__(self, other):
+        '''Allows use of == between multiple objects'''
+        return self.output() == other.output()
+    def __ne__(self, other):
+        '''Allows use of != between multiple objects'''
+        return self.output() != other.output()
 # Accessors
     def worldpts(self, points):
         '''Returns inverse points'''
