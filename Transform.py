@@ -2,7 +2,6 @@ import numpy as np
 from skimage import transform as tf
 
 class Transform:
-    '''Transform object containing the following data: \nTag \nDim \nyCoef \nxCoef \ntmatrix'''
 # Python functions
     # INITIALIZE
     def __init__(self, node=None): # node is xml tree node
@@ -34,7 +33,6 @@ class Transform:
         '''Returns inverse points'''
         newpts = self._tform.inverse(np.asarray(points))
         return newpts
-    
     def imgpts(self, points): #===
         '''Returns imgpts'''
         return
@@ -99,7 +97,6 @@ class Transform:
                 for i in range( len(pts) ):
                     # (u,v) for which we want (x,y)
                     u, v = pts[i,0], pts[i,1] # input pts
-#                     print('orig: '+str(u)+' '+str(v))
                     # initial guess of (x,y)
                     x0, y0 = 0.0, 0.0
                     # get forward tform of initial guess
@@ -131,15 +128,9 @@ class Transform:
                         v0 = uv0[1]
                         # compute closeness to goal
                         e = abs(u-u0) + abs(v-v0)
-#                         print('x0, y0: '+str(x0)+', '+str(y0))
-#                         print('u0, v0: '+str(u0)+', '+str(v0))
-#                         print('u, v  : '+str(u)+', '+str(v))
-#                         print('e(%d): '+str(e))%i #===
-#                     print('====================') #===
                     # append final estimate of (x,y) to newpts list
                     newpts.append((x0,y0))     
-                newpts = np.asarray(newpts)    
-#                 print('Newpts:\n'+str(newpts))           
+                newpts = np.asarray(newpts)           
                 return newpts
             tforward.inverse = getrevt
             

@@ -1,7 +1,4 @@
 class Image:
-    '''Image object containing the following attributes: src (string), mag (float), \
-contrast (float), brightness (float), red (bool), green (bool), blue (bool), and \
-transform (object)'''
 # Python functions
     # INITIALIZE
     def __init__(self, node=None, transform=None):

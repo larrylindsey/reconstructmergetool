@@ -1,6 +1,4 @@
 class ZContour:
-    '''Creates a <serContour> object which represents Contours and ZCountours in /
-a .ser file. Contour and ZContour can be distinguished by tags.'''
 # Python Functions
     # INITIALIZE
     def __init__(self, node=None):
@@ -27,9 +25,27 @@ a .ser file. Contour and ZContour can be distinguished by tags.'''
         '''Allows use of != between multiple objects'''
         return self.output() != other.output()
 # Accessors
+    def overlaps(self, other):
+        # For each index, build a dictionary containing a list of points
+        selfdict = {}
+        otherdict = {}
+        # create empty list for each index
+        for elem in self.points: 
+            ptgroup = elem.split(' ')
+            selfdict[ ptgroup[2] ] = []
+        for elem in other.points:
+            ptgroup = elem.split(' ')
+            otherdict[ ptgroup[2] ] = []   
+        for elem in self.points:
+            ptgroup = elem.split(' ')
+            selfdict[ ptgroup[2] ].append( (ptgroup[0], ptgroup[1]) )
+        for elem in other.points:
+            ptgroup = elem.split(' ')
+            otherdict[ ptgroup[2] ].append( (ptgroup[0], ptgroup[1]) )
+        #=== dictionaries form properly, finish later
+        
+        
     def getpoints(self):
-        '''Returns Points attribute (list of strings, each consisting of two numbers \
-separated by a single space)'''
         return self.points
     def getxbord(self):
         bord = ''

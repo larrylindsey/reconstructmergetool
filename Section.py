@@ -2,9 +2,6 @@ from Transform import *
 from Image import *
 from Contour import *
 class Section:
-    '''<Section> is an object with attributes: index, thickness, alignLocked \
-as well as a list containing <Image> and <Contour> objects. \
-Attributes printed with print(<Section>) objects in list printed with print(<Section>.contours)'''
 # Python Functions
     # INITIALIZE
     def __init__(self, root=None, name='Unknown'): #root is xml tree

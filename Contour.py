@@ -2,9 +2,6 @@ from shapely.geometry import Polygon, LineString, Point, box
 import math
 import numpy as np
 class Contour:
-    '''Contour object containing the following data: \n   Tag \n   Name \n \
-  Hidden \n   Closed \n   Simplified \n   Border \n   Fill \n \
-  Mode \n   Points'''
 # Python Functions
     # INITIALIZE
     def __init__(self, node=None, imgflag=None, transform=None):

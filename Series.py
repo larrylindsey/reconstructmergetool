@@ -5,14 +5,9 @@ from lxml import etree as ET
 import os, re
 # Recent changes: popgridSize int -> float
 class Series:
-    '''<Series> is an object with attributes: name \
-as well as a list containing all of the <Sections> objects associated within
-it'''
 # Python functions
     # INITIALIZE
     def __init__(self, root=None, name='No Name'):
-        '''Receives an xml file (root) that is a list of sections in the form \
-of an xml file. self.sections for <Sections>, self.contours for <Contours>&<ZContours>'''
         self.name = name
         self.tag = self.poptag(root)
         self.contours = self.popcontours(root)
