@@ -12,7 +12,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/25/2013
+#  Date Last Modified: 6/27/2013
 #
 # Currently working on:
         # GUI: PySide
@@ -125,11 +125,11 @@ def mergeSerContours(ser1conts, ser2conts, ser3conts):
     # add leftover, unique zcontours to ser3conts
     ser3conts.extend(ser1conts)
     ser3conts.extend(ser2conts)
-    while len(contlist) > 20:
-        print('Current length: '+str(len(contlist)))
+    while len(ser3conts) > 20:
+        print('Current length: '+str(len(ser3conts)))
         a = raw_input('Too many series contours to output, enter index of contour to delete\n'\
-                      +str([cont.name for cont in contlist]))
-        contlist.pop( int(a) )
+                      +str([cont.name for cont in ser3conts]))
+        ser3conts.pop( int(a) )
         print('\n')
     return ser3conts
 
@@ -163,8 +163,10 @@ def mergeSerConts(ser1Obj, ser2Obj, ser3Obj,\
     for elem in ser1zconts:
         for elem2 in ser2zconts:
             if elem.overlaps(elem2): # Merge same zcontours
+                print(elem.name)
                 ser3zconts.append(elem)
-                ser1zconts.remove(elem)
+                print(elem.name)
+                ser1zconts.remove(elem) #=== stupid error about not being in list? removing wrong element?
                 ser2zconts.remove(elem2)
     ser3Obj.contours.extend( handleSerZConts(ser1zconts, ser2zconts, ser3zconts) )
     print('DONE')

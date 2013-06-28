@@ -1,3 +1,4 @@
+import math
 class ZContour:
 # Python Functions
     # INITIALIZE
@@ -8,7 +9,7 @@ class ZContour:
         self.mode = self.popmode(node)
         self.border = self.popborder(node)
         self.fill = self.popfill(node)
-        self.points = self.poppts(node) #List of strings. Each string contains 3 numbers: 'float, float, section'
+        self.points = self.poppts(node) #list of pts [ (x,y,z), ... ]
         # Private
         self._attribs = ['name','closed','border','fill','mode','points'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
     # STRING REPRESENTATION
@@ -25,26 +26,34 @@ class ZContour:
         '''Allows use of != between multiple objects'''
         return self.output() != other.output()
 # Accessors
-    def overlaps(self, other):
-        # For each index, build a dictionary containing a list of points
-        selfdict = {}
-        otherdict = {}
-        # create empty list for each index
-        for elem in self.points: 
-            ptgroup = elem.split(' ')
-            selfdict[ ptgroup[2] ] = []
-        for elem in other.points:
-            ptgroup = elem.split(' ')
-            otherdict[ ptgroup[2] ] = []   
+    def overlaps(self, other): #===
+        threshold = (1+2**(-17))
+        
+        def distance(pt0, pt1):
+            return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
+        
+        # Check equal # pts
+        if len(self.points) != len(other.points):
+            return 0
+        
+        # Build list of min distance between pts
+        distlist = []
         for elem in self.points:
-            ptgroup = elem.split(' ')
-            selfdict[ ptgroup[2] ].append( (ptgroup[0], ptgroup[1]) )
-        for elem in other.points:
-            ptgroup = elem.split(' ')
-            otherdict[ ptgroup[2] ].append( (ptgroup[0], ptgroup[1]) )
-        #=== dictionaries form properly, finish later
+            ptdistances = []
+            for elem2 in other.points:
+                if elem[2] == elem2[2]: # if in same section
+                    dist = distance(elem[0:2],elem2[0:2])
+                    ptdistances.append( dist )
+            if len(ptdistances) != 0:
+                print('ptdistances: '+str(ptdistances))
+                distlist.append( min(ptdistances) )
         
-        
+        # check for any distances above threshold
+        for elem in distlist:
+            if elem > threshold: # no matching point
+                return 0
+        return 1
+                    
     def getpoints(self):
         return self.points
     def getxbord(self):
@@ -60,7 +69,7 @@ class ZContour:
     def getxpoints(self):
         ret = ''
         for tup in self.points:
-            ret += tup+', '
+            ret += str(tup[0])+' '+str(tup[1])+' '+str(tup[2])+', '
         return ret.rstrip()
     def getattribs(self):
         '''Returns all zcontour attributes'''
@@ -88,19 +97,26 @@ class ZContour:
             return None
         return str(string).lower() in ('true')
     def popmode(self, node):
-        if node.get('mode', None) == None:
+        if node.get('mode', None) == None or node == None:
             return None
         else:
             return int( node.get('mode') )
     def popborder(self, node):
         '''Populates self.border'''
-        bord = [float(elem) for elem in list(node.get('border').split(' '))]
-        return bord
+        if node.get('border', None) == None or node == None:
+            return None
+        else:
+            bord = [float(elem) for elem in list(node.get('border').split(' '))]
+            return bord
     def popfill(self, node):
         '''Populates self.fill'''
+        if node.get('fill', None) == None or node == None:
+            return None
         fill = [float(elem) for elem in list(node.get('fill').split(' '))]
         return fill
     def poppts(self, node):
+        if node.get('points', None) == None or node == None:
+            return None
         #partition points into a list of messy crap
         partPoints = list(node.get('points').lstrip(' ').split(','))
             #example: ['5.93694 3.75884 156', '  5.46795 4.10569 144',
@@ -114,12 +130,19 @@ class ZContour:
                 #'4.77912 4.64308 124', '4.63744 4.97528 99', '']
 
         #remove empty points
-        for i in range( len(ptList) ):
-            if ptList[i] == '':
-                ptList.remove('')
+        while '' in ptList:
+            ptList.remove('')
                 #example: ['5.93694 3.75884 156', '5.46795 4.10569 144', '4.82797 4.41347 139',
                 #'4.77912 4.64308 124', '4.63744 4.97528 99']
-        return ptList
+                
+        #turn into tuples of 3-space pts
+        finalList = []
+        for elem in ptList:
+            elsplit = elem.split(' ')
+            tup = ( float(elsplit[0]), float(elsplit[1]), int(elsplit[2]) )
+            finalList.append(tup)
+        return finalList
+            
     def popname(self, node):
         if node == None:
             return None
