@@ -12,7 +12,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 6/27/2013
+#  Date Last Modified: 6/28/2013
 #
 # Currently working on:
         # GUI: PySide
@@ -135,6 +135,7 @@ def mergeSerContours(ser1conts, ser2conts, ser3conts):
 
 def mergeSerZContours(ser1zconts, ser2zconts, ser3zconts):
     # add leftover, unique zcontours to ser3zconts
+    print('TESTING')
     ser3zconts.extend(ser1zconts)
     ser3zconts.extend(ser2zconts)
     return ser3zconts
@@ -143,14 +144,10 @@ def mergeSerConts(ser1Obj, ser2Obj, ser3Obj,\
                   handleSerConts=mergeSerContours,\
                   handleSerZConts=mergeSerZContours): #===
     print('Merging Series Contours...'), 
+    # CONTOURS
     ser1conts = [cont for cont in ser1Obj.contours if cont.tag == 'Contour']
     ser2conts = [cont for cont in ser2Obj.contours if cont.tag == 'Contour']
     ser3conts = []
-    ser1zconts = [cont for cont in ser1Obj.contours if cont.tag == 'ZContour']
-    ser2zconts = [cont for cont in ser2Obj.contours if cont.tag == 'ZContour']
-    ser3zconts = []
-    
-    # CONTOURS
     for elem in ser1conts:
         for elem2 in ser2conts:
             if elem == elem2: # Merge same contours
@@ -160,14 +157,22 @@ def mergeSerConts(ser1Obj, ser2Obj, ser3Obj,\
     ser3Obj.contours = handleSerConts( ser1conts, ser2conts, ser3conts )
     
     # ZCONTOURS
+    ser1zconts = [cont for cont in ser1Obj.contours if cont.tag == 'ZContour']
+    ser2zconts = [cont for cont in ser2Obj.contours if cont.tag == 'ZContour']
+    ser3zconts = []
+    
+    print(ser1zconts)
+    print(ser2zconts)
+    count1 = -1 # For indexing ser1zconts
     for elem in ser1zconts:
+        count1 += 1
+        count2 = -1 # For indexing ser2zconts
         for elem2 in ser2zconts:
-            if elem.overlaps(elem2): # Merge same zcontours
-                print(elem.name)
-                ser3zconts.append(elem)
-                print(elem.name)
-                ser1zconts.remove(elem) #=== stupid error about not being in list? removing wrong element?
-                ser2zconts.remove(elem2)
+            count2 += 1
+            if elem.name == elem2.name and elem.overlaps(elem2): # Merge same zcontours
+                print(elem.name+' '+elem2.name)
+                ser3zconts.append( ser1zconts.pop(count1) ) #
+                ser2zconts.pop(count2)
     ser3Obj.contours.extend( handleSerZConts(ser1zconts, ser2zconts, ser3zconts) )
     print('DONE')
     
