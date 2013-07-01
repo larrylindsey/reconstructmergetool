@@ -45,7 +45,6 @@ class ZContour:
                     dist = distance(elem[0:2],elem2[0:2])
                     ptdistances.append( dist )
             if len(ptdistances) != 0:
-                print('ptdistances: '+str(ptdistances))
                 distlist.append( min(ptdistances) )
         
         # check for any distances above threshold
