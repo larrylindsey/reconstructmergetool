@@ -8,13 +8,14 @@
 #
 #  Description: Driver for reconstructmergetool
 #
-#  Created by: Michael Musslewhite
+#  Created by: Michael Musslewhite, Larry Lindsey
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/1/2013
+#  Date Last Modified: 7/2/2013
 #
 # To do:
+    # make series object better, dictionary instead of a bunch of attributes? 
     # mergeSeries not adding attributes correctly
     # make sure mergeSeriesContours is removing correct elem and not 1st occurance in list
     # tospace() fromspace() in transform
@@ -80,7 +81,6 @@ def serAttHandler(ser1atts, ser2atts, ser3atts, conflicts):
                 ser3atts[conflict] = ser2atts[conflict]
             else:
                 print('Invalid choice. Please enter 1 or 2')
-        print
     return ser3atts
 
 def serContHandler(ser1conts, ser2conts, ser3conts):
@@ -116,9 +116,8 @@ def mergeSeries(serObj1, serObj2, name=None, \
     mergedAtts = mergeSeriesAttributes( serObj1.output()[0], serObj2.output()[0], handler=mergeSerAttfxn )
     mergedConts = mergeSeriesContours( serObj1.contours, serObj2.contours, handler=mergeSerContfxn )
     mergedZConts = mergeSeriesZContours( serObj1.contours, serObj2.contours, handler=mergeSerZContfxn )
-
-    mergedSeries = Series( root=mergedAtts, name=name) # Create series w/ merged attributes
-    mergedSeries.contours = mergedConts.extend(mergedZConts) # Append merged contours/Zcontours
+    mergedSeries = Series( root=ET.Element('Series',mergedAtts), name=name ) # Create series w/ merged atts
+    mergedSeries.contours = list(mergedConts+mergedZConts) # Append merged contours/Zcontours
     print('DONE')
     
     return mergedSeries
@@ -131,15 +130,13 @@ def mergeSeriesAttributes(ser1atts, ser2atts, handler=serAttHandler):
     ser3atts = {}
     conflicts = {}
     for att in ser1atts:
-        # If the same -> merge...
+        # If the same -> merge to ser3atts...
         if ser1atts[att] == ser2atts[att]:
             ser3atts[att] = ser1atts[att]
         # ...otherwise, add to conflicts dictionary
         else:
             conflicts[att] = True
-    print('dbug') #===
-    print(conflicts) #===
-    return ser3atts.update( handler(ser1atts, ser2atts, ser3atts, conflicts) )
+    return handler(ser1atts, ser2atts, ser3atts, conflicts)
 
 def mergeSeriesContours(ser1conts, ser2conts, handler=serContHandler):
     '''Merges the contours from two series. Conflicts handled with handler parameter.
@@ -252,7 +249,7 @@ def chkSecImgs(s1, s2):
     # If all the same, just copy 1st series' images
     return s1.imgs
 
-def mergeSecImgs(s1,s2): #===
+def mergeSecImgs(s1,s2):
     s3imgs = []
     s3imgs.extend(s1.imgs)
     s3imgs.extend(s2.imgs)
