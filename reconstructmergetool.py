@@ -12,11 +12,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/2/2013
+#  Date Last Modified: 7/3/2013
 #
 # To do:
     # make series object better, dictionary instead of a bunch of attributes? 
-    # mergeSeries not adding attributes correctly
     # make sure mergeSeriesContours is removing correct elem and not 1st occurance in list
     # tospace() fromspace() in transform
 
@@ -26,7 +25,7 @@ import sys, os
 from Series import *
 from lxml import etree as ET
 from PySide import *
-
+import time
 if len(sys.argv) > 1:
     ser = os.path.basename( sys.argv[1] ) # Name of series
     ser2 = os.path.basename( sys.argv[2] ) 
@@ -42,15 +41,18 @@ def main():
         #1)Create series object
         series = getSeriesXML( inpath+ser )
         series2 = getSeriesXML( inpath2+ser2 )
-        #2)Append sections to series
         series.getSectionsXML( inpath+ser )
         series2.getSectionsXML( inpath2+ser2 )
-        #3)Merge series
-        series3 = mergeSeries( series, series2 )
-        #4)Output series file
-        series3.writeseries( mergeoutpath )
+        
+        #2)Merge series attributes
+        mergeSer = mergeSeries( series, series2 )
+        mergeSer.sections = mergeAllSections( series, series2 )
+
+        #4)Output .ser file
+        mergeSer.writeseries( mergeoutpath )
+        
         #5)Output section file(s)
-        series3.writesections( mergeoutpath )
+        mergeSer.writesections( mergeoutpath )
 
 def getSeriesXML(path_to_series):
     '''Creates a series object representation from a .ser XML file in path_to_series'''
@@ -101,6 +103,62 @@ def serZContHandler(ser1zconts, ser2zconts, ser3zconts ):
     ser3zconts.extend(ser2zconts)
     return ser3zconts
 
+def secAttHandler(s1atts, s2atts, comparison):
+    mergedAttributes = {}
+    for att in comparison:
+        if not comparison[att]:
+            a = raw_input('CONFLICT: mergeSecAtts')
+            if a == 1:
+                mergedAttributes[att] = s1atts[att]
+            else:
+                mergedAttributes[att] = s2atts[att]
+        else:
+            mergedAttributes[att] = s1atts[att]
+    return mergedAttributes
+
+def secImgHandler(s1,s2):
+    s3imgs = []
+    s3imgs.extend(s1.imgs)
+    s3imgs.extend(s2.imgs)
+    a = 0
+    print('s1 images: '+str(s1.imgs))
+    print('s2 images: '+str(s2.imgs))
+    while str(a).lower() not in ['quit', 'q']:
+        print('s3 images: '+str(s3imgs))
+        a = raw_input('Enter index of contour to delete\nOr type \'more\' for more options\nEnter quit or q to finish ')
+        if str(a).lower() != 'more' and str(a).isdigit():
+            s3imgs.pop( int(a) )
+        elif str(a).lower() == 'more':
+            a = raw_input('Enter 1 to copy '+str(s1.imgs)+' to new section\nEnter 2 to copy '\
+                          +str(s2.imgs)+' to new section\nEnter \'back\' to return to previous option ')
+            if str(a).lower() == '1':
+                return s1.imgs
+            elif str(a).lower() == '2':
+                return s2.imgs
+        print('\n')
+    return s3imgs
+
+def secContHandler(ovlp1, ovlp2):
+    '''Handles lists of overlapping contours, returns list of handled contours'''
+    output = []
+    if len(ovlp2) == 0:
+        output.append(ovlp1.pop())
+    else:
+        for elem in ovlp1:
+            for elem2 in ovlp2:
+                if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
+                    output.append(elem)
+                else: # If contours overlap, but not 100% -> user input
+                    a = raw_input('CONFLICT NEEDS RESOLVING '+elem.name+' '+elem2.name)
+                    if a == 1:
+                        output.append(elem)
+                    elif a == 2:
+                        output.append(elem2)
+                    else:
+                        output.append(elem)
+                        output.append(elem2)
+    return output
+
 def mergeSeries(serObj1, serObj2, name=None, \
                 mergeSerAttfxn = serAttHandler, \
                 mergeSerContfxn = serContHandler, \
@@ -117,11 +175,11 @@ def mergeSeries(serObj1, serObj2, name=None, \
     mergedConts = mergeSeriesContours( serObj1.contours, serObj2.contours, handler=mergeSerContfxn )
     mergedZConts = mergeSeriesZContours( serObj1.contours, serObj2.contours, handler=mergeSerZContfxn )
     mergedSeries = Series( root=ET.Element('Series',mergedAtts), name=name ) # Create series w/ merged atts
-    mergedSeries.contours = list(mergedConts+mergedZConts) # Append merged contours/Zcontours
+    mergedSeries.contours = list(mergedConts+mergedZConts) # Append merged Contours/ZContours
     print('DONE')
     
     return mergedSeries
-
+        
 def mergeSeriesAttributes(ser1atts, ser2atts, handler=serAttHandler):
     '''Merges the attributes from two series. Conflicts handled with handler parameter.
     Attributes are returned in the form of a dictionary.'''
@@ -170,42 +228,34 @@ def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
                 ser2zconts.pop(count2)
     return handler(ser1zconts, ser2zconts, ser3zconts)
 
+def mergeAllSections(serObj1, serObj2, name=None):
+    '''Takes in two series, returns list of merged sections'''
+    print('Merging Sections...')
+    # Create list of parallel section pairs (paired by section name)
+    pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.index == y.index]
+     
+    # Merge sections
+    mergedSections = []
+    for (x,y) in pairlist:
+        print(x.name+' '+y.name)
+        mergedSections.append( mergeSection(x,y) )
+    print('...DONE')
+    return mergedSections
 
-# def mergeSeries(serObj1, serObj2, name=None):
-#     '''Takes in two series objects and returns a 3rd, merged series object'''
-#     
-#     # Make series object and merge attributes
-#     serObj3 = mergeSerAtts(serObj1, serObj2, name)
-#     
-#     # Merge series contours and zcontours
-#     mergeSerConts(serObj1, serObj2, serObj3) 
-#     
-#     # Create list of parallel section pairs (paired by section name)
-#     pairlist = [(x,y) for x in serObj1.sections for y in serObj2.sections if x.index == y.index]
-#     
-#     # Merge sections
-#     print('Merging Sections...')
-#     for (x,y) in pairlist:
-#         print(x.name+' '+y.name)
-#         serObj3.sections.append( mergeSections(x,y) )
-#     print('...DONE')
-#     return serObj3
-
-def mergeSections(sec1, sec2):
+def mergeSection(sec1, sec2):
     '''Takes in two sections, returns a 3rd merged section'''
     # Populate shapely polygons
     for contour in sec1.contours: contour.popshape()
     for contour in sec2.contours: contour.popshape()    
-    # create section for merge
-    sec3 = mergeSecAtts(sec1, sec2, chkSecAtts(sec1,sec2))
+    # create section w/ merged attributes
+    sec3 = mergeSectionAttributes( sec1, sec2 )
     # check section images
-    sec3.imgs = chkSecImgs(sec1,sec2)
-    # chkContOvlps
-    
-    sec3.contours = mergeSecConts(sec1, sec2)
+    sec3.imgs = checkSectionImgs( sec1, sec2 )
+    # merge section contours
+    sec3.contours = mergeSectionContours( sec1, sec2 )
     return sec3
 
-def chkSecAtts(sec1, sec2):
+def checkSectionAttributes(sec1, sec2):
     '''Returns dictionary of True/False for each attribute,
     describing if they are the same between both sections'''
     chkDict = {}
@@ -216,107 +266,58 @@ def chkSecAtts(sec1, sec2):
         chkDict[att] = (s1atts[att] == s2atts[att])
     return chkDict
 
-def mergeSecAtts(sec1, sec2, chkDict):
+def mergeSectionAttributes(sec1, sec2, name=None, handler=secAttHandler):
     '''Takes in two sections and a chkDict from chkSecAtts,
     returns merged section attributes (non-Contour/images)'''
-    s1atts = sec1.output()
-    s2atts = sec2.output()
-    s3atts = {}
-    for att in chkDict:
-        if not chkDict[att]:
-            a = raw_input('CONFLICT: mergeSecAtts')
-            if a == 1:
-                s3atts[att] = s1atts[att]
-            else:
-                s3atts[att] = s2atts[att]
-        else:
-            s3atts[att] = s1atts[att]
+    comparisonDict = checkSectionAttributes(sec1, sec2)
+    mergedAttributes = handler( sec1.output(), sec2.output(), comparisonDict )
+    
+    # Create element tree Section element
     elem = ET.Element('Section')
-    for att in s3atts:
-        elem.set(str(att), s3atts[att])
-    sec3 = Section(elem, sec1.name) #=== sec1 name?
+    for att in mergedAttributes:
+        elem.set(str(att), mergedAttributes[att])
+    if not name: #=== sec1 name?
+        name = sec1.name
+    sec3 = Section(elem, name)
     return sec3
 
-def chkSecImgs(s1, s2):
+def checkSectionImgs(s1, s2, handler=secImgHandler):
     '''Returns imgs to be addeded to new section'''
     # Do they have the same number of images?
     if len(s1.imgs) != len(s2.imgs):
-        return mergeSecImgs(s1,s2)
+        return handler(s1,s2)
     # Do the images contain the same data?
     for i in range( len(s1.imgs) ):
         if not s1.imgs[i] == s2.imgs[i]:
-            return mergeSecImgs(s1,s2)
+            return handler(s1,s2)
     # If all the same, just copy 1st series' images
     return s1.imgs
 
-def mergeSecImgs(s1,s2):
-    s3imgs = []
-    s3imgs.extend(s1.imgs)
-    s3imgs.extend(s2.imgs)
-    a = 0
-    print('s1 images: '+str(s1.imgs))
-    print('s2 images: '+str(s2.imgs))
-    while str(a).lower() not in ['quit', 'q']:
-        print('s3 images: '+str(s3imgs))
-        a = raw_input('Enter index of contour to delete\nOr type \'more\' for more options\nEnter quit or q to finish ')
-        if str(a).lower() != 'more' and str(a).isdigit():
-            s3imgs.pop( int(a) )
-        elif str(a).lower() == 'more':
-            a = raw_input('Enter 1 to copy '+str(s1.imgs)+' to new section\nEnter 2 to copy '\
-                          +str(s2.imgs)+' to new section\nEnter \'back\' to return to previous option ')
-            if str(a).lower() == '1':
-                return s1.imgs
-            elif str(a).lower() == '2':
-                return s2.imgs
-        print('\n')
-    return s3imgs
-
-def retOvlpConts(conts1, conts2):
+def checkOverlappingConts(conts1, conts2):
     '''Returns lists of mutually overlapping contours'''
     ovlp1 = [conts1.pop()]
     ovlp2 = []
     # Check sec2 for conts that ovlp with ovlp1
     for cont in conts2:
-        if ovlp1[0].overlaps(cont) != 0 and ovlp1[0].name == cont.name:
+        if ovlp1[0].name == cont.name and ovlp1[0].overlaps(cont) != 0:
             ovlp2.append(cont)
             conts2.remove(cont)
     # Now find overlaps in s1 that ovlp with ovlp2 conts
     for cont in ovlp2:
         for cont2 in conts1:
-            if cont.overlaps(cont2) != 0 and cont.name == cont2.name:
+            if cont.name == cont2.name and cont.overlaps(cont2) != 0:
                 ovlp1.append(cont2)
                 conts1.remove(cont2)
     return ovlp1, ovlp2
 
-def mergeOvlpConts(ovlp1, ovlp2):
-    '''Handles lists of overlapping contours, returns list of handled contours'''
-    output = []
-    if len(ovlp2) == 0:
-        output.append(ovlp1.pop())
-    else:
-        for elem in ovlp1:
-            for elem2 in ovlp2:
-                if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
-                    output.append(elem)
-                else: # If contours overlap, but not 100% -> user input
-                    a = raw_input('CONFLICT NEEDS RESOLVING '+elem.name+' '+elem2.name)
-                    if a == 1:
-                        output.append(elem)
-                    elif a == 2:
-                        output.apconflictspend(elem2)
-                    else:
-                        output.append(elem)
-                        output.append(elem2)
-    return output
-
-def mergeSecConts(s1,s2, mergefxn=mergeOvlpConts):
+def mergeSectionContours(s1,s2, handler=secContHandler):
     '''Returns merged contours between two sections'''
     # Lists of all contours in parallel sections
     conts1 = [cont for cont in s1.contours]
     conts2 = [cont for cont in s2.contours]
     conts3 = []
     while len(conts1) != 0 and len(conts2) != 0:
-        for elem in mergefxn( *retOvlpConts(conts1,conts2) ):
+        for elem in handler( *checkOverlappingConts(conts1,conts2) ):
             conts3.append( elem )
     # Append leftover, non-overlapping contours
     conts3.extend(conts1)
