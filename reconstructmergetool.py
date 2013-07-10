@@ -12,7 +12,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/3/2013
+#  Date Last Modified: 7/10/2013
 #
 # To do:
     # make series object better, dictionary instead of a bunch of attributes? 
@@ -39,10 +39,8 @@ def main():
         return
     if len(sys.argv) > 1:
         #1)Create series object
-        series = getSeriesXML( inpath+ser )
-        series2 = getSeriesXML( inpath2+ser2 )
-        series.getSectionsXML( inpath+ser )
-        series2.getSectionsXML( inpath2+ser2 )
+        series = getSeries( inpath+ser )
+        series2 = getSeries( inpath2+ser2 )
         
         #2)Merge series attributes
         mergeSer = mergeSeries( series, series2 )
@@ -54,6 +52,12 @@ def main():
         #5)Output section file(s)
         mergeSer.writesections( mergeoutpath )
 
+def getSeries(path_to_series):
+    '''Create a series object, fully populated.'''
+    series = getSeriesXML(path_to_series)
+    series.getSectionsXML(path_to_series)
+    return series
+    
 def getSeriesXML(path_to_series):
     '''Creates a series object representation from a .ser XML file in path_to_series'''
     print('Creating series object...'),
@@ -215,7 +219,7 @@ def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
     ser1zconts = [cont for cont in ser1conts if cont.tag == 'ZContour']
     ser2zconts = [cont for cont in ser2conts if cont.tag == 'ZContour']
     ser3zconts = []
-    count1 = -1 # For indexing ser1zconts
+    count1 = -1 # For indexing ser1zconts (indexing because it removes first occurance based on name)
     for elem in ser1zconts:
         count1 += 1
         count2 = -1 # For indexing ser2zconts
@@ -228,7 +232,10 @@ def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
                 ser2zconts.pop(count2)
     return handler(ser1zconts, ser2zconts, ser3zconts)
 
-def mergeAllSections(serObj1, serObj2, name=None):
+def mergeAllSections(serObj1, serObj2, name=None, \
+                     secAttfxn = secAttHandler, \
+                     secImgfxn = secImgHandler, \
+                     secContfxn = secContHandler):
     '''Takes in two series, returns list of merged sections'''
     print('Merging Sections...')
     # Create list of parallel section pairs (paired by section name)
@@ -238,21 +245,27 @@ def mergeAllSections(serObj1, serObj2, name=None):
     mergedSections = []
     for (x,y) in pairlist:
         print(x.name+' '+y.name)
-        mergedSections.append( mergeSection(x,y) )
+        mergedSections.append( mergeSection(x,y, name, \
+                                            secAttfxn = secAttfxn, \
+                                            secImgfxn = secImgfxn, \
+                                            secContfxn = secContfxn) )
     print('...DONE')
     return mergedSections
 
-def mergeSection(sec1, sec2):
+def mergeSection(sec1, sec2, name=None, \
+                 secAttfxn = secAttHandler, \
+                 secImgfxn = secImgHandler, \
+                 secContfxn = secContHandler):
     '''Takes in two sections, returns a 3rd merged section'''
     # Populate shapely polygons
     for contour in sec1.contours: contour.popshape()
     for contour in sec2.contours: contour.popshape()    
     # create section w/ merged attributes
-    sec3 = mergeSectionAttributes( sec1, sec2 )
+    sec3 = mergeSectionAttributes( sec1, sec2, name, handler=secAttfxn )
     # check section images
-    sec3.imgs = checkSectionImgs( sec1, sec2 )
+    sec3.imgs = checkSectionImgs( sec1, sec2, handler=secImgfxn )
     # merge section contours
-    sec3.contours = mergeSectionContours( sec1, sec2 )
+    sec3.contours = mergeSectionContours( sec1, sec2, handler=secContfxn )
     return sec3
 
 def checkSectionAttributes(sec1, sec2):
@@ -278,6 +291,8 @@ def mergeSectionAttributes(sec1, sec2, name=None, handler=secAttHandler):
         elem.set(str(att), mergedAttributes[att])
     if not name: #=== sec1 name?
         name = sec1.name
+    else:
+        name = name+'.'+str(sec1.index)
     sec3 = Section(elem, name)
     return sec3
 
@@ -325,7 +340,7 @@ def mergeSectionContours(s1,s2, handler=secContHandler):
     return conts3
 
 class mergeObject:
-    '''Abstract class for easily defining modular merge functions for reconstructmergetool.py'''
+    '''Abstract class to easily change functions for reconstructmergetool.py'''
     def __init__(self):
         
         # META STUFF
@@ -333,15 +348,72 @@ class mergeObject:
         self.outputPath = os.getcwd()+'/'+str(self.name)+'/'
         
         # SERIES MERGE FUNCTIONS
-        self.handleSerAtts = mergeSerAtts
-        self.handleSerImgs = mergeSerImgs
-        self.handleSerConts = mergeSerContours
-        self.handleSerZConts = mergeSerZContours
+        self.handleSerAtts = serAttHandler
+        self.handleSerConts = serContHandler
+        self.handleSerZConts = serZContHandler
         
         # SECTION MERGE FUNCTIONS
 #         self.handleSecConts =
-    
+        self.handleSecAtts = secAttHandler
+        self.handleSecImgs = secImgHandler
+        self.handleSecConts = secContHandler
 
+# Fxns
+    def merge(self, path_to_series1, path_to_series2):
+        s1 = getSeries(path_to_series1)
+        s2 = getSeries(path_to_series2)
 
+        mergeSer = mergeSeries( s1, s2, name = self.name, \
+                                mergeSerAttfxn = self.handleSerAtts, \
+                                mergeSerContfxn = self.handleSerConts, \
+                                mergeSerZContfxn = self.handleSerZConts  )
+        
+        mergeSer.sections = mergeAllSections( s1, s2, self.name, \
+                                              secAttfxn = self.handleSecAtts, \
+                                              secImgfxn = self.handleSecImgs, \
+                                              secContfxn = self.handleSecConts)
+        mergeSer.writeseries( self.outputPath )
+        mergeSer.writesections( self.outputPath )
+        
+# Setters
+    def setName(self, string):
+        self.name = str(string)
+        self.outputPath = os.getcwd()+'/'+str(self.name)+'/'
+        print('Merged series name changed to: '+self.name)
+        print
+        
+    def setOutpath(self, string):
+        self.outputPath = str(string)
+        print('New output path set: '+self.outputPath)
+        print
+        
+    def setSerAttHand(self, fxn):
+        self.handleSerAtts = fxn
+        print('New series attribute handler set')
+        print
+        
+    def setSerContHand(self, fxn):
+        self.handleSerConts = fxn
+        print('New series contour handler set')
+        
+    def setSerZContHand(self, fxn):
+        self.handleSerZConts = fxn
+        print('New series zcontour handler set')
+        
+    def setSecAttHand(self, fxn):
+        self.handleSecAtts = fxn
+        print('New section attribute handler set')
+        print
+        
+    def setSecImgHand(self, fxn):
+        self.handleSecImgs = fxn
+        print('New section image handler set')
+        print
+        
+    def setSecContHand(self, fxn):
+        self.handleSecConts = fxn
+        print('New section contour handler set')
+        print
+        
 main()
 

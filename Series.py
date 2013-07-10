@@ -539,7 +539,7 @@ class Series:
     def popdefaultThickness(self, root):
         if root == None:
             return None
-        return root.get('defaultThickness')
+        return float(root.get('defaultThickness'))
     def popzMidSection(self, root):
         if root == None:
             return None
