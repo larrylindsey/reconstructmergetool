@@ -360,20 +360,21 @@ class mergeObject:
 
 # Fxns
     def merge(self, path_to_series1, path_to_series2):
+        '''Merges two series together based on mergeObjects' attributes'''
         s1 = getSeries(path_to_series1)
         s2 = getSeries(path_to_series2)
 
-        mergeSer = mergeSeries( s1, s2, name = self.name, \
+        mergedSeries = mergeSeries( s1, s2, name = self.name, \
                                 mergeSerAttfxn = self.handleSerAtts, \
                                 mergeSerContfxn = self.handleSerConts, \
                                 mergeSerZContfxn = self.handleSerZConts  )
         
-        mergeSer.sections = mergeAllSections( s1, s2, self.name, \
+        mergedSeries.sections = mergeAllSections( s1, s2, self.name, \
                                               secAttfxn = self.handleSecAtts, \
                                               secImgfxn = self.handleSecImgs, \
                                               secContfxn = self.handleSecConts)
-        mergeSer.writeseries( self.outputPath )
-        mergeSer.writesections( self.outputPath )
+        mergedSeries.writeseries( self.outputPath )
+        mergedSeries.writesections( self.outputPath )
         
 # Setters
     def setName(self, string):
