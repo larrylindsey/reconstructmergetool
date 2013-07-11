@@ -2,7 +2,7 @@ from Contour import *
 from ZContour import *
 from Section import *
 from lxml import etree as ET
-import os, re, xmlOut
+import os, re
 # Recent changes: popgridSize int -> float
 class Series:
 # Python functions

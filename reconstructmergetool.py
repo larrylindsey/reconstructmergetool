@@ -12,9 +12,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/10/2013
+#  Date Last Modified: 7/11/2013
 #
 # To do:
+    # test RFHTC series fork
     # make series object better, dictionary instead of a bunch of attributes? 
     # make sure mergeSeriesContours is removing correct elem and not 1st occurance in list
     # tospace() fromspace() in transform
@@ -136,9 +137,11 @@ def secImgHandler(s1,s2):
             a = raw_input('Enter 1 to copy '+str(s1.imgs)+' to new section\nEnter 2 to copy '\
                           +str(s2.imgs)+' to new section\nEnter \'back\' to return to previous option ')
             if str(a).lower() == '1':
-                return s1.imgs
+                s3imgs = s1.imgs
+                break
             elif str(a).lower() == '2':
-                return s2.imgs
+                s3imgs = s2.imgs
+                break
         print('\n')
     return s3imgs
 
@@ -153,7 +156,7 @@ def secContHandler(ovlp1, ovlp2):
                 if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
                     output.append(elem)
                 else: # If contours overlap, but not 100% -> user input
-                    a = raw_input('CONFLICT NEEDS RESOLVING '+elem.name+' '+elem2.name)
+                    a = raw_input('CONFLICT NEEDS RESOLVING '+elem.name+' '+elem2.name+'\nOverlaps() returns: '+str(elem.overlaps(elem2)))
                     if a == 1:
                         output.append(elem)
                     elif a == 2:
@@ -353,7 +356,6 @@ class mergeObject:
         self.handleSerZConts = serZContHandler
         
         # SECTION MERGE FUNCTIONS
-#         self.handleSecConts =
         self.handleSecAtts = secAttHandler
         self.handleSecImgs = secImgHandler
         self.handleSecConts = secContHandler
@@ -388,33 +390,44 @@ class mergeObject:
         print('New output path set: '+self.outputPath)
         print
         
-    def setSerAttHand(self, fxn):
+    def setSerAttfxn(self, fxn):
         self.handleSerAtts = fxn
         print('New series attribute handler set')
         print
         
-    def setSerContHand(self, fxn):
+    def setSerContfxn(self, fxn):
         self.handleSerConts = fxn
         print('New series contour handler set')
         
-    def setSerZContHand(self, fxn):
+    def setSerZContfxn(self, fxn):
         self.handleSerZConts = fxn
         print('New series zcontour handler set')
         
-    def setSecAttHand(self, fxn):
+    def setSecAttfxn(self, fxn):
         self.handleSecAtts = fxn
         print('New section attribute handler set')
         print
         
-    def setSecImgHand(self, fxn):
+    def setSecImgfxn(self, fxn):
         self.handleSecImgs = fxn
         print('New section image handler set')
         print
         
-    def setSecContHand(self, fxn):
+    def setSecContfxn(self, fxn):
         self.handleSecConts = fxn
         print('New section contour handler set')
         print
-        
+    def current(self):
+        print('CURRENT MERGEOBJECT SETTINGS:')
+        print('Name: '+str(self.name))
+        print('Outpath: '+str(self.outputPath))
+        print
+        print('Series Attribute Handler: '+str(self.handleSerAtts))
+        print('Series Contour Handler: '+str(self.handleSerConts))
+        print('Series ZContour Handler: '+str(self.handleSerZConts))
+        print
+        print('Section Attribute Handler: '+str(self.handleSecAtts))
+        print('Section Image Handler: '+str(self.handleSecImgs))
+        print('Section Contour Handler: '+str(self.handleSecConts))
 main()
 

@@ -57,7 +57,7 @@ class Contour:
             if AoI == 0:
                 return 0
             elif AoU/AoI > threshold:
-                return AoU/AoI
+                return AoU/AoI #=== Returns actual value, not 0 or 1
             elif AoU/AoI < threshold:
                 return 1
         # Open contours
