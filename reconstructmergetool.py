@@ -123,47 +123,65 @@ def secAttHandler(s1atts, s2atts, comparison):
 
 def secImgHandler(s1,s2):
     s3imgs = []
-    s3imgs.extend(s1.imgs)
-    s3imgs.extend(s2.imgs)
     a = 0
-    print('s1 images: '+str(s1.imgs))
-    print('s2 images: '+str(s2.imgs))
-    while str(a).lower() not in ['quit', 'q']:
-        print('s3 images: '+str(s3imgs))
-        a = raw_input('Enter index of contour to delete\nOr type \'more\' for more options\nEnter quit or q to finish ')
-        if str(a).lower() != 'more' and str(a).isdigit():
-            s3imgs.pop( int(a) )
-        elif str(a).lower() == 'more':
-            a = raw_input('Enter 1 to copy '+str(s1.imgs)+' to new section\nEnter 2 to copy '\
-                          +str(s2.imgs)+' to new section\nEnter \'back\' to return to previous option ')
-            if str(a).lower() == '1':
-                s3imgs = s1.imgs
-                break
-            elif str(a).lower() == '2':
-                s3imgs = s2.imgs
-                break
-        print('\n')
+    print('1: '+str(s1.imgs[0].output()))
+    print('2: '+str(s2.imgs[0].output()))
+    a='hello'
+    while str(a) not in ['1','2']:
+        a = raw_input('Enter image to use in merged series: ')
+        if str(a).lower() == '1':
+            s3imgs = s1.imgs
+        elif str(a).lower() == '2':
+            s3imgs = s2.imgs
     return s3imgs
 
 def secContHandler(ovlp1, ovlp2):
-    '''Handles lists of overlapping contours, returns list of handled contours'''
+    '''Handles lists of overlapping contours, returns list of handled contours. Checks for 100% ovlp first'''
     output = []
     if len(ovlp2) == 0:
         output.append(ovlp1.pop())
-    else:
-        for elem in ovlp1:
-            for elem2 in ovlp2:
-                if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
-                    output.append(elem)
-                else: # If contours overlap, but not 100% -> user input
-                    a = raw_input('CONFLICT NEEDS RESOLVING '+elem.name+' '+elem2.name+'\nOverlaps() returns: '+str(elem.overlaps(elem2)))
-                    if a == 1:
-                        output.append(elem)
-                    elif a == 2:
-                        output.append(elem2)
-                    else:
-                        output.append(elem)
-                        output.append(elem2)
+
+    # Check for same contours and output first
+    for elem in ovlp1:
+        for elem2 in ovlp2:
+            if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
+                output.append( elem )
+                
+    # Check rest of contours
+    for i in range(len(ovlp1)):
+        for j in range(len(ovlp2)):
+            if ovlp1[i] not in output and ovlp1[i].overlaps(ovlp2[j]) != 1: # If contours overlap, but not 100% -> user input
+                print('Contour overlap conflict:\n'+'1: '+ovlp1[i].name+'\n'+'2: '+ovlp2[j].name)
+                print( ovlp1[i].overlaps(ovlp2[j]) )
+                a = raw_input('Choose which contour to output (3 to output both): ')
+                if a == 1:
+                    output.append( ovlp1[i] )
+                elif a == 2:
+                    output.append( ovlp2[j] )
+                else:
+                    output.append( ovlp1[i] )
+                    output.append( ovlp2[j] )
+    return output
+
+def secContHandler2(ovlp1, ovlp2):
+    '''Handles lists of overlapping contours, returns list of handled contours.'''
+    output = []
+    if len(ovlp2) == 0:
+        output.append(ovlp1.pop())
+    for i in range(len(ovlp1)):
+        for j in range(len(ovlp2)):
+            if ovlp1[i].overlaps(ovlp2[j]) == 1: # If contours are the same -> merge and output
+                output.append( ovlp1[i] )
+            else: # If contours overlap, but not 100% -> user input
+                print('Contour overlap conflict:\n'+'1: '+ovlp1[i].name+'\n'+'2: '+ovlp2[j].name)
+                a = raw_input('Choose which contour to output (3 to output both): ')
+                if a == 1:
+                    output.append( ovlp1[i] )
+                elif a == 2:
+                    output.append( ovlp2[j] )
+                else:
+                    output.append( ovlp1[i] )
+                    output.append( ovlp2[j] )
     return output
 
 def mergeSeries(serObj1, serObj2, name=None, \
@@ -266,7 +284,7 @@ def mergeSection(sec1, sec2, name=None, \
     # create section w/ merged attributes
     sec3 = mergeSectionAttributes( sec1, sec2, name, handler=secAttfxn )
     # check section images
-    sec3.imgs = checkSectionImgs( sec1, sec2, handler=secImgfxn )
+    sec3.imgs = mergeSectionImgs( sec1, sec2, handler=secImgfxn )
     # merge section contours
     sec3.contours = mergeSectionContours( sec1, sec2, handler=secContfxn )
     return sec3
@@ -299,7 +317,7 @@ def mergeSectionAttributes(sec1, sec2, name=None, handler=secAttHandler):
     sec3 = Section(elem, name)
     return sec3
 
-def checkSectionImgs(s1, s2, handler=secImgHandler):
+def mergeSectionImgs(s1, s2, handler=secImgHandler):
     '''Returns imgs to be addeded to new section'''
     # Do they have the same number of images?
     if len(s1.imgs) != len(s2.imgs):

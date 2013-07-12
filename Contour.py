@@ -61,17 +61,18 @@ class Contour:
             elif AoU/AoI < threshold:
                 return 1
         # Open contours
-        if len( self.points ) != len( other.points ):
-            return 0
-        def distance(pt0, pt1):
-            return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
-        # Lists of world coords to compare
-        a = self.transform.worldpts(self.points)
-        b = other.transform.worldpts(other.points)
-        distlist = [distance(a[i],b[i]) for i in range(len(self.points))] 
-        for elem in distlist:
-            if elem > threshold:
+        if not self.closed:
+            if len( self.points ) != len( other.points ):
                 return 0
+            def distance(pt0, pt1):
+                return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
+            # Lists of world coords to compare
+            a = self.transform.worldpts(self.points)
+            b = other.transform.worldpts(other.points)
+            distlist = [distance(a[i],b[i]) for i in range(len(self.points))] 
+            for elem in distlist:
+                if elem > threshold:
+                    return 0
         return 1
     def s2b(self, string):
         '''Converts string to bool'''
