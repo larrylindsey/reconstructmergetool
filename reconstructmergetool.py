@@ -12,12 +12,11 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/11/2013
+#  Date Last Modified: 7/15/2013
 #
 # To do:
     # test RFHTC series fork
-    # make series object better, dictionary instead of a bunch of attributes? 
-    # make sure mergeSeriesContours is removing correct elem and not 1st occurance in list
+    # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform
 
         
@@ -141,47 +140,34 @@ def secContHandler(ovlp1, ovlp2):
     if len(ovlp2) == 0:
         output.append(ovlp1.pop())
 
-    # Check for same contours and output first
+    # Check for same contours and remove (prevents unnecessary user input)
     for elem in ovlp1:
         for elem2 in ovlp2:
             if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
                 output.append( elem )
+                ovlp1.remove( elem )
+                ovlp2.remove( elem2 )
                 
     # Check rest of contours
-    for i in range(len(ovlp1)):
-        for j in range(len(ovlp2)):
-            if ovlp1[i] not in output and ovlp1[i].overlaps(ovlp2[j]) != 1: # If contours overlap, but not 100% -> user input
-                print('Contour overlap conflict:\n'+'1: '+ovlp1[i].name+'\n'+'2: '+ovlp2[j].name)
-                print( ovlp1[i].overlaps(ovlp2[j]) )
+    for elem in ovlp1:
+        for elem2 in ovlp2:
+            if elem.overlaps(elem2) != 1: # If contours overlap, but not 100% -> user input
+                print('Contour overlap conflict:\n'+'1: '+elem.name+'\n'+'2: '+elem2.name)
+                print( 'AoU/AoI: '+str(elem.overlaps(elem2)) )
                 a = raw_input('Choose which contour to output (3 to output both): ')
                 if a == 1:
-                    output.append( ovlp1[i] )
+                    output.append( elem )
+                    ovlp1.remove( elem )
+                    ovlp2.remove( elem2 )
                 elif a == 2:
-                    output.append( ovlp2[j] )
+                    output.append( elem2 )
+                    ovlp1.remove( elem )
+                    ovlp2.remove( elem2 )
                 else:
-                    output.append( ovlp1[i] )
-                    output.append( ovlp2[j] )
-    return output
-
-def secContHandler2(ovlp1, ovlp2):
-    '''Handles lists of overlapping contours, returns list of handled contours.'''
-    output = []
-    if len(ovlp2) == 0:
-        output.append(ovlp1.pop())
-    for i in range(len(ovlp1)):
-        for j in range(len(ovlp2)):
-            if ovlp1[i].overlaps(ovlp2[j]) == 1: # If contours are the same -> merge and output
-                output.append( ovlp1[i] )
-            else: # If contours overlap, but not 100% -> user input
-                print('Contour overlap conflict:\n'+'1: '+ovlp1[i].name+'\n'+'2: '+ovlp2[j].name)
-                a = raw_input('Choose which contour to output (3 to output both): ')
-                if a == 1:
-                    output.append( ovlp1[i] )
-                elif a == 2:
-                    output.append( ovlp2[j] )
-                else:
-                    output.append( ovlp1[i] )
-                    output.append( ovlp2[j] )
+                    output.append( elem )
+                    output.append( elem2 )
+                    ovlp1.remove( elem )
+                    ovlp2.remove( elem2 )
     return output
 
 def mergeSeries(serObj1, serObj2, name=None, \
