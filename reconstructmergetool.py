@@ -151,8 +151,8 @@ def secContHandler(ovlp1, ovlp2):
     # Check rest of contours
     for elem in ovlp1:
         for elem2 in ovlp2:
-            if elem.overlaps(elem2) != 1: # If contours overlap, but not 100% -> user input
-                print('Contour overlap conflict:\n'+'1: '+elem.name+'\n'+'2: '+elem2.name)
+            if elem.overlaps(elem2) != 1 and elem.overlaps(elem2) != 0: # If contours overlap, but not 100% -> user input
+                print('Contour overlap conflict:\n'+'1:\n'+str(elem)+'\n'+'2\n: '+str(elem2))
                 print( 'AoU/AoI: '+str(elem.overlaps(elem2)) )
                 a = raw_input('Choose which contour to output (3 to output both): ')
                 if a == 1:
@@ -216,8 +216,7 @@ def mergeSeriesContours(ser1conts, ser2conts, handler=serContHandler):
     for elem in ser1conts:
         for elem2 in ser2conts:
             if elem == elem2: # Merge same contours
-                ser3conts.append( elem ) #=== Make sure it is appending/removing correct elem/elem2...
-                # ...instead of the 1st in the list with same name
+                ser3conts.append( elem )
                 ser1conts.remove( elem )
                 ser2conts.remove( elem2 )
     return handler(ser1conts, ser2conts, ser3conts)
@@ -226,17 +225,12 @@ def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
     ser1zconts = [cont for cont in ser1conts if cont.tag == 'ZContour']
     ser2zconts = [cont for cont in ser2conts if cont.tag == 'ZContour']
     ser3zconts = []
-    count1 = -1 # For indexing ser1zconts (indexing because it removes first occurance based on name)
     for elem in ser1zconts:
-        count1 += 1
-        count2 = -1 # For indexing ser2zconts
         for elem2 in ser2zconts:
-            count2 += 1
-            if elem.name == elem2.name and elem.overlaps(elem2): # Merge same zcontours
-                # problem with removing wrong item (removes 1st one with same name instead... 
-                # ...of the actual elem or elem2).
-                ser3zconts.append( ser1zconts.pop(count1) ) 
-                ser2zconts.pop(count2)
+            if elem.name == elem2.name and elem.overlaps(elem2):
+                ser3zconts.append( elem ) 
+                ser1zconts.remove( elem )
+                ser2zconts.remove( elem2 )
     return handler(ser1zconts, ser2zconts, ser3zconts)
 
 def mergeAllSections(serObj1, serObj2, name=None, \
