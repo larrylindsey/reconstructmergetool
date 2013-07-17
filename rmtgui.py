@@ -14,6 +14,7 @@ class RmtGui(QtGui.QWidget):
         self.initUI(c1,c2,img)
         
     def initUI(self,c1,c2,img):
+        
         w,h = 750,500 # width and height of main window
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         self.setGeometry(100, 100, w, h) # ( startloc, dimensions )
@@ -23,7 +24,6 @@ class RmtGui(QtGui.QWidget):
         btn = QtGui.QPushButton('Contour 1', self)
         btn.setToolTip( str(c1) )
         btn.resize(btn.sizeHint())
-        print(btn.size())
         btn.move( 200-(85/2), h-(h/2)+150 ) # how far from topleft corner (x, y)
         
         btn2 = QtGui.QPushButton('Contour 2', self)
@@ -37,27 +37,32 @@ class RmtGui(QtGui.QWidget):
         btn3.resize(btn3.sizeHint())
         btn3.move( (w/2)-(btn3.width()/2), h-(h/2)+200 )
         
+        # Show image/traces
+        self.picbox(300,300,50,50,c1,img)
+        self.picbox(300,300, w-350, 50,c2,img)
+    
+        self.show()
+        
+    def picbox(self, w, h, x, y,c,img):
+        '''w = width of main window
+           h = height of main window
+           x = position in x direction, of picbox, from origin
+           y = position in y direction, of picbox, from origin
+           c = contour object for tooltip data
+           img = path to image being shown in picbox'''
         # Turn img path into actual QImage object
         pic = QtGui.QImage()
         pic.load(img)
         pic = pic.copy() # Don't overwrite original
-
-        # Load image into QLabel and modify size/position etc
-        picbox1 = QtGui.QLabel(self)
-        picbox1.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
-        picbox1.setPixmap( QtGui.QPixmap.fromImage(pic) )
-        picbox1.resize(300,300)
-        picbox1.move(50,50)
-        picbox1.setToolTip( str(c1) )
+        # Load image into QLabel
+        picbox = QtGui.QLabel(self)
+        picbox.setFrameStyle(QtGui.QFrame.Panel)
+        picbox.setPixmap( QtGui.QPixmap.fromImage(pic) )
+        picbox.resize(w,h)
+        picbox.move(x,y)
+        picbox.setToolTip( str(c) )
         
-        picbox2 = QtGui.QLabel(self)
-        picbox2.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
-        picbox2.setPixmap( QtGui.QPixmap.fromImage(pic) )
-        picbox2.resize(300,300)
-        picbox2.move(w-50-300,50)
-        picbox2.setToolTip( str(c2) )
         
-        self.show()
 
         
 def main():
