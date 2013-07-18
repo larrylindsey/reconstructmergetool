@@ -28,10 +28,14 @@ class Contour:
         '''Allows user to use print(<Contour>) function'''
         #################### Added for rmtgui tooltip output
         ptstr = '\n'
-        j = 3
-        for i in range(0,len(self.points),3):
-            ptstr += (str(self.points[i])+' '+str(self.points[(j-1)-i])+' '+str(self.points[j-1])+'\n')
-            j+=3
+        count = 0
+        for elem in self.points:
+            count += 1
+            if count == 3:
+                ptstr += '\n'
+                count = 0
+            else:
+                ptstr += ' '+str(elem)
         #####################
         return 'Contour object:\n-name: '+str(self.getname())+'\n-hidden: ' \
                +str(self.gethidden())+'\n-closed: '+str(self.getclosed()) \

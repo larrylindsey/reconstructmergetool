@@ -12,10 +12,9 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/15/2013
+#  Date Last Modified: 7/18/2013
 #
 # To do:
-    # test RFHTC series fork
     # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform
 
