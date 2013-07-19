@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 #  Files: reconstructmergetool.py, Series.py, Section.py, Transform.py,
 #         Contour.py, ZContour.py, Image.py
 #
