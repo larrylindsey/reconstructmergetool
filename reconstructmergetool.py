@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-#  Files: reconstructmergetool.py, Series.py, Section.py, Transform.py,
+#  Files: reconstructmergetool.py, rmtgui.py, Series.py, Section.py, Transform.py,
 #         Contour.py, ZContour.py, Image.py
 #
 #  Required Python libraries:
@@ -13,7 +13,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/18/2013
+#  Date Last Modified: 7/23/2013
 #
 # To do:
     # make series object better, dictionary instead of a bunch of attributes?
@@ -26,6 +26,7 @@ from Series import *
 from lxml import etree as ET
 from PySide import *
 import time
+
 if len(sys.argv) > 1:
     ser = os.path.basename( sys.argv[1] ) # Name of series
     ser2 = os.path.basename( sys.argv[2] ) 

@@ -8,12 +8,6 @@ import reconstructmergetool as rmt
 #        Proper feedback when clicking buttons
 app = QApplication
 
-
-
-
-
-
-
 class RmtGui(QtGui.QMainWindow):
     
     def __init__(self):
