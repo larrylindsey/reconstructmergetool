@@ -63,7 +63,18 @@ class Transform:
         for val in values:
             attributes[keys[count]] = val
             count += 1
-        return attributes      
+        return attributes
+    def isAffine(self):
+        '''Returns true if the transform is affine i.e. if a[3,4,5] and b[3,4,5] are 0'''
+        xcheck = self.xcoef[3:6]
+        ycheck = self.ycoef[3:6]
+        for elem in xcheck:
+            if elem != 0:
+                return False
+        for elem in ycheck:
+            if elem != 0:
+                return False
+        return True
 # Mutators              
     def popdim(self, node):
         if node == None:

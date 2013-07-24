@@ -3,9 +3,9 @@
 #         Contour.py, ZContour.py, Image.py
 #
 #  Required Python libraries:
-#        shapely, lxml, numpy, skimage
-#  Other required libraries:
-#        libgeo_c? 
+#        numpy, cython, scikit-image, lxml
+#  Other required packages (linux):
+#        libgeos-dev, python-scipy, libxslt-dev, python-lxml, cmake, qt4-qmake, qt-sdk, shiboken, python-pyside
 #
 #  Description: Driver for reconstructmergetool
 #
@@ -13,9 +13,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/23/2013
+#  Date Last Modified: 7/24/2013
 #
 # To do:
+    # find scale factor form a series ( rmt.findtFactor() )
     # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform
 
@@ -23,6 +24,11 @@
 '''Merge two series together'''
 import sys, os
 from Series import *
+from Section import *
+from Transform import *
+from Image import *
+from Contour import *
+from ZContour import *
 from lxml import etree as ET
 from PySide import *
 import time
@@ -52,6 +58,16 @@ def main():
         
         #5)Output section file(s)
         mergeSer.writesections( mergeoutpath )
+
+def findtFactor(series_object): #=== in dev
+    '''Returns the scale factor that was applied to the transformation of a series'''
+    ser = series_object
+    # create list of all image transforms in a series
+    imgtforms = []
+    for section in ser.sections:
+        section.imgs[0].transform.tag = 'Transform for '+section.imgs[0].name+' in section '+section.name
+        imgtforms.append(section.imgs[0].transform) # Change tag to include the section it belongs to
+    return imgtforms
 
 def getSeries(path_to_series):
     '''Create a series object, fully populated.'''
