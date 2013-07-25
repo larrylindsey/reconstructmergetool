@@ -1,64 +1,64 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide import QtCore, QtGui
 import reconstructmergetool as rmt
+
 # To do: Resize image, show right location, draw contour
 #        Proper feedback when clicking buttons
-app = QApplication
 
 class RmtGui(QtGui.QMainWindow):
     
     def __init__(self):
         super(RmtGui, self).__init__()
         self.startUI()
-#         self.series1, self.series2 = self.seriesSelect()
         
-
     def startUI(self):
-        w,h = 750,500 # width and height
-        self.resize(w, h) # Starting location and dimensions of main container
-        self.center()
-        self.setWindowTitle('RECONSTRUCT MERGETOOL v.1') 
-        
-        # Quit button
-        qbtn = QtGui.QPushButton('Quit', self)
-        qbtn.clicked.connect(QtCore.QCoreApplication.instance().quit)
-        qbtn.resize(qbtn.sizeHint())
-        qbtn.move(0,h-qbtn.height()) # bottom left corner
-        
-        # Start button
-        sbtn = QtGui.QPushButton('Begin Merge', self)
-        sbtn.clicked.connect(self.beginMerge)
-        sbtn.resize(sbtn.sizeHint())
-        sbtn.move((w/2)-(sbtn.width()/2),h/2)
-        
-        # Series 1 load
-        self.ser1path = None
-        ser1btn = QtGui.QPushButton('Load Series 1', self)
-        self.ser1path = ser1btn.clicked.connect(self.loadSeries)
-        ser1btn.resize(ser1btn.sizeHint())
-        ser1btn.move((w/2)-(ser1btn.width()*2), h/3)
-        
-        # Series 2 load
-        self.ser2path = None
-        ser2btn = QtGui.QPushButton('Load Series 2', self)
-        self.ser2path = ser2btn.clicked.connect(self.loadSeries)
-        ser2btn.resize(ser2btn.sizeHint())
-        ser2btn.move((w/2)+(ser2btn.width()), h/3)
-        
-        
-        
-        
-        
-#         menubar = self.menuBar()
-#         fileTab = menubar.addMenu('&File')
+        # FRAME
+        self.frame = QtGui.QFrame()
+        self.frame.setGeometry(QtCore.QRect(10, 10, 561, 421))
+        self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtGui.QFrame.Raised)
+        self.frame.setObjectName("frame")
 
-# QtGui.QHBoxLayout and QtGui.QVBoxLayout
-#    - Box layout
+        # LAYOUT
+        self.horizontalLayoutWidget = QtGui.QWidget(self.frame)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(59, 90, 441, 80))
+        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
+        self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setObjectName("horizontalLayout")
         
-        self.show()
+        # LOAD SERIES 1
+        self.ser1path = None
+        self.ser1Button = QtGui.QPushButton(self.horizontalLayoutWidget)
+        self.ser1Button.setObjectName("ser1Button")
+        self.horizontalLayout.addWidget(self.ser1Button)
+        self.ser1Button.setText(QtGui.QApplication.translate("Form", "Load Series 1", None, QtGui.QApplication.UnicodeUTF8))
+        self.ser1path = self.ser1Button.clicked.connect(self.loadSeries)
+        
+        # LOAD SERIES 2
+        self.ser2path = None
+        self.ser2Button = QtGui.QPushButton(self.horizontalLayoutWidget)
+        self.ser2Button.setObjectName("ser2Button")
+        self.horizontalLayout.addWidget(self.ser2Button)
+        self.ser2Button.setText(QtGui.QApplication.translate("Form", "Load Series 2", None, QtGui.QApplication.UnicodeUTF8))
+        self.ser2path = self.ser2Button.clicked.connect(self.loadSeries)
+        
+        # QUIT
+        self.quitButton = QtGui.QPushButton(self.frame)
+        self.quitButton.setGeometry(QtCore.QRect(460, 390, 96, 27))
+        self.quitButton.setObjectName("quitButton")
+        self.quitButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
+        self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit :(", None, QtGui.QApplication.UnicodeUTF8))
+        
+        # START
+        self.startButton = QtGui.QPushButton('Begin Merge', self)
+        self.startButton.setGeometry(QtCore.QRect(200, 250, 161, 91))
+        self.startButton.setObjectName("startButton")
+        self.startButton.clicked.connect(self.beginMerge)
+        self.startButton.setText(QtGui.QApplication.translate("Form", "START MERGE", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.frame.show()
         
     def beginMerge(self):
         if self.ser1path != None and self.ser2path != None:
