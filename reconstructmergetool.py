@@ -2,10 +2,11 @@
 #  Files: reconstructmergetool.py, rmtgui.py, Series.py, Section.py, Transform.py,
 #         Contour.py, ZContour.py, Image.py
 #
+#  Python 2.7.4
 #  Required Python libraries:
-#        numpy, cython, scikit-image, lxml
+#        numpy (1.7.1), cython (0.19.1), scikit-image (0.8.2), lxml (3.2.1), shapely (1.2.18)
 #  Other required packages (linux):
-#        libgeos-dev, python-scipy, libxslt-dev, python-lxml, cmake, qt4-qmake, qt-sdk, shiboken, python-pyside
+#        libgeos-dev, python-scipy (0.12.0), libxslt-dev, python-lxml, cmake, qt4-qmake, qt-sdk, shiboken, python-pyside
 #
 #  Description: Driver for reconstructmergetool
 #
@@ -13,7 +14,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/24/2013
+#  Date Last Modified: 7/25/2013
 #
 # To do:
     # find scale factor form a series ( rmt.findtFactor() )

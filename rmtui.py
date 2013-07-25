@@ -26,13 +26,13 @@ class Ui_Form(object):
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(59, 90, 441, 80))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
-    #     self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
         
         # LOAD SERIES 1
         self.ser1Button = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.ser1Button.setObjectName("ser1Button")
         self.horizontalLayout.addWidget(self.ser1Button)
+        self.ser1path = self.ser1Button.clicked.connect()
         
         # LOAD SERIES 2
         self.ser2Button = QtGui.QPushButton(self.horizontalLayoutWidget)
@@ -51,7 +51,7 @@ class Ui_Form(object):
     
         self.retranslateUi(Form)
         QtCore.QObject.connect(self.quitButton, QtCore.SIGNAL("clicked()"), Form.close)
-        QtCore.QObject.connect(self.ser1Button, QtCore.QAbstract) #=== file dialog goes here
+        QtCore.QObject.connect(self.ser1Button, QtCore.SIGNAL("clicked()")) #=== file dialog goes here
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
@@ -61,3 +61,13 @@ class Ui_Form(object):
         self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit :(", None, QtGui.QApplication.UnicodeUTF8))
         self.startButton.setText(QtGui.QApplication.translate("Form", "START MERGE", None, QtGui.QApplication.UnicodeUTF8))
 
+    def loadSeries(self):
+        dialog = QtGui.QFileDialog(self)
+        dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+        dialog.setNameFilter('Series files (*.ser)')
+        dialog.setViewMode(QtGui.QFileDialog.Detail)
+        if dialog.exec_():
+            seriesPath = dialog.selectedFiles()
+            return seriesPath
+        else:
+            return None
