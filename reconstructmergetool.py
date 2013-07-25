@@ -106,21 +106,21 @@ def findtFactor(series_object): #=== in dev
 
 def getSeries(path_to_series):
     '''Create a series object, fully populated.'''
+    if path_to_series.find(os.sep) < 0:
+        path_to_series = './' + path_to_series
     series = getSeriesXML(path_to_series)
     series.getSectionsXML(path_to_series)
     return series
     
 def getSeriesXML(path_to_series):
     '''Creates a series object representation from a .ser XML file in path_to_series'''
-    print('Creating series object...'),
+    print('Creating series object from ' + path_to_series + '...'),
     #Parse series
-    ser = os.path.basename( path_to_series )
-    serpath = os.path.dirname( path_to_series )+'/'+ser
-    tree = ET.parse( serpath )
+    tree = ET.parse( path_to_series )
     
     root = tree.getroot() #Series
     #Create series object
-    series = Series(root, ser.replace('.ser',''))
+    series = Series(root, path_to_series.replace('.ser',''))
     print('DONE')
     print('\tSeries: '+series.name)
     return series
