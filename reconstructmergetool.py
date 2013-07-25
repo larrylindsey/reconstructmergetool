@@ -35,7 +35,7 @@ from PySide import *
 import time
 from skimage import transform as tf
 
-if len(sys.argv) > 1:
+if len(sys.argv) == 3:
     ser = os.path.basename( sys.argv[1] ) # Name of series
     ser2 = os.path.basename( sys.argv[2] ) 
     inpath = os.path.abspath( os.path.dirname(sys.argv[1]) )+'/' # Directory of series

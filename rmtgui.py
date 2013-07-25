@@ -29,7 +29,6 @@ class RmtGui(QtGui.QMainWindow):
         self.horizontalLayout.setObjectName("horizontalLayout")
         
         # LOAD SERIES 1
-        self.ser1path = None
         self.ser1Button = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.ser1Button.setObjectName("ser1Button")
         self.horizontalLayout.addWidget(self.ser1Button)
@@ -37,7 +36,6 @@ class RmtGui(QtGui.QMainWindow):
         self.ser1path = self.ser1Button.clicked.connect(self.loadSeries)
         
         # LOAD SERIES 2
-        self.ser2path = None
         self.ser2Button = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.ser2Button.setObjectName("ser2Button")
         self.horizontalLayout.addWidget(self.ser2Button)
@@ -51,8 +49,8 @@ class RmtGui(QtGui.QMainWindow):
         self.quitButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
         self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit :(", None, QtGui.QApplication.UnicodeUTF8))
         
-        # START
-        self.startButton = QtGui.QPushButton('Begin Merge', self)
+        # START BUTTON
+        self.startButton = QtGui.QPushButton(self.frame)
         self.startButton.setGeometry(QtCore.QRect(200, 250, 161, 91))
         self.startButton.setObjectName("startButton")
         self.startButton.clicked.connect(self.beginMerge)
@@ -60,11 +58,11 @@ class RmtGui(QtGui.QMainWindow):
         
         self.frame.show()
         
-    def beginMerge(self):
-        if self.ser1path != None and self.ser2path != None:
-            print('Go')
-        else:
+    def beginMerge(self): #=== self.ser1path/ser2path are not None. what are they before file dialog?
+        if self.ser1path == None and self.ser2path == None:
             print('Make sure you have loaded both series')
+        else:
+            print('Go')
 
     def loadSeries(self):
         dialog = QtGui.QFileDialog(self)
