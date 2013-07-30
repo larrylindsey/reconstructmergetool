@@ -10,7 +10,7 @@ from skimage import transform as tf
 if len(sys.argv) > 1:
     path_to_series = str( sys.argv[1] )
 
-def findCalFactor(path_to_series): #=== in dev
+def findCalFactor(path_to_series):
     '''Returns the scale factor that was applied to the transformation of a series'''
     ser = rmt.getSeries(path_to_series)
     # create list of all image transforms in a series

@@ -28,7 +28,7 @@ class serLoadWindow(QtGui.QWidget):
         
         # LAYOUT
         self.horizontalLayoutWidget = QtGui.QWidget(self.frame)
-#         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(59, 90, 441, 80))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(59, 90, 441, 80))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setObjectName("horizontalLayout")       
