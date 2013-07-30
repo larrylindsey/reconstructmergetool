@@ -1,6 +1,5 @@
-from shapely.geometry import Polygon, LineString, Point, box
+from shapely.geometry import Polygon, LineString, box
 import math
-import numpy as np
 class Contour:
 # Python Functions
     # INITIALIZE

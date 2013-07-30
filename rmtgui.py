@@ -63,7 +63,7 @@ class RmtGui(QtGui.QMainWindow):
             print('Make sure you have loaded both series')
         else:
             print('Go')
-
+                   
     def loadSeries(self):
         dialog = QtGui.QFileDialog(self)
         dialog.setFileMode(QtGui.QFileDialog.AnyFile)
