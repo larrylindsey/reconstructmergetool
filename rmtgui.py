@@ -33,21 +33,23 @@ class loadWindow(QtGui.QWidget):
         self.ser1Button.setObjectName("ser1Button")
         self.horizontalLayout.addWidget(self.ser1Button)
         self.ser1Button.setText(QtGui.QApplication.translate("Form", "Load Series 1", None, QtGui.QApplication.UnicodeUTF8))
-        self.ser1path = self.ser1Button.clicked.connect(self.loadSeries)
+#         self.ser1path = self.ser1Button.clicked.connect(self.loadSeries)
+        print(self.ser1Button.clicked.connect(self.loadSeries))
         
         # LOAD SERIES 2
         self.ser2Button = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.ser2Button.setObjectName("ser2Button")
         self.horizontalLayout.addWidget(self.ser2Button)
         self.ser2Button.setText(QtGui.QApplication.translate("Form", "Load Series 2", None, QtGui.QApplication.UnicodeUTF8))
-        self.ser2path = self.ser2Button.clicked.connect(self.loadSeries)
+#         self.ser2path = self.ser2Button.clicked.connect(self.loadSeries)
+        print(self.ser2Button.clicked.connect(self.loadSeries))
         
         # QUIT
         self.quitButton = QtGui.QPushButton(self.frame)
         self.quitButton.setGeometry(QtCore.QRect(460, 390, 96, 27))
         self.quitButton.setObjectName("quitButton")
         self.quitButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
-        self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit :(", None, QtGui.QApplication.UnicodeUTF8))
+        self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit", None, QtGui.QApplication.UnicodeUTF8))
         
         # START BUTTON
         self.startButton = QtGui.QPushButton(self.frame)
