@@ -1,3 +1,4 @@
+import sys
 import reconstructmergetool as rmt
 from Series import *
 from Section import *
@@ -52,5 +53,7 @@ def findCalFactor(path_to_series):
     for elem in multiMins:
         output += '\n'+elem.tag
     print( output+'\nwith a scale of '+ str(minScale) )
-    
-findCalFactor(path_to_series)
+    return minScale
+
+if __name__ == '__main__':
+    findCalFactor(path_to_series)

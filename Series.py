@@ -363,19 +363,17 @@ class Series:
         print('DONE')
     def zeroIdentity(self):
         '''Converts points for all sections in a series to identity transform'''
-        i = raw_input('setidentzero() will PERMANENTLY alter data in '+self.name+'... Continue? y/n  ')
-        if i.lower() in ['y', 'yes']:
-            print('Converting sections...'),
-            for sec in self.sections:
-                for c in sec.contours:
-                    c.points = c.transform.worldpts(c.points)
-                    c.transform.dim = 0
-                    c.transform.ycoef = [0,0,1,0,0,0]
-                    c.transform.xcoef = [0,1,0,0,0,0]
-                    c._tform = c.transform.poptform()
-            print('DONE')
-        else:
-            return 'Abort...'
+        print('Converting sections to identity transform...'),
+        for sec in self.sections:
+            print(sec.name)
+            for c in sec.contours:
+                c.points = c.transform.worldpts(c.points)
+                c.transform.dim = 0
+                c.transform.ycoef = [0,0,1,0,0,0]
+                c.transform.xcoef = [0,1,0,0,0,0]
+                c._tform = c.transform.poptform()
+        print('DONE')
+
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
         self.sections.append(section)

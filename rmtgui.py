@@ -3,7 +3,6 @@
 
 import sys
 from PySide import QtCore, QtGui
-import reconstructmergetool as rmt
 
 class mainFrame(QtGui.QFrame):
     '''This class is the main window of Reconstruct Mergetool. All other objects inherit this class
@@ -24,7 +23,7 @@ class mainFrame(QtGui.QFrame):
 class welcomeButton(QtGui.QPushButton):
     def __init__(self, parent=None):
         QtGui.QPushButton.__init__(self, parent)
-    
+        self.parent=parent
         # WELCOME BUTTON
         self.setText('WELCOME TO RECONSTRUCT MERGETOOL\nClick to continue')
         self.setGeometry(200,200,400,100)
@@ -34,178 +33,66 @@ class welcomeButton(QtGui.QPushButton):
     def whenClicked(self):
         '''Hides the welcomeButton and begins next frame'''
         self.hide()
-        
+        loadSeries(self.parent)
         
 class loadSeries(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         
+        # Frame
+        self.frame = QtGui.QFrame(parent)
+        self.frame.setGeometry(0,0,800,500)
+        
         # Load ser 1
+        self.s1Button = QtGui.QPushButton(self.frame)
+        self.s1Button.setText('Load Series 1')
+        self.s1Button.setGeometry(100,200,200,100)
+        self.s1path = None # updated by browseFiles()
+        self.s1Button.clicked.connect(self.browseFiles)
         
         # Load ser 2
+        self.s2Button = QtGui.QPushButton(self.frame)
+        self.s2Button.setText('Load Series 2')
+        self.s2Button.setGeometry(500,200,200,100)
+        self.s2path = None # updated by browseFiles2()
+        self.s2Button.clicked.connect(self.browseFiles2)
         
+        # Go
+        self.goButton = QtGui.QPushButton(self.frame)
+        self.goButton.setText('Begin merge')
+        self.goButton.setGeometry(300,400,200,100)
+        self.goButton.clicked.connect(self.go)
+        
+        self.frame.show()
+
+    # File browsing dialogs. Return string of .ser file.
+    # Could not figure out how to update paths with a return function and thus had to make
+    # two separate functions
     def browseFiles(self):
-        dialog = QtGui.QFileDialog(self)
-        dialog.setFileMode(QtGui.QFileDialog.AnyFile)
-        dialog.setNameFilter('Series files (*.ser)')
-        dialog.setViewMode(QtGui.QFileDialog.Detail)
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+    "Load Series", "/home/", "Series File (*.ser)")
+        self.s1path = str(fileName[0])
+        self.s1Button.setText(self.s1path.rpartition('/')[2])
+    def browseFiles2(self):
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+    "Load Series", "/home/", "Series File (*.ser)")
+        self.s2path = str(fileName[0])
+        self.s2Button.setText(self.s2path.rpartition('/')[2])
+        
+    def go(self):
+        print('s1path: '+str(self.s1path))
+        print('s2path: '+str(self.s2path))
+        if '.ser' in str(self.s1path) and '.ser' in str(self.s2path):
+            print('Beginning merge...') # === popup window
+            self.hide()
+        else:
+            print('Invalid series. Please load valid .ser files') # === popup window
 
 def main():
     app = QtGui.QApplication(sys.argv)
     win = mainFrame()
-    welcomeButton(win) # Begin of 'chain of frames' that are the different states of rmt
+    welcomeButton(win)
     sys.exit( app.exec_() )
 
 if __name__ == '__main__':
     main()
-
-
-
-
-# class loadWindow(QtGui.QWidget):
-#     
-#     def __init__(self, parent=None):
-#         QtGui.QWidget.__init__(self, parent)
-#         self.startUI()
-#         
-#     def startUI(self):
-#         # FRAME
-#         self.frame = QtGui.QFrame()
-#         self.frame.setGeometry(QtCore.QRect(10, 10, 561, 421))
-#         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
-#         self.frame.setFrameShadow(QtGui.QFrame.Raised)
-#         self.frame.setObjectName("frame")
-# 
-#         # LAYOUT
-#         self.horizontalLayoutWidget = QtGui.QWidget(self.frame)
-#         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(59, 90, 441, 80))
-#         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-#         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
-#         self.horizontalLayout.setObjectName("horizontalLayout")
-#         
-#         # LOAD SERIES 1
-#         self.ser1Button = QtGui.QPushButton(self.horizontalLayoutWidget)
-#         self.ser1Button.setObjectName("ser1Button")
-#         self.horizontalLayout.addWidget(self.ser1Button)
-#         self.ser1Button.setText(QtGui.QApplication.translate("Form", "Load Series 1", None, QtGui.QApplication.UnicodeUTF8))
-# #         self.ser1path = self.ser1Button.clicked.connect(self.loadSeries)
-#         print(self.ser1Button.clicked.connect(self.loadSeries))
-#         
-#         # LOAD SERIES 2
-#         self.ser2Button = QtGui.QPushButton(self.horizontalLayoutWidget)
-#         self.ser2Button.setObjectName("ser2Button")
-#         self.horizontalLayout.addWidget(self.ser2Button)
-#         self.ser2Button.setText(QtGui.QApplication.translate("Form", "Load Series 2", None, QtGui.QApplication.UnicodeUTF8))
-# #         self.ser2path = self.ser2Button.clicked.connect(self.loadSeries)
-#         print(self.ser2Button.clicked.connect(self.loadSeries))
-#         
-#         # QUIT
-#         self.quitButton = QtGui.QPushButton(self.frame)
-#         self.quitButton.setGeometry(QtCore.QRect(460, 390, 96, 27))
-#         self.quitButton.setObjectName("quitButton")
-#         self.quitButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
-#         self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit", None, QtGui.QApplication.UnicodeUTF8))
-#         
-#         # START BUTTON
-#         self.startButton = QtGui.QPushButton(self.frame)
-#         self.startButton.setGeometry(QtCore.QRect(200, 250, 161, 91))
-#         self.startButton.setObjectName("startButton")
-#         self.startButton.clicked.connect(self.beginMerge)
-#         self.startButton.setText(QtGui.QApplication.translate("Form", "START MERGE", None, QtGui.QApplication.UnicodeUTF8))
-#         
-#         self.frame.show()
-#         
-#     def beginMerge(self): #=== self.ser1path/ser2path are not None. what are they before file dialog?
-#         if self.ser1path == None and self.ser2path == None:
-#             print('Make sure you have loaded both series')
-#         else:
-#             print('Go')
-#                    
-#     def loadSeries(self):
-#         dialog = QtGui.QFileDialog(self)
-#         dialog.setFileMode(QtGui.QFileDialog.AnyFile)
-#         dialog.setNameFilter('Series files (*.ser)')
-#         dialog.setViewMode(QtGui.QFileDialog.Detail)
-#         if dialog.exec_():
-#             seriesPath = dialog.selectedFiles()
-#             return seriesPath
-#         else:
-#             return None
-# 
-#     def picbox(self, w, h, x, y,c,img):
-#         '''w = width of main window
-#            h = height of main window
-#            x = position in x direction, of picbox, from origin
-#            y = position in y direction, of picbox, from origin
-#            c = contour object for tooltip data
-#            img = path to image being shown in picbox'''
-#         # Turn img path into actual QImage object
-#         pic = QtGui.QImage()
-#         pic.load(img)
-#         pic = pic.copy() # Don't overwrite original
-#         # Load image into QLabel
-#         picbox = QtGui.QLabel(self)
-#         picbox.setFrameStyle(QtGui.QFrame.Panel)
-#         picbox.setPixmap( QtGui.QPixmap.fromImage(pic) )
-#         picbox.resize(w,h)
-#         picbox.move(x,y)
-#         picbox.setToolTip( str(c) )
-# 
-# class serAttWindow(QtGui.QWidget):   
-#     def __init__(self, parent=None):
-#         QtGui.QWidget.__init__(self, parent)
-#         self.startUI()
-#         
-#     def startUI(self):
-#         # FRAME
-#         self.frame = QtGui.QFrame()
-#         self.frame.setGeometry(QtCore.QRect(10, 10, 561, 421))
-#         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
-#         self.frame.setFrameShadow(QtGui.QFrame.Raised)
-#         self.frame.setObjectName("frame")
-# 
-#         # LAYOUT
-#         self.horizontalLayoutWidget = QtGui.QWidget(self.frame)
-#         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(59, 90, 441, 80))
-#         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-#         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
-#         self.horizontalLayout.setObjectName("horizontalLayout")
-#         
-#         # LOAD SERIES 1
-#         self.ser1Button = QtGui.QPushButton(self.horizontalLayoutWidget)
-#         self.ser1Button.setObjectName("ser1Button")
-#         self.horizontalLayout.addWidget(self.ser1Button)
-#         self.ser1Button.setText(QtGui.QApplication.translate("Form", "Load Series 1", None, QtGui.QApplication.UnicodeUTF8))
-#         self.ser1path = self.ser1Button.clicked.connect(self.loadSeries)
-#         
-#         # LOAD SERIES 2
-#         self.ser2Button = QtGui.QPushButton(self.horizontalLayoutWidget)
-#         self.ser2Button.setObjectName("ser2Button")
-#         self.horizontalLayout.addWidget(self.ser2Button)
-#         self.ser2Button.setText(QtGui.QApplication.translate("Form", "Load Series 2", None, QtGui.QApplication.UnicodeUTF8))
-#         self.ser2path = self.ser2Button.clicked.connect(self.loadSeries)
-#         
-#         # QUIT
-#         self.quitButton = QtGui.QPushButton(self.frame)
-#         self.quitButton.setGeometry(QtCore.QRect(460, 390, 96, 27))
-#         self.quitButton.setObjectName("quitButton")
-#         self.quitButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
-#         self.quitButton.setText(QtGui.QApplication.translate("Form", "Quit :(", None, QtGui.QApplication.UnicodeUTF8))
-#         
-#         # START BUTTON
-#         self.startButton = QtGui.QPushButton(self.frame)
-#         self.startButton.setGeometry(QtCore.QRect(200, 250, 161, 91))
-#         self.startButton.setObjectName("startButton")
-#         self.startButton.clicked.connect(self.beginMerge)
-#         self.startButton.setText(QtGui.QApplication.translate("Form", "START MERGE", None, QtGui.QApplication.UnicodeUTF8))
-#         
-#         self.frame.show()
-#         
-#         
-# def main():
-#     app = QtGui.QApplication(sys.argv)
-#     win = loadWindow()
-#     sys.exit( app.exec_() )
-# 
-# if __name__ == '__main__':
-#     main()

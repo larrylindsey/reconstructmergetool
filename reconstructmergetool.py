@@ -124,7 +124,6 @@ def secAttHandler(s1atts, s2atts, comparison):
 
 def secImgHandler(s1,s2):
     s3imgs = []
-    a = 0
     print('1: '+str(s1.imgs[0].output()))
     print('2: '+str(s2.imgs[0].output()))
     a='hello'
