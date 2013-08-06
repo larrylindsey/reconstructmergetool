@@ -25,6 +25,7 @@ from Contour import *
 from ZContour import *
 from lxml import etree as ET
 from PySide import *
+import rmtgui as gui
 import time
 from skimage import transform as tf
 
@@ -76,7 +77,7 @@ def getSeriesXML(path_to_series):
     return series
 
 def serAttHandler(ser1atts, ser2atts, ser3atts, conflicts):
-    '''Resolves conflicts regard series attributes'''
+    '''Resolves conflicts regarding series attributes'''
     for conflict in conflicts:
         print('\nSeries attributes do not match: '+str(conflict))
         print('1: '+ser1atts[conflict]+'\n'+'2: '+ser2atts[conflict])
@@ -91,6 +92,25 @@ def serAttHandler(ser1atts, ser2atts, ser3atts, conflicts):
                 print('Invalid choice. Please enter 1 or 2')
     return ser3atts
 
+def serAttHandlerI(ser1atts, ser2atts, ser3atts, conflicts, frame=None):
+    '''Resolves conflicts regarding series attributes. Designed for use with gui'''
+    # create parallel list of conflicts for adding to list widget
+    lst1 = [ser1atts[conflict] for conflict in conflicts]   
+    lst2 = [ser2atts[conflict] for conflict in conflicts]
+    # Name of conflicting attributes. Will be to the left of the two list widgets
+    cAttributes = [conflict for conflict in conflicts]
+    
+    list1 = QtGui.QListWidget(frame)
+    list2 = QtGui.QListWidget(frame)
+    
+    for elem in list1.selectedItems():
+        list1.insertItem(elem)
+    for elem in list2.selectedItems():
+        list2.insertItem(elem)
+    
+    print(cAttributes)
+
+        
 def serContHandler(ser1conts, ser2conts, ser3conts):
     # add leftover, unique zcontours to ser3conts
     ser3conts.extend(ser1conts)
@@ -102,13 +122,15 @@ def serContHandler(ser1conts, ser2conts, ser3conts):
         ser3conts.pop( int(a) )
         print('\n')
     return ser3conts
-
+def serContHandlerI():
+    print('===')
 def serZContHandler(ser1zconts, ser2zconts, ser3zconts ):
     # add leftover, unique zcontours to ser3zconts
     ser3zconts.extend(ser1zconts)
     ser3zconts.extend(ser2zconts)
     return ser3zconts
-
+def serZContHandlerI():
+    print('===')
 def secAttHandler(s1atts, s2atts, comparison):
     mergedAttributes = {}
     for att in comparison:
@@ -174,7 +196,8 @@ def secContHandler(ovlp1, ovlp2):
 def mergeSeries(serObj1, serObj2, name=None, \
                 mergeSerAttfxn = serAttHandler, \
                 mergeSerContfxn = serContHandler, \
-                mergeSerZContfxn = serZContHandler ):
+                mergeSerZContfxn = serZContHandler, \
+                frame=None ):
     '''Returns a merged series object as defined by the mergefxn parameters. The <Series>.sections will \
     be empty and must be populated with a mergeSections function'''
     
@@ -183,16 +206,16 @@ def mergeSeries(serObj1, serObj2, name=None, \
         name = serObj1.name
     
     # Create merged parts    
-    mergedAtts = mergeSeriesAttributes( serObj1.output()[0], serObj2.output()[0], handler=mergeSerAttfxn )
-    mergedConts = mergeSeriesContours( serObj1.contours, serObj2.contours, handler=mergeSerContfxn )
-    mergedZConts = mergeSeriesZContours( serObj1.contours, serObj2.contours, handler=mergeSerZContfxn )
+    mergedAtts = mergeSeriesAttributes( serObj1.output()[0], serObj2.output()[0], handler=mergeSerAttfxn, frame=frame )
+    mergedConts = mergeSeriesContours( serObj1.contours, serObj2.contours, handler=mergeSerContfxn, frame=frame )
+    mergedZConts = mergeSeriesZContours( serObj1.contours, serObj2.contours, handler=mergeSerZContfxn, frame=frame )
     mergedSeries = Series( root=ET.Element('Series',mergedAtts), name=name ) # Create series w/ merged atts
     mergedSeries.contours = list(mergedConts+mergedZConts) # Append merged Contours/ZContours
     print('DONE')
     
     return mergedSeries
-        
-def mergeSeriesAttributes(ser1atts, ser2atts, handler=serAttHandler):
+
+def mergeSeriesAttributes(ser1atts, ser2atts, handler=serAttHandler, frame=None):
     '''Merges the attributes from two series. Conflicts handled with handler parameter.
     Attributes are returned in the form of a dictionary.'''
     # Compare and merge series attributes from ser1Obj/ser2Obj
@@ -206,9 +229,9 @@ def mergeSeriesAttributes(ser1atts, ser2atts, handler=serAttHandler):
         # ...otherwise, add to conflicts dictionary
         else:
             conflicts[att] = True
-    return handler(ser1atts, ser2atts, ser3atts, conflicts)
+    return handler(ser1atts, ser2atts, ser3atts, conflicts, frame)
 
-def mergeSeriesContours(ser1conts, ser2conts, handler=serContHandler):
+def mergeSeriesContours(ser1conts, ser2conts, handler=serContHandler, frame=None):
     '''Merges the contours from two series. Conflicts handled with handler parameter.
     Contours returned in the form of a list.'''
     ser1conts = [cont for cont in ser1conts if cont.tag == 'Contour']
@@ -220,9 +243,9 @@ def mergeSeriesContours(ser1conts, ser2conts, handler=serContHandler):
                 ser3conts.append( elem )
                 ser1conts.remove( elem )
                 ser2conts.remove( elem2 )
-    return handler(ser1conts, ser2conts, ser3conts)
+    return handler(ser1conts, ser2conts, ser3conts, frame)
     
-def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
+def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler, frame=None):
     ser1zconts = [cont for cont in ser1conts if cont.tag == 'ZContour']
     ser2zconts = [cont for cont in ser2conts if cont.tag == 'ZContour']
     ser3zconts = []
@@ -232,12 +255,13 @@ def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
                 ser3zconts.append( elem ) 
                 ser1zconts.remove( elem )
                 ser2zconts.remove( elem2 )
-    return handler(ser1zconts, ser2zconts, ser3zconts)
+    return handler(ser1zconts, ser2zconts, ser3zconts, frame)
 
 def mergeAllSections(serObj1, serObj2, name=None, \
                      secAttfxn = secAttHandler, \
                      secImgfxn = secImgHandler, \
-                     secContfxn = secContHandler):
+                     secContfxn = secContHandler, \
+                     frame=None):
     '''Takes in two series, returns list of merged sections'''
     print('Merging Sections...')
     # Create list of parallel section pairs (paired by section name)

@@ -322,7 +322,7 @@ class Series:
                 #build list of transforms in root; check if transform already exists
                 tlist= [trnsfrm.attrib for trnsfrm in root.getchildren()]
     
-                # Image/Image contour transform
+                # Image/Image contour transform === outputs first image in section.imgs list
                 if elem.img != None: # Make transform from image
                     if elem.transform.output() == section.imgs[0].transform.output():
                         subelem = ET.Element('Image', section.imgs[0].output())

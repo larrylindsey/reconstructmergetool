@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import reconstructmergetool as rmt
 from PySide import QtCore, QtGui
+import time
 
 class mainFrame(QtGui.QFrame):
     '''This class is the main window of Reconstruct Mergetool. All other objects inherit this class
     such that they can be displayed within it.'''
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
-       
+        
         self.setGeometry(100,100,800,600)
         
         # QUIT BUTTON. Always exists
@@ -38,7 +40,7 @@ class welcomeButton(QtGui.QPushButton):
 class loadSeries(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        
+        self.parent=parent
         # Frame
         self.frame = QtGui.QFrame(parent)
         self.frame.setGeometry(0,0,800,500)
@@ -59,7 +61,7 @@ class loadSeries(QtGui.QWidget):
         
         # Go
         self.goButton = QtGui.QPushButton(self.frame)
-        self.goButton.setText('Begin merge')
+        self.goButton.setText('Begin merge\n(may take a minute)')
         self.goButton.setGeometry(300,400,200,100)
         self.goButton.clicked.connect(self.go)
         
@@ -84,14 +86,34 @@ class loadSeries(QtGui.QWidget):
         print('s2path: '+str(self.s2path))
         if '.ser' in str(self.s1path) and '.ser' in str(self.s2path):
             print('Beginning merge...') # === popup window
-            self.hide()
+            self.frame.hide()
+            seriesAttributes(self.parent, self.s1path, self.s2path)
         else:
             print('Invalid series. Please load valid .ser files') # === popup window
 
+class seriesAttributes(QtGui.QWidget):
+    def __init__(self, parent=None, s1p=None, s2p=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.parent = parent
+        
+        # Frame
+        self.frame = QtGui.QFrame(parent)
+        self.frame.setGeometry(0,0,800,500)
+        
+        # Create series objects from paths
+        self.ser1 = rmt.getSeries(s1p)
+        self.ser2 = rmt.getSeries(s2p)
+        
+        # Calls mergeSeries with the gui versions of the fxns
+        mSer = rmt.mergeSeries(self.ser1, self.ser2, mergeSerAttfxn=rmt.serAttHandlerI,
+                        mergeSerContfxn=rmt.serContHandlerI,
+                        mergeSerZContfxn=rmt.serZContHandlerI)
+        mSer = 'place'
+        
 def main():
     app = QtGui.QApplication(sys.argv)
     win = mainFrame()
-    welcomeButton(win)
+    welcomeButton(win) # begin chain of rmtgui stuff
     sys.exit( app.exec_() )
 
 if __name__ == '__main__':
