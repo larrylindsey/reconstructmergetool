@@ -32,7 +32,7 @@ class Transform:
     def worldpts(self, points):
         '''Returns inverse points'''
         newpts = self._tform.inverse(np.asarray(points))
-        return newpts
+        return list(map(tuple,newpts)) #=== just added the 'list(map(tuple' part
     def imgpts(self, points): #===
         '''Returns imgpts'''
         return

@@ -24,15 +24,15 @@ def reScale(path_to_series, name=None, outpath=None):
     
     # scale traces
     for section in ser.sections:
-        #replace mag factor === to what? 0.0022?
-#         section.imgs[0].mag = 
+        # rescale contour points
         for contour in section:
             newPts = []
             # create list of scaled points for this contour
             for pt in contour.points:
                 newPts.append( (pt[0]*scale,pt[1]*scale) )
             contour.points = newPts
-    
+        #replace mag factor === to what? 0.0022?
+#         section.imgs[0].mag = 
     # output new series
     if outpath == None:
         outpath = str(input('Enter path to output folder: '))
