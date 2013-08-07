@@ -320,9 +320,6 @@ class Series:
             for elem in section.contours:
                 curT = ET.Element('Transform', elem.transform.output())
                 
-                #build list of transforms in root; check if transform already exists
-                tlist= [trnsfrm.attrib for trnsfrm in root.getchildren()]
-    
                 # Image/Image contour transform === outputs first image in section.imgs list
                 if elem.img != None: # Make transform from image
                     if elem.transform.output() == section.imgs[0].transform.output():
@@ -331,6 +328,9 @@ class Series:
                         subelem = ET.Element(elem.tag, elem.output())
                         curT.append(subelem)
                         root.append(curT)
+                    else:
+                        print('Image contour transform != section image contour transform '+section.name)
+                        print('i.e.: '+str(elem.transform.output())+' != '+str(section.imgs[0].transform.output()))
                 else:
                     subelem = ET.Element(elem.tag, elem.output())
                     curT.append(subelem)
@@ -366,13 +366,14 @@ class Series:
         '''Converts points for all sections in a series to identity transform'''
         print('Converting sections to identity transform...'),
         for sec in self.sections:
-            print(sec.name)
+            print('zeroIdentity(): '+sec.name)
             for c in sec.contours:
-                c.points = c.transform.worldpts(c.points)
-                c.transform.dim = 0
-                c.transform.ycoef = [0,0,1,0,0,0]
-                c.transform.xcoef = [0,1,0,0,0,0]
-                c._tform = c.transform.poptform()
+                if c.img == None: # Don't alter image contours i.e. domain1     
+                    c.points = c.transform.worldpts(c.points)
+                    c.transform.dim = 0
+                    c.transform.ycoef = [0,0,1,0,0,0]
+                    c.transform.xcoef = [0,1,0,0,0,0]
+                    c._tform = c.transform.poptform()
         print('DONE')
 
     def addsection(self, section):

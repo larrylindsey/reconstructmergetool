@@ -1,43 +1,38 @@
 import sys
 import reconstructmergetool as rmt
-from Series import *
-from Section import *
-from Transform import *
-from Image import *
-from Contour import *
-from ZContour import *
-from skimage import transform as tf
-import findCalFactor as fcf
+from findCalFactor import *
+print(sys.argv)
+# ==== still off by a bit
 
- 
-if len(sys.argv) > 1:
-    path_to_series = str( sys.argv[1] )
- 
-def reScale(path_to_series, name=None, outpath=None):
-    # get scale
-    scale = fcf.findCalFactor(path_to_series)
-    
-    # create series w/ sections, etc.
-    ser = rmt.getSeries(path_to_series)
-    # perform forward tform to identity transform
-    ser.zeroIdentity()
-    
-    # scale traces
-    for section in ser.sections:
-        # rescale contour points
-        for contour in section:
-            newPts = []
-            # create list of scaled points for this contour
-            for pt in contour.points:
-                newPts.append( (pt[0]*scale,pt[1]*scale) )
-            contour.points = newPts
-        #replace mag factor === to what? 0.0022?
-#         section.imgs[0].mag = 
-    # output new series
-    if outpath == None:
-        outpath = str(input('Enter path to output folder: '))
-    ser.writeseries(outpath)
-    ser.writesections(outpath)
-reScale(path_to_series)
+path_to_series = sys.argv[1]
+newMag = float(sys.argv[2])
+if len(sys.argv) == 4:
+    outpath = sys.argv[3]
+else:
+    outpath = str( input('Specify output directory: ') )
 
-
+# Load series
+ser = rmt.getSeries(path_to_series)
+# Set contours to identity transform
+ser.zeroIdentity()
+# Set mag field and rescale
+for section in ser.sections:
+    # img objects exist in two locations per section
+    # Set newMag for section.imgs[0-x].mag (1/2)*
+    for img in section.imgs:
+        oldMag = img.mag
+        img.mag = newMag
+    scale = newMag/oldMag
+    for contour in section.contours:
+        # Set newMag for contour.img.mag (2/2)*
+        if contour.img != None:
+            contour.img.mag = newMag
+        else: # if not an image contour, rescale all the points
+            pts = contour.points
+            newpts = []
+            for pt in pts:
+                newpts.append( (pt[0]*scale, pt[1]*scale) )
+            contour.points = newpts
+# Write out series/sections
+ser.writeseries(outpath)
+ser.writesections(outpath)

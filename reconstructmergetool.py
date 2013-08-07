@@ -374,19 +374,19 @@ def bethBellMerge(): #===
     #=== make sure it is removing the right object from the list
     
     #Keep some objects from FPNCT_BB (use regular expressions)
-    keepList = [d##vftz##, d##vftzcfa##, d##ax##, d##ax##dcv#, d##ax##dssvdh,
-                d##ax##dssvrh, d##ax##dssvrhclose, d##c##, d##c##scale, d##cfa##]
-    for section in ser1.sections:
-        for contour in section.contours:
-            if contour.name not in keepList:
-                section.contours.remove(contour)
+#     keepList = [d##vftz##, d##vftzcfa##, d##ax##, d##ax##dcv#, d##ax##dssvdh,
+#                 d##ax##dssvrh, d##ax##dssvrhclose, d##c##, d##c##scale, d##cfa##]
+#     for section in ser1.sections:
+#         for contour in section.contours:
+#             if contour.name not in keepList:
+#                 section.contours.remove(contour)
     
     #Remove some objects from FPNCT_JNB: d##c##, d##cfa##
-    removeList = [d##c##, d##cfa##]
-    for section in ser2.sections:
-        for contour in sections.contours:
-            if contour.name in removeList:
-                section.contours.remove(contour)
+#     removeList = [d##c##, d##cfa##]
+#     for section in ser2.sections:
+#         for contour in sections.contours:
+#             if contour.name in removeList:
+#                 section.contours.remove(contour)
                 
     #Merge sections
     ser3 = mergeSeries(ser1, ser2, name='FPNCT')

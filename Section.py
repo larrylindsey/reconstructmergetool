@@ -1,6 +1,7 @@
 from Transform import *
 from Image import *
 from Contour import *
+from ZContour import *
 class Section:
 # Python Functions
     # INITIALIZE
@@ -81,6 +82,7 @@ class Section:
                     contours.append(C)
                     imgflag = None
                 elif child.tag == 'ZContour': # No ZContours in Sections?
+                    print('ZCont in section') #=== testing ^ question
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)
         return contours, images

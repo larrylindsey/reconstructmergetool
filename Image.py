@@ -1,4 +1,7 @@
 class Image:
+    '''Abstract data type to store data associated with images. Image classes exist in <Section>.imgs as 
+    well as in contour.img if contour == 'domain1'. Be aware of this when making changes to image classes
+    as they will have to be applied to both locations unless pointers created after change. '''
 # Python functions
     # INITIALIZE
     def __init__(self, node=None, transform=None):
