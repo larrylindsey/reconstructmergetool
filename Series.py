@@ -322,7 +322,7 @@ class Series:
                 
                 # Image/Image contour transform === outputs first image in section.imgs list
                 if elem.img != None: # Make transform from image
-                    if elem.transform.output() == section.imgs[0].transform.output():
+                    if elem.img.transform.output() == section.imgs[0].transform.output():
                         subelem = ET.Element('Image', section.imgs[0].output())
                         curT.append(subelem)
                         subelem = ET.Element(elem.tag, elem.output())
@@ -331,6 +331,7 @@ class Series:
                     else:
                         print('Image contour transform != section image contour transform '+section.name)
                         print('i.e.: '+str(elem.transform.output())+' != '+str(section.imgs[0].transform.output()))
+                        print('Image not written to xml file')
                 else:
                     subelem = ET.Element(elem.tag, elem.output())
                     curT.append(subelem)
