@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #  Files: reconstructmergetool.py, rmtgui.py, Series.py, Section.py, Transform.py,
-#         Contour.py, ZContour.py, Image.py
+#         Contour.py, ZContour.py, Image.py, mergeObject.py, reScale.py, findCalFactor.py
 #
 #  Description: Driver for reconstructmergetool
 #
@@ -8,7 +8,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 7/30/2013
+#  Date Last Modified: 8/12/2013
 #
 # To do:
     # Needs to be a better way to change image contour and section.img stuff simultaneously
