@@ -375,8 +375,10 @@ def bethBellMerge(): #===
     #=== make sure it is removing the right object from the list
     
     #Keep some objects from FPNCT_BB (use regular expressions)
-#     keepList = [d##vftz##, d##vftzcfa##, d##ax##, d##ax##dcv#, d##ax##dssvdh,
-#                 d##ax##dssvrh, d##ax##dssvrhclose, d##c##, d##c##scale, d##cfa##]
+    keepList = ['[d][0-9]*vftz[0-9]*', '[d][0-9]*vftzcfa[0-9]*', '[d][0-9]*ax[0-9]*',
+                '[d][0-9]*ax[0-9]*dcv[0-9]', '[d][0-9]*ax[0-9]*dssvdh',
+                '[d][0-9]*ax[0-9]*dssvrh', '[d][0-9]*ax[0-9]*dssvrhclose', '[d][0-9]*c[0-9]*',
+                '[d][0-9]c[0-9]*scale', 'd[0-9]*cfa[0-9]*']
 #     for section in ser1.sections:
 #         for contour in section.contours:
 #             if contour.name not in keepList:
