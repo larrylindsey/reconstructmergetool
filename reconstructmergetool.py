@@ -11,6 +11,7 @@
 #  Date Last Modified: 7/30/2013
 #
 # To do:
+    # Needs to be a better way to change image contour and section.img stuff simultaneously
     # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform
 
