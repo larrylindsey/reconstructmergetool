@@ -89,8 +89,10 @@ class loadSeries(QtGui.QWidget):
             self.frame.hide()
             seriesAttributes(self.parent, self.s1path, self.s2path)
         else:
+            error = QtGui.QMessageBox(self)
+            error.setText('Please load valid .ser into each slot!')
+            error.exec_()
             print('Invalid series. Please load valid .ser files') # === popup window
-
 class seriesAttributes(QtGui.QWidget):
     def __init__(self, parent=None, s1p=None, s2p=None):
         QtGui.QWidget.__init__(self, parent)
