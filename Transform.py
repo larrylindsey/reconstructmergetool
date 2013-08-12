@@ -80,7 +80,7 @@ class Transform:
         if node == None:
             return None
         return int(node.get('dim'))  
-    def poptform(self):
+    def poptform(self): # v for verbosity
         '''Creates self._tform variable which represents the transform'''
         if self.xcoef == [] or self.ycoef == [] or self.dim == []:
             print( 'Empty tform: no xcoef, ycoef, or dim' )

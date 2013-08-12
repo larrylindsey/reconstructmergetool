@@ -367,7 +367,7 @@ class Series:
         '''Converts points for all sections in a series to identity transform'''
         print('Converting sections to identity transform...'),
         for sec in self.sections:
-            print('zeroIdentity(): '+sec.name)
+            print('Converting to unity transform: '+sec.name)
             for c in sec.contours:
                 if c.img == None: # Don't alter image contours i.e. domain1     
                     c.points = c.transform.worldpts(c.points)

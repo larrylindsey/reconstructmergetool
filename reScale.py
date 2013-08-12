@@ -1,25 +1,19 @@
-import sys
+import argparse
+parser = argparse.ArgumentParser(description='Rescales a <series> to a new <magnitude>')
+parser.add_argument('series', nargs=1, type=str, help='Path to the series/sections that needs to be re-scaled')
+parser.add_argument('magnitude', nargs=1, help='New magnitude to be scaled to')
+parser.add_argument('outpath', nargs=1, type=str, help='Path to where the re-scaled series/sections will be placed')
+args = vars(parser.parse_args())
+# Assign argparse things to their variables
+series = str(args['series'][0])
+magnitude = float(args['magnitude'][0])
+outpath = str(args['outpath'][0])
+
 import reconstructmergetool as rmt
 from Transform import *
-from findCalFactor import *
-a = sys.argv
-def main(a=None):
-    if __name__ != '__main__':
-        print('reScale')
-        return
-    path_to_series = sys.argv[1]
-    newMag = float(sys.argv[2])
-    if len(sys.argv) == 4:
-        outpath = sys.argv[3]
-    else:
-        outpath = str( input('Specify output directory: ') )
-    
-    ser = rmt.getSeries(path_to_series) # Load series
-    reScale(ser, newMag, outpath)
-
-       
+   
 def reScale(ser, newMag, outpath):
-    
+    ser = rmt.getSeries(ser)
     ser.zeroIdentity() # Non-image contour transform -> unity transform
     
     for section in ser.sections:# Set mag field and rescale
@@ -77,4 +71,4 @@ def scaleImgTForms(oldT, scale):
     newT.poptform()
     return newT
 
-main(sys.argv)
+reScale(series, magnitude, outpath) #=== put argparse stuff here
