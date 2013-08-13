@@ -9,6 +9,9 @@ series = str(args['series'][0])
 magnitude = float(args['magnitude'][0])
 outpath = str(args['outpath'][0])
 
+if outpath[len(outpath)-1] != '/':
+    outpath += '/'
+    
 import reconstructmergetool as rmt
 from Transform import *
    
