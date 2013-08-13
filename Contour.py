@@ -106,6 +106,8 @@ class Contour:
                 yvals = [pt[1]*mag for pt in self.points]
                 pts = zip(xvals,yvals)
             else:
+                if len(self.points) < 3:
+                    return None
                 pts = self.points
             self._shape = Polygon( self.transform.worldpts(pts) )
         # Open trace

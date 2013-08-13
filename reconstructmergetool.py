@@ -8,10 +8,11 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/12/2013
+#  Date Last Modified: 8/13/2013
 #
 # To do:
     # Needs to be a better way to change image contour and section.img stuff simultaneously
+        # check for multiple images is in beta (Section.py)
     # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform
 
@@ -263,7 +264,10 @@ def mergeSeriesZContours(ser1conts, ser2conts, handler=serZContHandler):
 def mergeAllSections(serObj1, serObj2, name=None, \
                      secAttfxn = secAttHandler, \
                      secImgfxn = secImgHandler, \
-                     secContfxn = secContHandler):
+                     secContfxn = secContHandler, \
+                     attOverride = None, \
+                     imageOverride = None, \
+                     contOverride = None):
     '''Takes in two series, returns list of merged sections'''
     print('Merging Sections...')
     # Create list of parallel section pairs (paired by section name)
@@ -276,24 +280,52 @@ def mergeAllSections(serObj1, serObj2, name=None, \
         mergedSections.append( mergeSection(x,y, name, \
                                             secAttfxn = secAttfxn, \
                                             secImgfxn = secImgfxn, \
-                                            secContfxn = secContfxn) )
+                                            secContfxn = secContfxn, \
+                                            attOverride = attOverride, \
+                                            imageOverride = imageOverride, \
+                                            contOverride = contOverride) )
     print('...DONE')
     return mergedSections
 
 def mergeSection(sec1, sec2, name=None, \
                  secAttfxn = secAttHandler, \
                  secImgfxn = secImgHandler, \
-                 secContfxn = secContHandler):
+                 secContfxn = secContHandler, \
+                 attOverride = None, \
+                 imageOverride = None, \
+                 contOverride = None):
     '''Takes in two sections, returns a 3rd merged section'''
     # Populate shapely polygons
     for contour in sec1.contours: contour.popshape()
     for contour in sec2.contours: contour.popshape()    
     # create section w/ merged attributes
-    sec3 = mergeSectionAttributes( sec1, sec2, name, handler=secAttfxn )
+    if attOverride != None:
+        if int(attOverride) == 1:
+            sec3 = mergeSectionAttributes(sec1, sec1, name, handler=secAttfxn)
+        elif int(attOverride) == 2:
+            sec3 = mergeSectionAttributes(sec2, sec2, name, handler=secAttfxn)
+    else:
+        sec3 = mergeSectionAttributes( sec1, sec2, name, handler=secAttfxn )
     # check section images
-    sec3.imgs = mergeSectionImgs( sec1, sec2, handler=secImgfxn )
+    if imageOverride != None:
+        if int(imageOverride) == 1:
+            sec3.imgs = sec1.imgs
+        elif int(imageOverride) == 2:
+            sec3.imgs = sec2.imgs
+        elif int(imageOverride) == 3:
+            sec3.imgs = (sec1.imgs).extend(sec2.imgs)
+    else:
+        sec3.imgs = mergeSectionImgs( sec1, sec2, handler=secImgfxn )
     # merge section contours
-    sec3.contours = mergeSectionContours( sec1, sec2, handler=secContfxn )
+    if contOverride != None:
+        if int(contOverride) == 1:
+            sec3.contours = sec1.contours
+        elif int(contOverride) == 2:
+            sec3.contours = sec2.contours
+        elif int(contOverride) == 3:
+            sec3.contours = (sec1.contours).extend(sec2.contours)
+    else:
+        sec3.contours = mergeSectionContours( sec1, sec2, handler=secContfxn )
     return sec3
 
 def checkSectionAttributes(sec1, sec2):
@@ -368,34 +400,55 @@ def mergeSectionContours(s1,s2, handler=secContHandler):
     return conts3
 
 def bethBellMerge(): #===
-    '''Custom function for merging a project for Beth Bell'''
-    ser1 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser')
-    ser2 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser')
+    # First load FPNCT_BB and delete everything except those in saveList
+    saveList = [re.compile('[d][0-9]*vftz[0-9]*$', re.I), re.compile('[d][0-9]*vftzcfa[0-9]*$', re.I),
+                         re.compile('[d][0-9]*vftzca[0-9]*$', re.I), re.compile('[d][0-9]*ax[0-9]*$', re.I),
+                         re.compile('[d][0-9]*ax[0-9]*dcv*$', re.I), re.compile('[d][0-9]*ax[0-9]*dssvdh$', re.I),
+                         re.compile('[d][0-9]*ax[0-9]*dssvrh$', re.I), re.compile('[d][0-9]*ax[0-9]*dssvrhclose$', re.I),
+                         re.compile('[d][0-9]*c[0-9]*$', re.I), re.compile('[d][0-9]*c[0-9]*$', re.I),
+                         re.compile('[d][0-9]*c[0-9]*scale$', re.I), re.compile('[d][0-9]*cfa[0-9]*$', re.I)]
+    ser1 = rmt.getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser')
+    for section in ser1.sections:
+        print('SECTION: '+section.name)
+        print('before: '+str(len(section.contours)))
+        savedContours = []
+        for contour in section.contours:
+            for prog in saveList:
+                if len(prog.findall(contour.name)) != 0:
+                    savedContours.append(contour)
+                    break
+        section.contours = savedContours
+        print('after: '+str(len(section.contours)))
+    for section in ser1.sections:
+        print('SECTION: '+section.name)
+        print([contour.name for contour in section.contours])
     
-    #=== make sure it is removing the right object from the list
     
-    #Keep some objects from FPNCT_BB (use regular expressions)
-    keepList = ['[d][0-9]*vftz[0-9]*', '[d][0-9]*vftzcfa[0-9]*', '[d][0-9]*ax[0-9]*',
-                '[d][0-9]*ax[0-9]*dcv[0-9]', '[d][0-9]*ax[0-9]*dssvdh',
-                '[d][0-9]*ax[0-9]*dssvrh', '[d][0-9]*ax[0-9]*dssvrhclose', '[d][0-9]*c[0-9]*',
-                '[d][0-9]c[0-9]*scale', 'd[0-9]*cfa[0-9]*']
-#     for section in ser1.sections:
-#         for contour in section.contours:
-#             if contour.name not in keepList:
-#                 section.contours.remove(contour)
+    # Now load FPNCT_JNB and delete everything in delList
+    delList = [re.compile('[d][0-9]*c[0-9]*$', re.I), re.compile('[d][0-9]*cfa[0-9]*$', re.I)]
     
-    #Remove some objects from FPNCT_JNB: d##c##, d##cfa##
-#     removeList = [d##c##, d##cfa##]
-#     for section in ser2.sections:
-#         for contour in sections.contours:
-#             if contour.name in removeList:
-#                 section.contours.remove(contour)
-                
-    #Merge sections
-    ser3 = mergeSeries(ser1, ser2, name='FPNCT')
-    ser3.sections = mergeAllSections( ser1, ser2, name='FPNCT')
-    ser3.writeseries('/home/michaelm/Documents/Test Series/bb/merge/')
-    ser3.writesections('/home/michaelm/Documents/Test Series/bb/merge/')
+    ser2 = rmt.getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser')
+    for section in ser2.sections:
+        print('SECTION: '+section.name)
+        print('before: '+str(len(section.contours)))
+        deletedContours = []
+        for contour in section.contours:
+            for prog in delList:
+                if len(prog.findall(contour.name)) != 0:
+                    deletedContours.append(contour.name)
+                    break
+        section.contours = [cont for cont in section.contours if cont.name not in deletedContours]
+        print('after: '+str(len(section.contours)))
+    for section in ser2.sections:
+        print('SECTION: '+section.name)
+        print([contour.name for contour in section.contours])
+    
+    ser3 = rmt.mergeSeries(ser1, ser2, name='FPNCT_merge')
+    # imageOverride set to 2; imageOverride 1 has different image and domain1 transforms
+    ser3.sections = rmt.mergeAllSections(ser1, ser2, name='FPNCT_merge', imageOverride=2)
+    ser3.writeseries('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
+    ser3.writesections('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
+    print('done')
     
 class mergeObject:
     '''Abstract class to easily change functions for reconstructmergetool.py'''

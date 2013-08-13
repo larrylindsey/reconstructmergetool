@@ -82,9 +82,19 @@ class Section:
                     contours.append(C)
                     imgflag = None
                 elif child.tag == 'ZContour': # No ZContours in Sections?
-                    print('ZCont in section') #=== testing ^ question
+                    raw_input('ZCont in section') #=== testing ^ question
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)
+        #=== Check for multiple images; still need to match domain1 contour and image transforms (imageOverride issue only?)
+        if len(images) > 1:
+            srcList = set([img.src for img in images])
+            if len(srcList) == 1:
+                images = [images[0]]
+            else: #===
+                print('Multiple images sources present in '+self.name+'\nRMT not prepared to handle this')
+            domain1 = [cont for cont in contours if cont.name == 'domain1'][0]
+            if images[0].transform.output() != domain1.transform.output():
+                raw_input('Image transform does not match domain1 transform for '+self.name)
         return contours, images
     def popindex(self, root):
         if root == None:
