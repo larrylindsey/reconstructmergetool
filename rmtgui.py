@@ -5,7 +5,8 @@ import sys
 import reconstructmergetool as rmt
 from PySide import QtCore, QtGui
 import time
-
+# Follows the same steps as reconstructmergetool.mergeSeries(etc) but doesnt call that function...
+# ... easier to implement separately for GUI
 class mainFrame(QtGui.QFrame):
     '''This class is the main window of Reconstruct Mergetool. All other objects inherit this class
     such that they can be displayed within it.'''
@@ -92,7 +93,7 @@ class loadSeries(QtGui.QWidget):
             error = QtGui.QMessageBox(self)
             error.setText('Please load valid .ser into each slot!')
             error.exec_()
-            print('Invalid series. Please load valid .ser files') # === popup window
+            
 class seriesAttributes(QtGui.QWidget):
     def __init__(self, parent=None, s1p=None, s2p=None):
         QtGui.QWidget.__init__(self, parent)
@@ -106,11 +107,19 @@ class seriesAttributes(QtGui.QWidget):
         self.ser1 = rmt.getSeries(s1p)
         self.ser2 = rmt.getSeries(s2p)
         
-        # Calls mergeSeries with the gui versions of the fxns
-        mSer = rmt.mergeSeries(self.ser1, self.ser2, mergeSerAttfxn=rmt.serAttHandlerI,
-                        mergeSerContfxn=rmt.serContHandlerI,
-                        mergeSerZContfxn=rmt.serZContHandlerI)
-        mSer = 'place'
+        # Create 3 column table: left column has name of all attributes,
+        # middle column is all ser1 atts, right column is all ser2 atts.
+        # Highlight same atts in green for both rows
+        # Rest can only be picked from 1 column
+        table = QtGui.QTableWidget(self.frame)
+        
+        
+        ser1atts = self.ser1.output()[0]
+        ser2atts = self.ser2.output()[0]
+        
+        
+         
+
         
 def main():
     app = QtGui.QApplication(sys.argv)

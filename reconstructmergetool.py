@@ -27,8 +27,6 @@ from Image import *
 from Contour import *
 from ZContour import *
 from lxml import etree as ET
-from PySide import QtGui, QtCore
-import rmtgui as gui
 import time
 from skimage import transform as tf
 
@@ -97,26 +95,7 @@ def serAttHandler(ser1atts, ser2atts, ser3atts, conflicts):
             else:
                 print('Invalid choice. Please enter 1 or 2')
     return ser3atts
-
-def serAttHandlerI(ser1atts, ser2atts, ser3atts, conflicts):
-    '''Resolves conflicts regarding series attributes. Designed for use with gui'''
-    # create parallel list of conflicts for adding to list widget
-    lst1 = [ser1atts[conflict] for conflict in conflicts]   
-    lst2 = [ser2atts[conflict] for conflict in conflicts]
-    # Name of conflicting attributes. Will be to the left of the two list widgets
-    cAttributes = [conflict for conflict in conflicts]
     
-#     list1 = QtGui.QListWidget(frame)
-#     list2 = QtGui.QListWidget(frame)
-    
-#     for elem in list1.selectedItems():
-#         list1.insertItem(elem)
-#     for elem in list2.selectedItems():
-#         list2.insertItem(elem)
-#     
-#     print(cAttributes)
-
-        
 def serContHandler(ser1conts, ser2conts, ser3conts):
     # add leftover, unique zcontours to ser3conts
     ser3conts.extend(ser1conts)
@@ -128,15 +107,11 @@ def serContHandler(ser1conts, ser2conts, ser3conts):
         ser3conts.pop( int(a) )
         print('\n')
     return ser3conts
-def serContHandlerI():
-    print('===')
 def serZContHandler(ser1zconts, ser2zconts, ser3zconts ):
     # add leftover, unique zcontours to ser3zconts
     ser3zconts.extend(ser1zconts)
     ser3zconts.extend(ser2zconts)
     return ser3zconts
-def serZContHandlerI():
-    print('===')
 def secAttHandler(s1atts, s2atts, comparison):
     mergedAttributes = {}
     for att in comparison:
@@ -211,7 +186,7 @@ def mergeSeries(serObj1, serObj2, name=None, \
         name = serObj1.name
     
     # Create merged parts    
-    mergedAtts = mergeSeriesAttributes( serObj1.output()[0], serObj2.output()[0], handler=mergeSerAttfxn)
+    mergedAtts = mergeSeriesAttributes( serObj1, serObj2, handler=mergeSerAttfxn)
     mergedConts = mergeSeriesContours( serObj1.contours, serObj2.contours, handler=mergeSerContfxn)
     mergedZConts = mergeSeriesZContours( serObj1.contours, serObj2.contours, handler=mergeSerZContfxn)
     mergedSeries = Series( root=ET.Element('Series',mergedAtts), name=name ) # Create series w/ merged atts
@@ -220,11 +195,13 @@ def mergeSeries(serObj1, serObj2, name=None, \
     
     return mergedSeries
 
-def mergeSeriesAttributes(ser1atts, ser2atts, handler=serAttHandler):
+def mergeSeriesAttributes(serObj1, serObj2, handler=serAttHandler ):
     '''Merges the attributes from two series. Conflicts handled with handler parameter.
     Attributes are returned in the form of a dictionary.'''
     # Compare and merge series attributes from ser1Obj/ser2Obj
     # Handle conflict independently
+    ser1atts = serObj1.output()[0]
+    ser2atts = serObj2.output()[0]
     ser3atts = {}
     conflicts = {}
     for att in ser1atts:
@@ -402,16 +379,18 @@ def mergeSectionContours(s1,s2, handler=secContHandler):
 
 def bethBellMerge(): #===
     # First load FPNCT_BB and delete everything except those in saveList
-    saveList = [re.compile('[d][0-9]*vftz[0-9]*$', re.I), re.compile('[d][0-9]*vftzcfa[0-9]*$', re.I),
-                         re.compile('[d][0-9]*vftzca[0-9]*$', re.I), re.compile('[d][0-9]*ax[0-9]*$', re.I),
-                         re.compile('[d][0-9]*ax[0-9]*dcv*$', re.I), re.compile('[d][0-9]*ax[0-9]*dssvdh$', re.I),
-                         re.compile('[d][0-9]*ax[0-9]*dssvrh$', re.I), re.compile('[d][0-9]*ax[0-9]*dssvrhclose$', re.I),
-                         re.compile('[d][0-9]*c[0-9]*$', re.I), re.compile('[d][0-9]*c[0-9]*$', re.I),
-                         re.compile('[d][0-9]*c[0-9]*scale$', re.I), re.compile('[d][0-9]*cfa[0-9]*$', re.I)]
+    saveList = [re.compile('[d][0-9]{0,2}vftz[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}vftzcfa[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dcv[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvdh[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvrh[0-0]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvrhclose[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}c[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}c[0-9]{0,2}scale[0-9]{0,2}[a-z]?$', re.I),
+                re.compile('[d][0-9]{0,2}cfa[0-9]{0,2}[a-z]?$', re.I)]
     ser1 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser')
     for section in ser1.sections:
-        print('SECTION: '+section.name)
-        print('before: '+str(len(section.contours)))
         savedContours = []
         for contour in section.contours:
             for prog in saveList:
@@ -419,19 +398,13 @@ def bethBellMerge(): #===
                     savedContours.append(contour)
                     break
         section.contours = savedContours
-        print('after: '+str(len(section.contours)))
-    for section in ser1.sections:
-        print('SECTION: '+section.name)
-        print([contour.name for contour in section.contours])
-    
     
     # Now load FPNCT_JNB and delete everything in delList
-    delList = [re.compile('[d][0-9]*c[0-9]*$', re.I), re.compile('[d][0-9]*cfa[0-9]*$', re.I)]
+    delList = [re.compile('[d][0-9]{0,2}c[0-9]{0,2}[a-z]?$', re.I),
+               re.compile('[d][0-9]{0,2}cfa[0-9]{0,2}[a-z]?$', re.I)]
     
     ser2 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser')
     for section in ser2.sections:
-        print('SECTION: '+section.name)
-        print('before: '+str(len(section.contours)))
         deletedContours = []
         for contour in section.contours:
             for prog in delList:
@@ -439,17 +412,12 @@ def bethBellMerge(): #===
                     deletedContours.append(contour.name)
                     break
         section.contours = [cont for cont in section.contours if cont.name not in deletedContours]
-        print('after: '+str(len(section.contours)))
-    for section in ser2.sections:
-        print('SECTION: '+section.name)
-        print([contour.name for contour in section.contours])
     
     ser3 = mergeSeries(ser1, ser2, name='FPNCT_merge')
     # imageOverride set to 2; imageOverride 1 has different image and domain1 transforms
     ser3.sections = mergeAllSections(ser1, ser2, name='FPNCT_merge', imageOverride=2)
     ser3.writeseries('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
     ser3.writesections('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
-    print('done')
     
 class mergeObject:
     '''Abstract class to easily change functions for reconstructmergetool.py'''
