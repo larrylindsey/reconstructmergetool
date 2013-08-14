@@ -32,7 +32,7 @@ class Transform:
     def worldpts(self, points):
         '''Returns inverse points'''
         newpts = self._tform.inverse(np.asarray(points))
-        return list(map(tuple,newpts)) #=== just added the 'list(map(tuple' part
+        return list(map(tuple,newpts))
     def imgpts(self, points): #===
         '''Returns imgpts'''
         return
@@ -83,8 +83,7 @@ class Transform:
     def poptform(self): # v for verbosity
         '''Creates self._tform variable which represents the transform'''
         if self.xcoef == [] or self.ycoef == [] or self.dim == []:
-            print( 'Empty tform: no xcoef, ycoef, or dim' )
-            return
+            return None
         a = self.xcoef
         b = self.ycoef
         # Affine transform

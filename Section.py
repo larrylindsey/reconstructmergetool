@@ -91,7 +91,7 @@ class Section:
             if len(srcList) == 1:
                 images = [images[0]]
             else: #===
-                print('Multiple images sources present in '+self.name+'\nRMT not prepared to handle this')
+                raw_input('Multiple images sources present in '+self.name+'\nRMT not prepared to handle this')
             domain1 = [cont for cont in contours if cont.name == 'domain1'][0]
             if images[0].transform.output() != domain1.transform.output():
                 raw_input('Image transform does not match domain1 transform for '+self.name)

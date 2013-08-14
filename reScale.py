@@ -74,4 +74,4 @@ def scaleImgTForms(oldT, scale):
     newT.poptform()
     return newT
 
-reScale(series, magnitude, outpath) #=== put argparse stuff here
+reScale(series, magnitude, outpath)

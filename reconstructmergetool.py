@@ -8,11 +8,12 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/13/2013
+#  Date Last Modified: 8/14/2013
 #
 # To do:
     # Needs to be a better way to change image contour and section.img stuff simultaneously
         # check for multiple images is in beta (Section.py)
+    # verbosity mode
     # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform
 
@@ -26,7 +27,7 @@ from Image import *
 from Contour import *
 from ZContour import *
 from lxml import etree as ET
-from PySide import *
+from PySide import QtGui, QtCore
 import rmtgui as gui
 import time
 from skimage import transform as tf
@@ -407,7 +408,7 @@ def bethBellMerge(): #===
                          re.compile('[d][0-9]*ax[0-9]*dssvrh$', re.I), re.compile('[d][0-9]*ax[0-9]*dssvrhclose$', re.I),
                          re.compile('[d][0-9]*c[0-9]*$', re.I), re.compile('[d][0-9]*c[0-9]*$', re.I),
                          re.compile('[d][0-9]*c[0-9]*scale$', re.I), re.compile('[d][0-9]*cfa[0-9]*$', re.I)]
-    ser1 = rmt.getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser')
+    ser1 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser')
     for section in ser1.sections:
         print('SECTION: '+section.name)
         print('before: '+str(len(section.contours)))
@@ -427,7 +428,7 @@ def bethBellMerge(): #===
     # Now load FPNCT_JNB and delete everything in delList
     delList = [re.compile('[d][0-9]*c[0-9]*$', re.I), re.compile('[d][0-9]*cfa[0-9]*$', re.I)]
     
-    ser2 = rmt.getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser')
+    ser2 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser')
     for section in ser2.sections:
         print('SECTION: '+section.name)
         print('before: '+str(len(section.contours)))
@@ -443,9 +444,9 @@ def bethBellMerge(): #===
         print('SECTION: '+section.name)
         print([contour.name for contour in section.contours])
     
-    ser3 = rmt.mergeSeries(ser1, ser2, name='FPNCT_merge')
+    ser3 = mergeSeries(ser1, ser2, name='FPNCT_merge')
     # imageOverride set to 2; imageOverride 1 has different image and domain1 transforms
-    ser3.sections = rmt.mergeAllSections(ser1, ser2, name='FPNCT_merge', imageOverride=2)
+    ser3.sections = mergeAllSections(ser1, ser2, name='FPNCT_merge', imageOverride=2)
     ser3.writeseries('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
     ser3.writesections('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
     print('done')

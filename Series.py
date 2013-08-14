@@ -170,58 +170,58 @@ class Series:
         str(self.getmvmntinc()), str(self.getctrlinc()), str(self.getshiftinc()))
     def getviewport(self):
         ret = ''
-        for float in self.viewport:
-            ret += str(float)+' '
+        for elem in self.viewport:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getdim3d(self):
         ret = ''
-        for float in self.dim3D:
-            ret += str(float)+' '
+        for elem in self.dim3D:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getoffset3d(self):
         ret = ''
-        for float in self.offset3D:
-            ret += str(float)+' '
+        for elem in self.offset3D:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getmvmntinc(self):
         ret = ''
-        for float in self.mvmtIncrement:
-            ret += str(float)+' '
+        for elem in self.mvmtIncrement:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getctrlinc(self):
         ret = ''
-        for float in self.ctrlIncrement:
-            ret += str(float)+' '
+        for elem in self.ctrlIncrement:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getshiftinc(self):
         ret = ''
-        for float in self.shiftIncrement:
-            ret += str(float)+' '
+        for elem in self.shiftIncrement:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getdefaultborder(self):
         ret = ''
-        for float in self.defaultBorder:
-            ret += str(float)+' '
+        for elem in self.defaultBorder:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getdefaultfill(self):
         ret = ''
-        for float in self.defaultFill:
-            ret += str(float)+' '
+        for elem in self.defaultFill:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getgridsize(self):
         ret = ''
-        for float in self.gridSize:
-            ret += str(float)+' '
+        for elem in self.gridSize:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getgriddistance(self):
         ret = ''
-        for float in self.gridDistance:
-            ret += str(float)+' '
+        for elem in self.gridDistance:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getgridnumber(self):
         ret = ''
-        for float in self.gridNumber:
-            ret += str(float)+' '
+        for elem in self.gridNumber:
+            ret += str(elem)+' '
         return ret.rstrip()
     def getbordercolors(self):
         ret = ''
