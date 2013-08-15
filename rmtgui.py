@@ -107,15 +107,35 @@ class seriesAttributes(QtGui.QWidget):
         self.ser1 = rmt.getSeries(s1p)
         self.ser2 = rmt.getSeries(s2p)
         
+        # Create attribute list for each series
+        ser1atts = self.ser1.output()[0]
+        ser2atts = self.ser2.output()[0]
+        
         # Create 3 column table: left column has name of all attributes,
         # middle column is all ser1 atts, right column is all ser2 atts.
         # Highlight same atts in green for both rows
         # Rest can only be picked from 1 column
-        table = QtGui.QTableWidget(self.frame)
+        table = QtGui.QTableWidget(len(ser1atts), 2, parent=self.frame)
+        table.setGeometry(0,0,800,500)
+        table.setHorizontalHeaderLabels([self.ser1.name, self.ser2.name])
+        table.setVerticalHeaderLabels([attribute for attribute in self.ser1._attribs])
+        # Load table with attributes
+        for row in range(len(ser1atts)):
+            header = table.verticalHeaderItem(row).text()
+            # Series 1
+            tableItem = QtGui.QTableWidgetItem( ser1atts[header] )
+            table.setItem(row,0,tableItem)
+            # Series 2
+            tableItem = QtGui.QTableWidgetItem( ser2atts[header] )
+            table.setItem(row,1,tableItem)
+#         item.isSelected()
+#         setBackground(brush)
+#         table.setCurrentCell(r,c,comm) # <-- use to pick only 1 at a time
+#         table.selectedItems()
+        self.frame.show()
         
         
-        ser1atts = self.ser1.output()[0]
-        ser2atts = self.ser2.output()[0]
+        
         
         
          
