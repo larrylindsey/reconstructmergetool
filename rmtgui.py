@@ -1,111 +1,137 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-import sys
+from PySide import QtGui, QtCore
 import reconstructmergetool as rmt
-from PySide import QtCore, QtGui
+import sys
 
-# Follows the same steps as reconstructmergetool.mergeSeries(etc) but doesnt call that function...
-# ... easier to implement separately for GUI
 class mainFrame(QtGui.QFrame):
-    '''This class is the main window of Reconstruct Mergetool. All other objects inherit this class
-    such that they can be displayed within it.'''
+    '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
+    RMTgui class that is open throughout the entire program.
+    GUI-wise: the mainframe contains the widgets necessary for proper functioning of RMT. And a
+        quit button.
+    Data-wise: It contains all the important info regarding the series that are being merged.'''
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
+        self.initUI()
         
-        self.setGeometry(100,100,800,600)
+        # Data
+        self.ser1path = None
+        self.ser2path = None
+        self.ser1obj = None
+        self.ser2obj = None
+        self.mergedSer = None
         
-        # QUIT BUTTON. Always exists
-        self.qButton = QtGui.QPushButton(self)
-        self.qButton.setText('Quit')
-        self.qButton.setGeometry(QtCore.QRect(704, 573, 96, 27))
-        self.qButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
+    def initUI(self):
+        # Quit Button
+        quitButton = QtGui.QPushButton(self)
+        quitButton.setText('Quit')
+        quitButton.clicked.connect( QtCore.QCoreApplication.instance().quit )
         
-        self.show()
-        self.rmtStart()
-         
-    def rmtStart(self): #===
-        '''This function begins the process of merging series'''
-        welcomeButton(self)
+        # Window Dimensions and Attributes
+        self.setGeometry(0,0,800,600)
+        self.setWindowTitle('Reconstructmergetool v.1')
+        self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Plain)
+        self.setLineWidth(2)
+        self.setMidLineWidth(3)
         
-class welcomeButton(QtGui.QPushButton):
-    def __init__(self, parent=None):
-        QtGui.QPushButton.__init__(self, parent)
-        self.parent=parent
-        # WELCOME BUTTON
-        self.setText('WELCOME TO RECONSTRUCT MERGETOOL\nClick to continue')
-        self.setGeometry(200,200,400,100)
-        self.clicked.connect(self.whenClicked)
+        # Layout
+        hbox = QtGui.QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(quitButton)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addStretch(1)
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
+
         self.show()
 
-    def whenClicked(self):
-        '''Hides the welcomeButton and begins next frame'''
-        self.hide()
-        loadSeries(self.parent)
-        
-class loadSeries(QtGui.QWidget):
+class serLoadWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.parent=parent
-        # Frame
-        self.frame = QtGui.QFrame(parent)
-        self.frame.setGeometry(0,0,800,500)
+        self.initUI()
+        # Data
+        self.parent = parent
+        self.s1p = None
+        self.s2p = None
         
-        # Load ser 1
-        self.s1Button = QtGui.QPushButton(self.frame)
-        self.s1Button.setText('Load Series 1')
-        self.s1Button.setGeometry(100,200,200,100)
-        self.s1path = None # updated by browseFiles()
-        self.s1Button.clicked.connect(self.browseFiles)
+    def initUI(self):
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        self.setGeometry(0,0,800,500)
         
-        # Load ser 2
-        self.s2Button = QtGui.QPushButton(self.frame)
-        self.s2Button.setText('Load Series 2')
-        self.s2Button.setGeometry(500,200,200,100)
-        self.s2path = None # updated by browseFiles2()
-        self.s2Button.clicked.connect(self.browseFiles2)
+        # Load Series Buttons
+        self.ser1Button = QtGui.QPushButton('Load Series 1', parent=self)
+        self.ser1Button.setGeometry(400-150,100,300,100)
+        self.ser1Button.clicked.connect( self.loadSeries )
         
-        # Go
-        self.goButton = QtGui.QPushButton(self.frame)
-        self.goButton.setText('Begin merge\n(may take a minute)')
-        self.goButton.setGeometry(300,400,200,100)
-        self.goButton.clicked.connect(self.go)
+        self.ser2Button = QtGui.QPushButton('Load Series 2', parent=self)
+        self.ser2Button.setGeometry(400-150,250,300,100)
+        self.ser2Button.clicked.connect( self.loadSeries )
         
-        self.frame.show()
-
-    # File browsing dialogs. Return string of .ser file.
-    # Could not figure out how to update paths with a return function and thus had to make
-    # two separate functions
-    def browseFiles(self):
+        # Continue button
+        self.continueButton = QtGui.QPushButton(self)
+        self.continueButton.setText('Load both series\nto continue')
+        self.continueButton.setGeometry(400-75,400,150,75)
+        self.continueButton.setFlat(True)
+        
+        self.show()
+        
+    def loadSeries(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
-    "Load Series", "/home/", "Series File (*.ser)")
-        self.s1path = str(fileName[0])
-        self.s1Button.setText(self.s1path.rpartition('/')[2])
-    def browseFiles2(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,
-    "Load Series", "/home/", "Series File (*.ser)")
-        self.s2path = str(fileName[0])
-        self.s2Button.setText(self.s2path.rpartition('/')[2])
-        
-    def go(self):
-        print('s1path: '+str(self.s1path))
-        print('s2path: '+str(self.s2path))
-        if '.ser' in str(self.s1path) and '.ser' in str(self.s2path):
-            print('Beginning merge...') # === popup window
-            self.frame.hide()
-            seriesAttributes(self.parent, self.s1path, self.s2path)
-        else:
-            error = QtGui.QMessageBox(self)
-            error.setText('Please load valid .ser into each slot!')
-            error.exec_()
+                                                     "Load Series",
+                                                     "/home/",
+                                                     "Series File (*.ser)")
+        # Change appropriate path
+        if self.sender() == self.ser1Button:
+            self.s1p=str(fileName[0])
+            self.parent.ser1path = self.s1p
+            self.parent.ser1obj = rmt.getSeries(self.s1p)
+            self.ser1Button.setText(self.s1p.rsplit('/')[len(self.s1p.split('/'))-1]) # Text = ser name
+            self.ser1Button.setFlat(True)
+        elif self.sender() == self.ser2Button:
+            self.s2p=str(fileName[0])
+            self.ser2Button.setText(self.s2p.rsplit('/')[len(self.s2p.split('/'))-1])
+            self.ser2Button.setFlat(True)
+            self.parent.ser2path = self.s2p
+            self.parent.ser2obj = rmt.getSeries(self.s2p)
 
-class seriesAttributeTable(QtGui.QTableWidget):
+        # Check to see if both series are loaded
+        if self.s1p != None and self.s2p != None:
+            self.continueButton.show()
+            self.continueButton.setText('Continue...')
+            self.continueButton.setFlat(False)
+            self.continueButton.clicked.connect( self.nextStep )
+            
+    def nextStep(self):
+        '''Updates data in the mainFrame() class'''
+        serAttributeWidget(self.parent)
+        self.close()
+        
+class serAttributeWidget(QtGui.QWidget): #=== problems getting table loaded
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        # Data
+        self.parent = parent
+        self.ser1obj = parent.ser1obj
+        self.ser2obj = parent.ser2obj
+        self.ser3obj = None
+        self.initUI()
+        
+    def initUI(self):
+        message = QtGui.QMessageBox(self)
+        message.setText('Please be patient...\nThis process may take a few minutes.')
+        message.show()
+        self.table = serAttributeTable(self,
+                                       s1atts=self.ser1obj.output()[0],
+                                       s2atts=self.ser2obj.output()[0])
+        self.table.show()
+        print('should be up')
+
+class serAttributeTable(QtGui.QTableWidget):
     '''Receives a parent frame, series1 attributes and series2 attributes. Provides a table display
     GUI for selecting and outputting the attributes to be included in the merged series'''
     def __init__(self, parent=None, s1atts=None, s2atts=None):
         QtGui.QTableWidget.__init__(self, len(s1atts), 2, parent=parent)
         self.parent = parent
-        
+        self.ser1 = self.parent.ser1obj
+        self.ser2 = self.parent.ser2obj
         # Create table
         self.setColumnWidth(0, 318)
         self.setColumnWidth(1, 318)
@@ -138,55 +164,9 @@ class seriesAttributeTable(QtGui.QTableWidget):
         
     def returnItems(self):
         return self.selectedItems()
-        
-class seriesAttributes(QtGui.QWidget):
-    def __init__(self, parent=None, s1p=None, s2p=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.parent = parent
-        
-        # Frame
-        self.frame = QtGui.QFrame(parent)
-        self.frame.setGeometry(0,0,800,500)
-        #=== question mark box with instructions?
-        #=== merge button
-        
-        # Create series objects from paths
-        self.ser1 = rmt.getSeries(s1p)
-        self.ser2 = rmt.getSeries(s2p)
-        
-        # Create attribute list for each series
-        ser1atts = self.ser1.output()[0]
-        ser2atts = self.ser2.output()[0]
-        
-        # Create table
-        self.table = seriesAttributeTable(parent=parent, s1atts=ser1atts, s2atts=ser2atts)
-        
-        # Output
-        self.goButton = QtGui.QPushButton(parent)
-        self.goButton.setText('Continue')
-        self.goButton.setGeometry(300,500,200,100)
-        self.goButton.clicked.connect(self.go)
-        
-        self.goButton.show()
-        self.frame.show()
-        
-    def go(self):
-        items = self.table.selectedItems()
-        if len(items) == 86:
-            print('Output Series Attributes')
-            self.goButton.hide()
-            self.frame.hide()
-            for item in items:
-                print(item.type)
-        else:
-            error = QtGui.QMessageBox(self)
-            error.setText('Make sure attributes are selected: 1 per row')
-            error.exec_()
 def main():
     app = QtGui.QApplication(sys.argv)
-    win = mainFrame()
-#     welcomeButton(win) # begin chain of rmtgui stuff
+    rmtFrame = mainFrame()
+    serLoadWidget( rmtFrame )
     sys.exit( app.exec_() )
-
-if __name__ == '__main__':
-    main()
+main()
