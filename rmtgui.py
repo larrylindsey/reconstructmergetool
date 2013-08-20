@@ -65,8 +65,6 @@ class serLoadWidget(QtGui.QWidget):
         self.initUI()
         # Data
         self.parent = parent
-        self.s1p = None
-        self.s2p = None
         
     def initUI(self):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
@@ -102,22 +100,21 @@ class serLoadWidget(QtGui.QWidget):
                                                      "Series File (*.ser)")
         # Change appropriate path
         if self.sender() == self.ser1Button:
-            self.s1p=str(fileName[0])
-            self.parent.ser1path = self.s1p
-            self.parent.ser1obj = rmt.getSeries(self.s1p)
-            self.ser1Button.setText(self.s1p.rsplit('/')[len(self.s1p.split('/'))-1]) # new text = ser name
+            self.parent.ser1path = str(fileName[0])
+            self.parent.ser1obj = rmt.getSeries(self.parent.ser1path)
+            self.ser1Button.setText(self.parent.ser1path.rsplit('/')[len(self.parent.ser1path.split('/'))-1]) # new text = ser name
             self.ser1Button.setFlat(True)
         elif self.sender() == self.ser2Button:
-            self.s2p=str(fileName[0])
-            self.ser2Button.setText(self.s2p.rsplit('/')[len(self.s2p.split('/'))-1])
+            self.parent.ser2path = str(fileName[0])
+            self.parent.ser2obj = rmt.getSeries(self.parent.ser2path)
+            self.ser2Button.setText(self.parent.ser2path.rsplit('/')[len(self.parent.ser2path.split('/'))-1])
             self.ser2Button.setFlat(True)
-            self.parent.ser2path = self.s2p
-            self.parent.ser2obj = rmt.getSeries(self.s2p)
+            
         self.checkContinueButton()
         
     def checkContinueButton(self):
         # Check to see if both series are loaded
-        if self.s1p != None and self.s2p != None:
+        if self.parent.ser1path != None and self.parent.ser2path != None:
             self.continueButton.show()
             self.continueButton.setText('Continue')
             self.continueButton.setFlat(False)
@@ -131,7 +128,10 @@ class serLoadWidget(QtGui.QWidget):
             err.setText('Please enter a name for the new series')
             err.show()
         else:
-            self.parent.serName = self.lineEd.text()
+            name = self.lineEd.text()
+            if '.ser' in name:
+                name = name.replace('.ser','') # series names dont have .ser in them
+            self.parent.serName = name
             serAttributeWidget(self.parent)
             self.close()
         
