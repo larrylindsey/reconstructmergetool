@@ -129,7 +129,7 @@ class Series:
     # print(<Section>) output
     def __str__(self):
         '''Allows use of print(<Series>) function.'''
-        return 'Name: %s\nTag: %s' %(self.getname(),self.gettag())
+        return 'Name: %s\nTag: %s' %(self.name,self.tag)
     def __eq__(self, other):
         '''Allows use of == between multiple objects'''
         return self.output()[0] == other.output()[0] and self.output()[1] == other.output()[1]

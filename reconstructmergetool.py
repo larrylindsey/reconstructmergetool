@@ -8,7 +8,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/19/2013
+#  Date Last Modified: 8/20/2013
 #
 # To do:
     # Needs to be a better way to change image contour and section.img stuff simultaneously
@@ -194,7 +194,7 @@ def mergeSeries(serObj1, serObj2, name=None, \
     print('DONE')
     
     return mergedSeries
-
+    
 def mergeSeriesAttributes(serObj1, serObj2, handler=serAttHandler ):
     '''Merges the attributes from two series. Conflicts handled with handler parameter.
     Attributes are returned in the form of a dictionary.'''
