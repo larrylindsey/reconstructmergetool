@@ -16,7 +16,6 @@ class mainFrame(QtGui.QFrame):
     Data-wise: It contains all the important info regarding the series that are being merged.'''
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
-        self.initUI()
         
         # Data
         self.ser1path = None # Populated in serLoadWidget.loadSeries()
@@ -29,6 +28,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedConts = None # Populated in serContourWidget.nextStep()
         self.mergedZConts = None # Populated in serZContourWidget.nextStep()
         
+        self.initUI()
         
     def initUI(self):
         # Quit Button
@@ -43,21 +43,28 @@ class mainFrame(QtGui.QFrame):
         self.setLineWidth(2)
         self.setMidLineWidth(3)
         
+        # Name indicator: shown in bot-left corner after Series() object is created
+        self.nameIndicator = QtGui.QPushButton(self)
+        self.nameIndicator.hide()
+        
         # Layout
         hbox = QtGui.QHBoxLayout()
         hbox.addStretch(1)
         hbox.addWidget(quitButton)
+        hbox.insertWidget(0, self.nameIndicator)
         vbox = QtGui.QVBoxLayout()
         vbox.addStretch(1)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
-
+        
         self.show()
     
     def mkMergeSer(self):
         '''Creates a Series object with attributes and name.
         Does not contain contours or sections'''
         self.mergedSeries = Series( root=ET.Element('Series', self.mergedAtts), name=self.serName ) #=== where to pick name?
+        self.nameIndicator.setText('Output Series: '+self.serName)
+        self.nameIndicator.show()
         
 class serLoadWidget(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -102,12 +109,12 @@ class serLoadWidget(QtGui.QWidget):
         if self.sender() == self.ser1Button:
             self.parent.ser1path = str(fileName[0])
             self.parent.ser1obj = rmt.getSeries(self.parent.ser1path)
-            self.ser1Button.setText(self.parent.ser1path.rsplit('/')[len(self.parent.ser1path.split('/'))-1]) # new text = ser name
+            self.ser1Button.setText(self.parent.ser1path) # new text = ser name
             self.ser1Button.setFlat(True)
         elif self.sender() == self.ser2Button:
             self.parent.ser2path = str(fileName[0])
             self.parent.ser2obj = rmt.getSeries(self.parent.ser2path)
-            self.ser2Button.setText(self.parent.ser2path.rsplit('/')[len(self.parent.ser2path.split('/'))-1])
+            self.ser2Button.setText(self.parent.ser2path)
             self.ser2Button.setFlat(True)
             
         self.checkContinueButton()
@@ -133,8 +140,8 @@ class serLoadWidget(QtGui.QWidget):
                 name = name.replace('.ser','') # series names dont have .ser in them
             self.parent.serName = name
             serAttributeWidget(self.parent)
-            self.close()
-        
+            self.close()     
+              
 class serAttributeWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -168,9 +175,14 @@ class serAttributeWidget(QtGui.QWidget):
             self.parent.mergedAtts = self.table.returnItems() # turns selectedItems() to a dictionary
             self.continueButton.close()
             self.parent.mkMergeSer()
-#             serContourWidget(self.parent)
+            serContourWidget(self.parent)
             self.close()
-
+    def serAttHandler(self): # rmt.serAttHandler(ser1atts, ser2atts, ser3atts, conflicts)
+        
+        
+        
+        return
+    
 class serAttributeTable(QtGui.QTableWidget):
     '''Receives a parent frame, series1 attributes and series2 attributes. Provides a table display
     GUI for selecting and outputting the attributes to be included in the merged series'''
@@ -224,6 +236,11 @@ class serContourWidget(QtGui.QWidget): #===
         
     def initUI(self):
         self.setGeometry(0,0,800,500)
+        
+        # Instructional message
+        msg = QtGui.QMessageBox(self)
+        msg.setText('Please select a set of series contours to be output to the merged series')
+        msg.show()
         
         
         self.show()
