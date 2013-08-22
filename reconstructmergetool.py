@@ -8,7 +8,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/21/2013
+#  Date Last Modified: 8/22/2013
 #
 # To do:
     # Needs to be a better way to change image contour and section.img stuff simultaneously
