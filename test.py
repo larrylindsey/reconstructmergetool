@@ -156,7 +156,8 @@ class mainFrame(QtGui.QFrame):
                 self.close()
             
                 
-    class mergeSeries(QtGui.QWidget):
+    class mergeSeries(QtGui.QWidget): #=== table is returning items before even shown/selected: QWaitCondition
+                                      # mutex.wait(ULONG_MAX)
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -165,9 +166,12 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             
             # Data
+            self.table = None
             self.parent.ser1obj = rmt.getSeries(self.parent.ser1path)
             self.parent.ser2obj = rmt.getSeries(self.parent.ser2path)
-                
+            
+            # mutex used to keep functions from overlapping i.e. one at a time
+            self.mutex = QtCore.QMutex()
             self.newSer = rmt.mergeSeries(self.parent.ser1obj,
                                           self.parent.ser2obj,
                                           name = self.parent.serName,
@@ -175,37 +179,54 @@ class mainFrame(QtGui.QFrame):
                                           mergeSerContfxn = self.serContHandler,
                                           mergeSerZContfxn = self.serZContHandler)
             self.show()
+            
         def back(self):
             self.parent.serLoadWidget(self.parent)
             self.close()
-        
+        def next(self):
+            msg = QtGui.QMessageBox(self) #===
+            msg.setText('Next Pressed') #===
+            
         def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
+            def next():
+                if len( self.table.selectedItems() ) != len(conflicts): #===
+                    msg = QtGui.QMessageBox(self) #===
+                    msg.setText('Please selected one attribute per row') #===
+                else:
+                    msg = QtGui.QMessageBox(self)
+                    msg.setText('Items selected')
+                    self.mutex.unlock()
+            self.parent.nextButton.clicked.connect( next )
+            self.mutex.lock() #===
             attLabels = [str(conflict) for conflict in conflicts]
             confAtts1 = [ser1atts[conflict] for conflict in conflicts]
             confAtts2 = [ser2atts[conflict] for conflict in conflicts]
             
             # Present conflicts in a 2 column table, can select individual attributes or all for a series
-            table = QtGui.QTableWidget(len(conflicts), 2, parent=self)
-            table.setGeometry(0,0,800,500)
-            table.setColumnWidth(0, 300)
-            table.setColumnWidth(1, 300)
-            table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
-            table.setVerticalHeaderLabels( attLabels )
+            self.table = QtGui.QTableWidget(len(conflicts), 2, parent=self)
+            self.table.setGeometry(0,0,800,500)
+            self.table.setColumnWidth(0, 300)
+            self.table.setColumnWidth(1, 300)
+            self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
+            self.table.setVerticalHeaderLabels( attLabels )
             
+            # Load attributes into their slots: To keep them in order (since dictionaries are unordered)
+            # ...they are pulled out of the dictionary by the key in the verticalHeaderColumn
             for row in range(len(conflicts)):
-                att = table.verticalHeaderItem(row).text()
+                att = self.table.verticalHeaderItem(row).text() # attribute to be extracted
                 # Series 1
                 tableItem = QtGui.QTableWidgetItem( self.parent.ser1obj.output()[0][att] )
-                table.setItem(row, 0, tableItem)
+                self.table.setItem(row, 0, tableItem)
                 # Series 2
                 tableItem = QtGui.QTableWidgetItem( self.parent.ser2obj.output()[0][att] )
-                table.setItem(row, 1, tableItem)
-            table.show()
+                self.table.setItem(row, 1, tableItem)
+            self.table.show()
             
-            return ser1atts #=== output dictionary of atts
         def serContHandler(self, ser1conts, ser2conts, ser3conts):
+            self.currentFxn = 'serContHandler'
             return []
         def serZContHandler(self, ser1zconts, ser2zconts, ser3zconts):
+            self.currentFxn = 'serZContHandler'
             return []
             
 def main():
