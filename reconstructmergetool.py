@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 #  Files: reconstructmergetool.py, rmtgui.py, Series.py, Section.py, Transform.py,
 #         Contour.py, ZContour.py, Image.py, mergeObject.py, reScale.py, findCalFactor.py
 #
@@ -275,7 +275,8 @@ def mergeSection(sec1, sec2, name=None, \
     '''Takes in two sections, returns a 3rd merged section'''
     # Populate shapely polygons
     for contour in sec1.contours: contour.popshape()
-    for contour in sec2.contours: contour.popshape()    
+    for contour in sec2.contours: contour.popshape()
+     
     # create section w/ merged attributes
     if attOverride != None:
         if int(attOverride) == 1:
@@ -284,6 +285,7 @@ def mergeSection(sec1, sec2, name=None, \
             sec3 = mergeSectionAttributes(sec2, sec2, name, handler=secAttfxn)
     else:
         sec3 = mergeSectionAttributes( sec1, sec2, name, handler=secAttfxn )
+    
     # check section images
     if imageOverride != None:
         if int(imageOverride) == 1:
@@ -294,6 +296,7 @@ def mergeSection(sec1, sec2, name=None, \
             sec3.imgs = (sec1.imgs).extend(sec2.imgs)
     else:
         sec3.imgs = mergeSectionImgs( sec1, sec2, handler=secImgfxn )
+    
     # merge section contours
     if contOverride != None:
         if int(contOverride) == 1:
@@ -377,19 +380,19 @@ def mergeSectionContours(s1,s2, handler=secContHandler):
     conts3.extend(conts2)
     return conts3
 
-def bethBellMerge(): #===
+def bethBellMerge(path_FPNCT_BB, path_FPNCT_JNB): #===
     # First load FPNCT_BB and delete everything except those in saveList
-    saveList = [re.compile('[d][0-9]{0,2}vftz[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}vftzcfa[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dcv[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvdh[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvrh[0-0]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvrhclose[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}c[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}c[0-9]{0,2}scale[0-9]{0,2}[a-z]?$', re.I),
-                re.compile('[d][0-9]{0,2}cfa[0-9]{0,2}[a-z]?$', re.I)]
-    ser1 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser')
+    saveList = [re.compile('[d][0-9]{0,2}vftz[0-9]{0,2}[a-z]?$', re.I), # d##vftz##_
+                re.compile('[d][0-9]{0,2}vftzcfa[0-9]{0,2}[a-z]?$', re.I), # d##vftzcfa##_
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}[a-z]?$', re.I), # d##ax##_
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dcv[0-9]{0,2}[a-z]?$', re.I), # d##ax##dcv##_
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvdh[0-9]{0,2}[a-z]?$', re.I), # d##ax##dssvdh##_
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvrh[0-0]{0,2}[a-z]?$', re.I), # d##ax##dssvrh##_
+                re.compile('[d][0-9]{0,2}ax[0-9]{0,2}dssvrhclose[0-9]{0,2}[a-z]?$', re.I), # d##ax##dssvrhclose##_
+                re.compile('[d][0-9]{0,2}c[0-9]{0,2}[a-z]?$', re.I), # d##c##_
+                re.compile('[d][0-9]{0,2}c[0-9]{0,2}scale[0-9]{0,2}[a-z]?$', re.I), # d##c##scale##_
+                re.compile('[d][0-9]{0,2}cfa[0-9]{0,2}[a-z]?$', re.I)] # d##cfa##_
+    ser1 = getSeries(path_FPNCT_BB)
     for section in ser1.sections:
         savedContours = []
         for contour in section.contours:
@@ -400,10 +403,10 @@ def bethBellMerge(): #===
         section.contours = savedContours
     
     # Now load FPNCT_JNB and delete everything in delList
-    delList = [re.compile('[d][0-9]{0,2}c[0-9]{0,2}[a-z]?$', re.I),
-               re.compile('[d][0-9]{0,2}cfa[0-9]{0,2}[a-z]?$', re.I)]
+    delList = [re.compile('[d][0-9]{0,2}c[0-9]{0,2}[a-z]?$', re.I), # d##c##_
+               re.compile('[d][0-9]{0,2}cfa[0-9]{0,2}[a-z]?$', re.I)] # d##cfa##_
     
-    ser2 = getSeries('/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser')
+    ser2 = getSeries(path_FPNCT_JNB)
     for section in ser2.sections:
         deletedContours = []
         for contour in section.contours:

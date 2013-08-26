@@ -2,6 +2,8 @@ from PySide import QtGui, QtCore
 import reconstructmergetool as rmt
 import sys
 from Series import *
+from threading import Thread, Lock
+
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
@@ -157,8 +159,7 @@ class mainFrame(QtGui.QFrame):
             
                 
     class mergeSeries(QtGui.QWidget): #=== table is returning items before even shown/selected: QWaitCondition
-                                      # mutex.wait(ULONG_MAX)
-        def __init__(self, parent=None):
+        def __init__(self, parent=None): # .... mutex.wait(ULONG_MAX)
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
@@ -167,17 +168,16 @@ class mainFrame(QtGui.QFrame):
             
             # Data
             self.table = None
-            self.parent.ser1obj = rmt.getSeries(self.parent.ser1path)
-            self.parent.ser2obj = rmt.getSeries(self.parent.ser2path)
+            self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path) # .ser only, no sections
+            self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path) # "
             
-            # mutex used to keep functions from overlapping i.e. one at a time
-            self.mutex = QtCore.QMutex()
             self.newSer = rmt.mergeSeries(self.parent.ser1obj,
                                           self.parent.ser2obj,
                                           name = self.parent.serName,
                                           mergeSerAttfxn = self.serAttHandler,
                                           mergeSerContfxn = self.serContHandler,
                                           mergeSerZContfxn = self.serZContHandler)
+            self.mainThread.start() #===
             self.show()
             
         def back(self):
@@ -189,15 +189,16 @@ class mainFrame(QtGui.QFrame):
             
         def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
             def next():
+                print( len(self.table.selectedItems()) )
                 if len( self.table.selectedItems() ) != len(conflicts): #===
                     msg = QtGui.QMessageBox(self) #===
                     msg.setText('Please selected one attribute per row') #===
                 else:
                     msg = QtGui.QMessageBox(self)
                     msg.setText('Items selected')
-                    self.mutex.unlock()
+
             self.parent.nextButton.clicked.connect( next )
-            self.mutex.lock() #===
+
             attLabels = [str(conflict) for conflict in conflicts]
             confAtts1 = [ser1atts[conflict] for conflict in conflicts]
             confAtts2 = [ser2atts[conflict] for conflict in conflicts]
@@ -221,14 +222,13 @@ class mainFrame(QtGui.QFrame):
                 tableItem = QtGui.QTableWidgetItem( self.parent.ser2obj.output()[0][att] )
                 self.table.setItem(row, 1, tableItem)
             self.table.show()
-            
+
         def serContHandler(self, ser1conts, ser2conts, ser3conts):
-            self.currentFxn = 'serContHandler'
             return []
+
         def serZContHandler(self, ser1zconts, ser2zconts, ser3zconts):
-            self.currentFxn = 'serZContHandler'
             return []
-            
+         
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
