@@ -8,9 +8,10 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/22/2013
+#  Date Last Modified: 8/27/2013
 #
 # To do:
+    # File input from commandline doesnt work with ~
     # Needs to be a better way to change image contour and section.img stuff simultaneously
         # check for multiple images is in beta (Section.py)
     # verbosity mode
@@ -29,7 +30,7 @@ from ZContour import *
 from lxml import etree as ET
 import time
 from skimage import transform as tf
-
+ 
 if len(sys.argv) >= 3:
     ser = os.path.basename( sys.argv[1] ) # Name of series
     ser2 = os.path.basename( sys.argv[2] ) 

@@ -171,14 +171,15 @@ class mainFrame(QtGui.QFrame):
             self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path) # .ser only, no sections
             self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path) # "
             
-            self.newSer = rmt.mergeSeries(self.parent.ser1obj,
-                                          self.parent.ser2obj,
-                                          name = self.parent.serName,
-                                          mergeSerAttfxn = self.serAttHandler,
-                                          mergeSerContfxn = self.serContHandler,
-                                          mergeSerZContfxn = self.serZContHandler)
-            self.mainThread.start() #===
+# Running threads simultaneously. Will try to compress code later, for now -> separate functions
+#             self.newSer = rmt.mergeSeries(self.parent.ser1obj,
+#                                           self.parent.ser2obj,
+#                                           name = self.parent.serName,
+#                                           mergeSerAttfxn = self.serAttHandler,
+#                                           mergeSerContfxn = self.serContHandler,
+#                                           mergeSerZContfxn = self.serZContHandler)
             self.show()
+            self.serAttHandler()
             
         def back(self):
             self.parent.serLoadWidget(self.parent)
