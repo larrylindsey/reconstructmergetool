@@ -7,7 +7,7 @@ from threading import Thread, Lock
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
-#     return seratts as dict
+#     back/next for each class
 #     when to load series into objects?
 #     Reworking GUI to use functions already in reconstructmergetool
 #     Serconts, serzconts, secatts, secimgs, secconts, etc.
@@ -75,7 +75,7 @@ class mainFrame(QtGui.QFrame):
             self.setGeometry(0,0,800,500)
             self.parent.backButton.setFlat(True)
             self.parent.nextButton.clicked.connect( self.checkNextButton )
-            
+             
             # Series path text bars
             self.s1bar = QtGui.QLineEdit(self)
             self.s1bar.setText(parent.ser1path)
@@ -154,56 +154,49 @@ class mainFrame(QtGui.QFrame):
                 self.parent.serName = self.sNameBar.text().replace('.ser','')
                 
                 # Merge series widget
-                self.parent.mergeSeries(self.parent)
+                self.parent.seriesAttributeWidget(self.parent)
+                self.parent.nextButton.clicked.disconnect( self.checkNextButton )
                 self.close()
-            
-                
-    class mergeSeries(QtGui.QWidget): #=== table is returning items before even shown/selected: QWaitCondition
-        def __init__(self, parent=None): # .... mutex.wait(ULONG_MAX)
+
+    class seriesAttributeWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
-            self.parent.backButton.setFlat(False)
-            self.parent.backButton.clicked.connect( self.back )
-            
-            # Data
             self.table = None
-            self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path) # .ser only, no sections
-            self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path) # "
+            self.conflicts = None
             
-# Running threads simultaneously. Will try to compress code later, for now -> separate functions
-#             self.newSer = rmt.mergeSeries(self.parent.ser1obj,
-#                                           self.parent.ser2obj,
-#                                           name = self.parent.serName,
-#                                           mergeSerAttfxn = self.serAttHandler,
-#                                           mergeSerContfxn = self.serContHandler,
-#                                           mergeSerZContfxn = self.serZContHandler)
+            # Update mainFrame data
+            self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path)
+            self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path)
+            self.parent.nextButton.clicked.connect( self.next )
+            
+            # merge series
+            rmt.mergeSeriesAttributes(self.parent.ser1obj, self.parent.ser2obj, handler=self.serAttHandler)
+            
             self.show()
-            self.serAttHandler()
             
-        def back(self):
-            self.parent.serLoadWidget(self.parent)
-            self.close()
         def next(self):
-            msg = QtGui.QMessageBox(self) #===
-            msg.setText('Next Pressed') #===
-            
+            if len(self.table.selectedItems()) != len(self.conflicts):
+                msg = QtGui.QMessageBox(self)
+                msg.setText('Please select one item per row')
+                msg.show()
+            else:
+                # Create new dictionary of merged attributes
+                newAtts = self.parent.ser1obj.output()[0]
+                resolvedAtts = [ str(item.text()) for item in self.table.selectedItems() ]
+                for row in range(len(self.conflicts)):
+                    att = self.table.verticalHeaderItem(row).text()
+                    newAtts[att] = resolvedAtts.pop(0)
+                self.parent.mergedAttributes = newAtts
+                
+                self.parent.nextButton.clicked.disconnect( self.next )
+                self.parent.seriesContourWidget(self.parent)
+                self.close()
+        
         def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
-            def next():
-                print( len(self.table.selectedItems()) )
-                if len( self.table.selectedItems() ) != len(conflicts): #===
-                    msg = QtGui.QMessageBox(self) #===
-                    msg.setText('Please selected one attribute per row') #===
-                else:
-                    msg = QtGui.QMessageBox(self)
-                    msg.setText('Items selected')
-
-            self.parent.nextButton.clicked.connect( next )
-
             attLabels = [str(conflict) for conflict in conflicts]
-            confAtts1 = [ser1atts[conflict] for conflict in conflicts]
-            confAtts2 = [ser2atts[conflict] for conflict in conflicts]
-            
+            self.conflicts = conflicts
             # Present conflicts in a 2 column table, can select individual attributes or all for a series
             self.table = QtGui.QTableWidget(len(conflicts), 2, parent=self)
             self.table.setGeometry(0,0,800,500)
@@ -211,28 +204,68 @@ class mainFrame(QtGui.QFrame):
             self.table.setColumnWidth(1, 300)
             self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
             self.table.setVerticalHeaderLabels( attLabels )
-            
+
             # Load attributes into their slots: To keep them in order (since dictionaries are unordered)
             # ...they are pulled out of the dictionary by the key in the verticalHeaderColumn
             for row in range(len(conflicts)):
                 att = self.table.verticalHeaderItem(row).text() # attribute to be extracted
                 # Series 1
-                tableItem = QtGui.QTableWidgetItem( self.parent.ser1obj.output()[0][att] )
+                tableItem = QtGui.QTableWidgetItem( ser1atts[att] )
                 self.table.setItem(row, 0, tableItem)
                 # Series 2
-                tableItem = QtGui.QTableWidgetItem( self.parent.ser2obj.output()[0][att] )
+                tableItem = QtGui.QTableWidgetItem( ser2atts[att] )
                 self.table.setItem(row, 1, tableItem)
+            self.table.show() 
+        
+    class seriesContourWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            self.table = None
+            
+            # update mainFrame stuff
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            rmt.mergeSeriesContours(self.parent.ser1obj.contours, self.parent.ser2obj.contours, handler=self.serContHandler)
+            self.show()
+            
+        def serContHandler(self, ser1conts, ser2conts, ser3conts): #=== replace att stuff with cont stuff
+            msg = QtGui.QMessageBox(self)
+            msg.setText('Series Contours are the buttons in the trace palette found in RECONSTRUCT\nSelect the set to be pushed to the merged series')
+            msg.show()
+            
+            self.table = QtGui.QTableWidget(len(ser1conts), 2, parent=self)
+            self.table.setGeometry(0,0,800,500)
+            self.table.setColumnWidth(0, 300)
+            self.table.setColumnWidth(1, 300)
+            self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
+
+            for row in range( len(ser1conts) ):
+                # Series 1
+                tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
+                tableItem.setToolTip( ser1conts[row].output() )
+                self.table.setItem(row, 0, tableItem)
+                # Series 2
+                tableItem = QtGui.QTableWidgetItem( ser2conts[row].name )
+                tableItem.setToolTip( ser2conts[row].output() )
+                self.table.setItem(row, 1, tableItem)
+            
             self.table.show()
 
-        def serContHandler(self, ser1conts, ser2conts, ser3conts):
-            return []
-
-        def serZContHandler(self, ser1zconts, ser2zconts, ser3zconts):
-            return []
-         
+        def next(self):
+            msg = QtGui.QMessageBox(self)
+            msg.setText('NEXT') #===
+            msg.show()
+            
+        def back(self):
+            msg = QtGui.QMessageBox(self)
+            msg.setText('BACK') #===
+            msg.show()
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
-    a = mainFrame.serLoadWidget(rmtFrame)   
+    mainFrame.serLoadWidget(rmtFrame)   
     sys.exit( app.exec_() )
 main()
