@@ -8,7 +8,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/27/2013
+#  Date Last Modified: 8/30/2013
 #
 # To do:
     # File input from commandline doesnt work with ~
@@ -420,6 +420,8 @@ def bethBellMerge(path_FPNCT_BB, path_FPNCT_JNB): #===
     ser3 = mergeSeries(ser1, ser2, name='FPNCT_merge')
     # imageOverride set to 2; imageOverride 1 has different image and domain1 transforms
     ser3.sections = mergeAllSections(ser1, ser2, name='FPNCT_merge', imageOverride=2)
+    
+    # OUTPUT
     ser3.writeseries('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
     ser3.writesections('/home/michaelm/Documents/Test Series/bb/FPNCT_merge/')
     
