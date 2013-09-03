@@ -4,6 +4,8 @@ import sys
 from Series import *
 
 # To Do:
+#     when to load series into objects?
+#     Reworking GUI to use functions already in reconstructmergetool
 #     Serconts, serzconts, secatts, secimgs, secconts, etc.
 #     QPushButton.setAcceptDrops(True) for load series
 #     Allow multiple images option
@@ -17,237 +19,448 @@ class mainFrame(QtGui.QFrame):
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
         
-        # Data
-        self.ser1path = None # Populated in serLoadWidget.loadSeries()
-        self.ser2path = None # "
-        self.ser1obj = None # "
-        self.ser2obj = None # "
-        self.serName = None # "
-        self.mergedAtts = None # Populated in serAttributeWidget.nextStep()
-        self.mergedSeries = None # Populated in self.mkMergeSer()
-        self.mergedConts = None # Populated in serContourWidget.nextStep()
-        self.mergedZConts = None # Populated in serZContourWidget.nextStep()
+        # Main Data (accessed regularly by subsequent functions)
+        self.ser1path = 'Drag and drop, or enter path to, series 1 file'
+        self.ser2path = 'Drag and drop, or enter path to, series 2 file'
+        self.serName = 'Enter name of new series'
+        self.ser1obj = None
+        self.ser2obj = None
         
+        # More Data
+        self.mergedAttributes = None
+        self.mergedSerContours = None
+        self.mergedSerZContours = None
+        
+        # Load Functional Frame
         self.initUI()
         
     def initUI(self):
-        # Quit Button
-        quitButton = QtGui.QPushButton(self)
-        quitButton.setText('Quit')
-        quitButton.clicked.connect( QtCore.QCoreApplication.instance().quit )
-        
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
         self.setWindowTitle('Reconstructmergetool v.1')
-        self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Plain)
+        self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Plain)
         self.setLineWidth(2)
         self.setMidLineWidth(3)
         
-        # Name indicator: shown in bot-left corner after Series() object is created
-        self.nameIndicator = QtGui.QPushButton(self)
-        self.nameIndicator.hide()
+        # Next button
+        self.nextButton = QtGui.QPushButton(self)
+        self.nextButton.setText('Next')
+
+        # Back button
+        self.backButton = QtGui.QPushButton(self)
+        self.backButton.setText('Back')
+
+        # Layout: Puts buttons in bottom-right corner
+        hbox = QtGui.QHBoxLayout() # Horizontal
+        hbox.addStretch(1) # Push down
+        hbox.addWidget(self.backButton)
+        hbox.addWidget(self.nextButton)
         
-        # Layout
-        hbox = QtGui.QHBoxLayout()
-        hbox.addStretch(1)
-        hbox.addWidget(quitButton)
-        hbox.insertWidget(0, self.nameIndicator)
-        vbox = QtGui.QVBoxLayout()
-        vbox.addStretch(1)
+        vbox = QtGui.QVBoxLayout() # Vertical
+        vbox.addStretch(1) # Push right
         vbox.addLayout(hbox)
         self.setLayout(vbox)
         
+        # Show mainFrame()
         self.show()
     
-    def mkMergeSer(self):
-        '''Creates a Series object with attributes and name.
-        Does not contain contours or sections'''
-        self.mergedSeries = Series( root=ET.Element('Series', self.mergedAtts), name=self.serName ) #=== where to pick name?
-        self.nameIndicator.setText('Output Series: '+self.serName)
-        self.nameIndicator.show()
-        
-class serLoadWidget(QtGui.QWidget):
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.initUI()
-        # Data
-        self.parent = parent
-        
-    def initUI(self):
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
-        self.setGeometry(0,0,800,500)
-        
-        # Load Series Buttons
-        self.ser1Button = QtGui.QPushButton('Load Series 1\n(may take a few seconds)', parent=self)
-        self.ser1Button.setGeometry(400-150,100,300,100)
-        self.ser1Button.clicked.connect( self.loadSeries )
-        
-        self.ser2Button = QtGui.QPushButton('Load Series 2\n(may take a few seconds)', parent=self)
-        self.ser2Button.setGeometry(400-150,250,300,100)
-        self.ser2Button.clicked.connect( self.loadSeries )
-        
-        # Series Name lineEdit
-        self.lineEd = QtGui.QLineEdit(self)
-        self.lineEd.setText('<Enter name for new series>')
-        self.lineEd.setGeometry(400-100,362,200,25)
-        self.lineEd.setAlignment(QtCore.Qt.AlignCenter)
-        
-        # Continue button
-        self.continueButton = QtGui.QPushButton(self)
-        self.continueButton.setText('Load both series\nto continue')
-        self.continueButton.setGeometry(400-75,400,150,75)
-        self.continueButton.setFlat(True)
-        
-        self.show()
-        
-    def loadSeries(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,
-                                                     "Load Series",
-                                                     "/home/",
-                                                     "Series File (*.ser)")
-        # Change appropriate path
-        if self.sender() == self.ser1Button:
-            self.parent.ser1path = str(fileName[0])
-            self.parent.ser1obj = rmt.getSeries(self.parent.ser1path)
-            self.ser1Button.setText(self.parent.ser1path) # new text = ser name
-            self.ser1Button.setFlat(True)
-        elif self.sender() == self.ser2Button:
-            self.parent.ser2path = str(fileName[0])
-            self.parent.ser2obj = rmt.getSeries(self.parent.ser2path)
-            self.ser2Button.setText(self.parent.ser2path)
-            self.ser2Button.setFlat(True)
+    class serLoadWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            self.parent.backButton.setFlat(True)
+            self.parent.nextButton.clicked.connect( self.checkNextButton )
+             
+            # Series path text bars
+            self.s1bar = QtGui.QLineEdit(self)
+            self.s1bar.setText(parent.ser1path)
+            self.s1browse = QtGui.QPushButton(self)
+            self.s1browse.setIconSize(QtCore.QSize(25,25))
+            self.s1browse.setText('Browse')
+            self.s1browse.clicked.connect( self.browseSer )
             
-        self.checkContinueButton()
-        
-    def checkContinueButton(self):
-        # Check to see if both series are loaded
-        if self.parent.ser1path != None and self.parent.ser2path != None:
-            self.continueButton.show()
-            self.continueButton.setText('Continue')
-            self.continueButton.setFlat(False)
-            self.continueButton.clicked.connect( self.nextStep )
+            self.s2bar = QtGui.QLineEdit(self)
+            self.s2bar.setText(parent.ser2path)
+            self.s2browse = QtGui.QPushButton(self)
+            self.s2browse.setIconSize(QtCore.QSize(25,25))
+            self.s2browse.setText('Browse')
+            self.s2browse.clicked.connect( self.browseSer )
             
-    def nextStep(self):
-        '''Updates data in the mainFrame() class'''
-        print('New series name: '+str(self.lineEd.text()))
-        if self.lineEd.text() == None or self.lineEd.text() == '<Enter name for new series>' or self.lineEd.text() == '':
-            err = QtGui.QMessageBox(self)
-            err.setText('Please enter a name for the new series')
-            err.show()
-        else:
-            name = self.lineEd.text()
-            if '.ser' in name:
-                name = name.replace('.ser','') # series names dont have .ser in them
-            self.parent.serName = name
-            serAttributeWidget(self.parent)
-            self.close()     
-              
-class serAttributeWidget(QtGui.QWidget):
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        # Data
-        self.parent = parent
-        self.ser1obj = parent.ser1obj
-        self.ser2obj = parent.ser2obj
-        self.initUI()
-        
-        self.setGeometry(0,0,800,500)
-        
-    def initUI(self):
-        self.table = serAttributeTable(parent = self)
-        
-        # Continue button
-        self.continueButton = QtGui.QPushButton(self.parent) # Parent = mainFrame()
-        self.continueButton.setText('Continue')
-        self.continueButton.setGeometry(400-75,500,150,75)
-        self.continueButton.clicked.connect( self.nextStep )
-    
-        self.continueButton.show()
-        self.show()
-        
-    def nextStep(self):
-        selectedAtts = self.table.selectedItems() # dictionary of selected attributes
-        if len(selectedAtts) != 86:
-            err = QtGui.QMessageBox(self)
-            err.setText('Please select one item per row to continue\n(86 items total must be selected)\nClick on the series name to choose all attributes for that series')
-            err.show()
-        else:
-            self.parent.mergedAtts = self.table.returnItems() # turns selectedItems() to a dictionary
-            self.continueButton.close()
-            self.parent.mkMergeSer()
-            serContourWidget(self.parent)
-            self.close()
-    def serAttHandler(self): # rmt.serAttHandler(ser1atts, ser2atts, ser3atts, conflicts)
-        
-        
-        
-        return
-    
-class serAttributeTable(QtGui.QTableWidget):
-    '''Receives a parent frame, series1 attributes and series2 attributes. Provides a table display
-    GUI for selecting and outputting the attributes to be included in the merged series'''
-    def __init__(self, parent=None):
-        QtGui.QTableWidget.__init__(self, len(parent.ser1obj.output()[0]), 2, parent=parent)
-        self.parent = parent
-        self.ser1obj = self.parent.ser1obj
-        self.ser2obj = self.parent.ser2obj
-        # Create table
-        self.setGeometry(0,0,800,500)
-        self.setColumnWidth(0, 318)
-        self.setColumnWidth(1, 318)
-        
-        # Make attribute labels for rows, series names for columns
-        self.setHorizontalHeaderLabels( [self.ser1obj.name, self.ser2obj.name] )
-        self.setVerticalHeaderLabels( [attribute for attribute in self.ser1obj._attribs] )
-        
-        # Some rows need to be taller to show all output
-        self.setWordWrap(True)
-        self.resizeRowsToContents()
-        self.setRowHeight(55, 100) # borderColors
-        self.setRowHeight(56, 100) # fillcolors
-        self.setRowHeight(83, 75) # mvmtIncrement
-        self.setRowHeight(84, 75) # ctrlIncrement
-        self.setRowHeight(85, 75) # shiftIncrement
-        
-        # Load table with attributes
-        for row in range(len(self.ser1obj.output()[0])):
-            header = self.verticalHeaderItem(row).text()
-            # Series 1
-            tableItem = QtGui.QTableWidgetItem( self.ser1obj.output()[0][header] )
-            self.setItem(row,0,tableItem)
-            # Series 2
-            tableItem = QtGui.QTableWidgetItem( self.ser2obj.output()[0][header] )
-            self.setItem(row,1,tableItem)
-        
-        self.show()
-        
-    def returnItems(self):
-        '''Returns dictionary of selected attributes'''
-        selAtts = [ str(item.text()) for item in self.selectedItems() ]
-        attDict = {}
-        for att in self.ser1obj._attribs:
-            attDict[att] = selAtts.pop(0)
-        return attDict
+            # Series name text bar
+            self.sNameBar = QtGui.QLineEdit(self)
+            self.sNameBar.setText(parent.serName)
+            
+            # Layout
+            hbox1 = QtGui.QHBoxLayout()
+            hbox1.addWidget(self.s1bar)
+            hbox1.addWidget(self.s1browse)
+            hbox1.insertSpacing(0,150)
+            hbox1.insertSpacing(-1,150)
+            
+            hbox2 = QtGui.QHBoxLayout()
+            hbox2.addWidget(self.s2bar)
+            hbox2.addWidget(self.s2browse)
+            hbox2.insertSpacing(0,150)
+            hbox2.insertSpacing(-1,150)
+            
+            hbox3 = QtGui.QHBoxLayout()
+            hbox3.addWidget(self.sNameBar)
+            hbox3.insertSpacing(0,300)
+            hbox3.insertSpacing(-1,300)
+            
+            vbox = QtGui.QVBoxLayout()
+            vbox.insertSpacing(0,200)
 
-class serContourWidget(QtGui.QWidget): #===
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.initUI()
+            vbox.addLayout(hbox1)
+            vbox.addLayout(hbox2)
+            vbox.addLayout(hbox3)
+            
+            self.setLayout(vbox)
+            self.show()
         
-    def initUI(self):
-        self.setGeometry(0,0,800,500)
+        def browseSer(self):
+            '''Displays file browser and updates text in s1bar or s2bar.
+            Parent data is not updated until next button function is executed
+            successfully.'''
+            path = QtGui.QFileDialog.getOpenFileName(self,
+                                                     'Load Series',
+                                                     '/home/',
+                                                     'Series File (*.ser)')
+            path = str(path[0]) # extract path and turn unicode -> regstr
+            if self.sender() == self.s1browse: 
+                self.s1bar.setText(path)
+            elif self.sender() == self.s2browse:
+                self.s2bar.setText(path)
         
-        # Instructional message
-        msg = QtGui.QMessageBox(self)
-        msg.setText('Please select a set of series contours to be output to the merged series')
-        msg.show()
+        def checkNextButton(self):
+            msg = QtGui.QMessageBox(self)
+            if '.ser' not in self.s1bar.text() or '.ser' not in self.s2bar.text():
+                msg.setText('Please enter valid paths for both series')
+                msg.show()
+            elif self.sNameBar.text() == 'Enter name of new series' or self.sNameBar.text() == '':
+                msg.setText('Please enter a valid series name')
+                msg.show()
+            else:
+                msg.setText('Creating new series: %s'%(self.sNameBar.text()))
+                msg.show()
+                # Update mainFrame() data
+                self.parent.ser1path = self.s1bar.text()
+                self.parent.ser2path = self.s2bar.text()
+                self.parent.serName = self.sNameBar.text().replace('.ser','')
+                
+                # Merge series widget
+                self.parent.seriesAttributeWidget(self.parent)
+                self.parent.nextButton.clicked.disconnect( self.checkNextButton )
+                self.close()
+
+    class seriesAttributeWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            self.table = None
+            self.conflicts = None
+            
+            # Update mainFrame data
+            self.parent.setWindowTitle('Series Attributes') #===
+            self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path)
+            self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path)
+            self.parent.backButton.setFlat(False)
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            # merge series
+            rmt.mergeSeriesAttributes(self.parent.ser1obj, self.parent.ser2obj, handler=self.serAttHandler)
+            
+            self.show()
+            
+        def next(self):
+            if len(self.table.selectedItems()) != len(self.conflicts):
+                msg = QtGui.QMessageBox(self)
+                msg.setText('Please select one item per row')
+                msg.show()
+            else:
+                # Create new dictionary of merged attributes
+                newAtts = self.parent.ser1obj.output()[0]
+                resolvedAtts = [ str(item.text()) for item in self.table.selectedItems() ]
+                for row in range(len(self.conflicts)):
+                    att = self.table.verticalHeaderItem(row).text()
+                    newAtts[att] = resolvedAtts.pop(0)
+                self.parent.mergedAttributes = newAtts
+                
+                self.parent.nextButton.clicked.disconnect( self.next )
+                self.parent.backButton.clicked.disconnect( self.back )
+                self.parent.seriesContourWidget(self.parent)
+                self.close()
         
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.serLoadWidget( self.parent )
+            self.close()
         
-        self.show()
+        def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
+            attLabels = [str(conflict) for conflict in conflicts]
+            self.conflicts = conflicts
+            # Present conflicts in a 2 column table, can select individual attributes or all for a series
+            self.table = QtGui.QTableWidget(len(conflicts), 2, parent=self)
+            self.table.setGeometry(0,0,800,500)
+            self.table.setColumnWidth(0, 300)
+            self.table.setColumnWidth(1, 300)
+            self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
+            self.table.setVerticalHeaderLabels( attLabels )
+
+            # Load attributes into their slots: To keep them in order (since dictionaries are unordered)
+            # ...they are pulled out of the dictionary by the key in the verticalHeaderColumn
+            for row in range(len(conflicts)):
+                att = self.table.verticalHeaderItem(row).text() # attribute to be extracted
+                # Series 1
+                tableItem = QtGui.QTableWidgetItem( ser1atts[att] )
+                self.table.setItem(row, 0, tableItem)
+                # Series 2
+                tableItem = QtGui.QTableWidgetItem( ser2atts[att] )
+                self.table.setItem(row, 1, tableItem)
+            self.table.show() 
         
+    class seriesContourWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            self.table = None
+            
+            # update mainFrame stuff
+            self.parent.setWindowTitle('Series Contours') #===
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            rmt.mergeSeriesContours(self.parent.ser1obj.contours, self.parent.ser2obj.contours, handler=self.serContHandler)
+            self.show()
+            
+        def serContHandler(self, ser1conts, ser2conts, ser3conts):            
+            self.table = QtGui.QTableWidget(len(ser1conts), 2, parent=self)
+            self.table.setGeometry(0,0,800,500)
+            self.table.setColumnWidth(0, 300)
+            self.table.setColumnWidth(1, 300)
+            self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
+
+            for row in range( len(ser1conts) ):
+                # Series 1
+                tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
+                self.table.setItem(row, 0, tableItem)
+                # Series 2
+                tableItem = QtGui.QTableWidgetItem( ser2conts[row].name )
+                self.table.setItem(row, 1, tableItem)
+            
+            self.table.show()
+
+        def next(self):
+            if len(self.table.selectedItems()) != 20:
+                msg = QtGui.QMessageBox(self)
+                msg.setText('Please select one contour per row')
+                msg.show()
+            else:
+                self.parent.nextButton.clicked.disconnect( self.next )
+                self.parent.backButton.clicked.disconnect( self.back )
+                mainFrame.seriesZContourWidget( self.parent )
+                self.close()
+            
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.seriesAttributeWidget(self.parent)
+            self.close()
+    
+    class seriesZContourWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            self.table = None
+            
+            # Update mainFrame data
+            self.parent.setWindowTitle('Series ZContours') #===
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            rmt.mergeSeriesZContours(self.parent.ser1obj.contours,
+                                                    self.parent.ser2obj.contours,
+                                                    handler=self.serZContHandler)
+            
+            self.show()
+            
+        def serZContHandler(self, ser1zconts, ser2zconts, ser3zconts): #===
+            msg = QtGui.QMessageBox(self)
+            msg.setText('Identical ZContours have been merged. Please select any additional ZContours to carry over')
+            msg.show()
+            
+            self.prepTables(ser1zconts, ser2zconts, ser3zconts)  
+        
+        def prepTables(self, ser1zconts, ser2zconts, ser3zconts):
+            table = QtGui.QTableWidget( max(len(ser1zconts),len(ser2zconts)), 2, parent=self )
+            table.setGeometry(0,0,800,500)
+            table.setColumnWidth(0, 300)
+            table.setColumnWidth(1, 300)
+            print('s1z: '+str(len(ser1zconts)))
+            print('s2z: '+str(len(ser2zconts)))
+            for row in range( max(len(ser1zconts),len(ser2zconts)) ):
+                # Series 1
+                tableItem = QtGui.QTableWidgetItem( ser1zconts[row].name )
+                table.setItem(row, 0, tableItem)
+                # Series 2
+                if row < len(ser2zconts):
+                    tableItem = QtGui.QTableWidgetItem( ser2zconts[row].name )
+                    table.setItem(row, 1, tableItem)
+            self.table = table
+            self.table.show()
+            
+        def next(self): #===
+            tableItems = [ str(item.text()) for item in self.table.selectedItems() ]
+            for item in tableItems:
+                print(item)
+            
+            # Disconnect buttons and load next window
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionAttributeWidget( self.parent )
+            self.close()
+            
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.seriesContourWidget( self.parent )
+            self.close()
+    
+    class sectionAttributeWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            
+            # Update mainFrame data
+            self.parent.setWindowTitle('Section Attributes') #===
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            self.parent.ser1obj.getSectionsXML(self.parent.ser1path)
+            self.parent.ser2obj.getSectionsXML(self.parent.ser2path)
+            self.show()
+            
+        def next(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionImageWidget( self.parent )
+            self.close()
+            
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.seriesZContourWidget( self.parent )
+            self.close()
+                   
+    class sectionImageWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            self.series1 = self.parent.ser1obj
+            self.series2 = self.parent.ser2obj
+            
+            # Update mainFrame data
+            self.parent.setWindowTitle('Section Images') #===
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            self.checkMultipleImage()
+            self.show()
+            
+        def checkMultipleImage(self): #===
+            
+            ser1conflictList = []
+            for section in self.series1.sections:
+                ser1conflict = []
+                if len(section.imgs) > 1:
+                    ser1conflict = [img for img in section.imgs]
+                ser1conflictList.append(ser1conflict)
+            
+            ser2conflictList = []
+            for section in self.series2.sections:
+                ser2conflict = []
+                if len(section.imgs) > 1:
+                    ser2conflict = [img for img in section.imgs]
+                ser2conflictList.append(ser2conflict)
+            print('Image conflicts in %s:' %(self.series1.name))
+            print(ser1conflictList)
+            print('Image conflicts in %s:' %(self.series2.name))
+            print(ser2conflictList)
+            
+        def secImgHandler(self): #===
+            return
+         
+        def next(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionContourWidget( self.parent )
+            self.close()
+            
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionAttributeWidget( self.parent )
+            self.close()
+    
+    class sectionContourWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self,parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            
+            # Update mainFrame data
+            self.parent.setWindowTitle('Section Contours') #===
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            self.show()
+            
+        def next(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionContourWidget( self.parent )
+            self.close()
+            
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionImageWidget( self.parent )
+            self.close()
+            
+    class outputWidget(QtGui.QWidget):
+        def __init__(self, parent=None):
+            QtGui.QWidget.__init__(self, parent)
+            self.parent = parent
+            self.setGeometry(0,0,800,500)
+            
+            # Update mainFrame data
+            self.parent.setWindowTitle('Output Merged Series') #===
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+        def next(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            self.close()
+            
+        def back(self):
+            self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.backButton.clicked.disconnect( self.back )
+            mainFrame.sectionContourWidget( self.parent )
+            self.close()
+            
+            
+            
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
-    serLoadWidget( rmtFrame )
+    mainFrame.serLoadWidget(rmtFrame)   
     sys.exit( app.exec_() )
 main()

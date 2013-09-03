@@ -8,7 +8,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 8/30/2013
+#  Date Last Modified: 9/3/2013
 #
 # To do:
     # File input from commandline doesnt work with ~
@@ -113,6 +113,7 @@ def serZContHandler(ser1zconts, ser2zconts, ser3zconts ):
     ser3zconts.extend(ser1zconts)
     ser3zconts.extend(ser2zconts)
     return ser3zconts
+
 def secAttHandler(s1atts, s2atts, comparison):
     mergedAttributes = {}
     for att in comparison:

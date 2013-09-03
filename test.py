@@ -7,7 +7,6 @@ from threading import Thread, Lock
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
-#     back/next for each class
 #     when to load series into objects?
 #     Reworking GUI to use functions already in reconstructmergetool
 #     Serconts, serzconts, secatts, secimgs, secconts, etc.
@@ -24,9 +23,9 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         
         # Main Data (accessed regularly by subsequent functions)
-        self.ser1path = 'Drag and drop, or enter path to, series 1 file'
-        self.ser2path = 'Drag and drop, or enter path to, series 2 file'
-        self.serName = 'Enter name of new series'
+        self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
+        self.serName = 'Apple' #===
         self.ser1obj = None
         self.ser2obj = None
         
@@ -138,16 +137,15 @@ class mainFrame(QtGui.QFrame):
                 self.s2bar.setText(path)
         
         def checkNextButton(self):
-            msg = QtGui.QMessageBox(self)
             if '.ser' not in self.s1bar.text() or '.ser' not in self.s2bar.text():
+                msg = QtGui.QMessageBox(self)
                 msg.setText('Please enter valid paths for both series')
                 msg.show()
             elif self.sNameBar.text() == 'Enter name of new series' or self.sNameBar.text() == '':
+                msg = QtGui.QMessageBox(self)
                 msg.setText('Please enter a valid series name')
                 msg.show()
             else:
-                msg.setText('Creating new series: %s'%(self.sNameBar.text()))
-                msg.show()
                 # Update mainFrame() data
                 self.parent.ser1path = self.s1bar.text()
                 self.parent.ser2path = self.s2bar.text()
@@ -193,12 +191,14 @@ class mainFrame(QtGui.QFrame):
                     newAtts[att] = resolvedAtts.pop(0)
                 self.parent.mergedAttributes = newAtts
                 
+                # Disconnect buttons and load next window
                 self.parent.nextButton.clicked.disconnect( self.next )
                 self.parent.backButton.clicked.disconnect( self.back )
                 self.parent.seriesContourWidget(self.parent)
                 self.close()
         
         def back(self):
+            # Disconnect buttons and load prev window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.serLoadWidget( self.parent )
@@ -233,6 +233,9 @@ class mainFrame(QtGui.QFrame):
             self.parent = parent
             self.setGeometry(0,0,800,500)
             self.table = None
+            self.s1c = None
+            self.s2c = None
+            self.mergedConts = None
             
             # update mainFrame stuff
             self.parent.setWindowTitle('Series Contours') #===
@@ -242,11 +245,7 @@ class mainFrame(QtGui.QFrame):
             rmt.mergeSeriesContours(self.parent.ser1obj.contours, self.parent.ser2obj.contours, handler=self.serContHandler)
             self.show()
             
-        def serContHandler(self, ser1conts, ser2conts, ser3conts): #=== replace att stuff with cont stuff
-            msg = QtGui.QMessageBox(self)
-            msg.setText('Series Contours are the buttons in the trace palette found in RECONSTRUCT\nSelect the set to be pushed to the merged series')
-            msg.show()
-            
+        def serContHandler(self, ser1conts, ser2conts, ser3conts):            
             self.table = QtGui.QTableWidget(len(ser1conts), 2, parent=self)
             self.table.setGeometry(0,0,800,500)
             self.table.setColumnWidth(0, 300)
@@ -262,21 +261,37 @@ class mainFrame(QtGui.QFrame):
                 self.table.setItem(row, 1, tableItem)
             
             self.table.show()
+            self.s1c = ser1conts
+            self.s2c = ser2conts
+            self.mergedConts = ser3conts
+            
+        def returnItems(self):
+            selItems = self.table.selectedItems()
+            selConts = []
+            for item in selItems:
+                if item.column() == 0:
+                    selConts.append( self.s1c[item.row()] )
+                if item.column() == 1:
+                    selConts.append( self.s2c[item.row()] )
+            return selConts
 
         def next(self):
-            msg = QtGui.QMessageBox(self)
-            if len(self.table.selectedItems()) != 20:
-                msg.setText('Please select one contour per row')
+            if ( len(self.mergedConts) + len(self.table.selectedItems()) ) != 20:
+                msg = QtGui.QMessageBox(self)
+                msg.setText('Please select one item per row')
                 msg.show()
             else:
-                msg.setText('NEXT') #===
-                msg.show()
+                # Add the selectedItems() to self.mergedAtts
+                self.parent.mergedSerContours = self.mergedConts.extend( self.returnItems() )
+                
+                # Disconnect buttons and load next window
                 self.parent.nextButton.clicked.disconnect( self.next )
                 self.parent.backButton.clicked.disconnect( self.back )
                 mainFrame.seriesZContourWidget( self.parent )
                 self.close()
             
         def back(self):
+            # Disconnect buttons and load prev window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.seriesAttributeWidget(self.parent)
@@ -287,30 +302,74 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
+            self.table = None
+            self.s1zc = None
+            self.s2zc = None
+            self.mergedZConts = None
             
             # Update mainFrame data
             self.parent.setWindowTitle('Series ZContours') #===
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
             
+            rmt.mergeSeriesZContours(self.parent.ser1obj.contours,
+                                                    self.parent.ser2obj.contours,
+                                                    handler=self.serZContHandler)
+            
             self.show()
             
+        def serZContHandler(self, ser1zconts, ser2zconts, ser3zconts):
+            self.s1zc = ser1zconts
+            self.s2zc = ser2zconts
+            self.mergedZConts = ser3zconts
+            
+            self.prepTables(ser1zconts, ser2zconts, ser3zconts)  
+
+        def prepTables(self, ser1zconts, ser2zconts, ser3zconts):
+            table = QtGui.QTableWidget( max(len(ser1zconts),len(ser2zconts)), 2, parent=self )
+            table.setGeometry(0,0,800,500)
+            table.setColumnWidth(0, 300)
+            table.setColumnWidth(1, 300)
+            for row in range( max(len(ser1zconts),len(ser2zconts)) ):
+                # Series 1
+                if row < len(ser1zconts): # Prevent index out of range
+                    tableItem = QtGui.QTableWidgetItem( ser1zconts[row].name )
+                    table.setItem(row, 0, tableItem)
+                # Series 2
+                if row < len(ser2zconts):
+                    tableItem = QtGui.QTableWidgetItem( ser2zconts[row].name )
+                    table.setItem(row, 1, tableItem)
+            self.table = table
+            self.table.show()
+        
+        def returnItems(self):
+            selItems = self.table.selectedItems()
+            selzConts = []
+            for item in selItems:
+                if item.column() == 0:
+                    selzConts.append( self.s1zc[item.row()] )
+                if item.column() == 1:
+                    selzConts.append( self.s2zc[item.row()] )
+            return selzConts   
+        
         def next(self):
-            msg = QtGui.QMessageBox(self)
-            msg.setText('NEXT') #===
-            msg.show()
+            self.mergedZConts.extend( self.returnItems() )
+            self.parent.mergedSerZContours = self.mergedZConts
+            
+            # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
             
         def back(self):
+            # Disconnect buttons and load prev window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.seriesContourWidget( self.parent )
             self.close()
     
-    class sectionAttributeWidget(QtGui.QWidget):
+    class sectionAttributeWidget(QtGui.QWidget): #=== should be basically the same as seriesAttributeWidget()
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -320,14 +379,11 @@ class mainFrame(QtGui.QFrame):
             self.parent.setWindowTitle('Section Attributes') #===
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-            self.parent.ser1obj.getSectionsXML(self.parent.ser1path)
-            self.parent.ser2obj.getSectionsXML(self.parent.ser2path)
+            self.parent.ser1obj.getSectionsXML( self.parent.ser1path )
+            self.parent.ser2obj.getSectionsXML( self.parent.ser2path )
             self.show()
             
         def next(self):
-            msg = QtGui.QMessageBox(self)
-            msg.setText('NEXT') #===
-            msg.show()
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionImageWidget( self.parent )
@@ -346,6 +402,7 @@ class mainFrame(QtGui.QFrame):
             self.setGeometry(0,0,800,500)
             self.series1 = self.parent.ser1obj
             self.series2 = self.parent.ser2obj
+            self.table = None
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Images') #===
@@ -353,15 +410,18 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             
             self.checkMultipleImage()
+            print('TESTING')
             self.show()
             
-        def checkMultipleImage(self):
-            
+        def checkMultipleImage(self): #===
+            '''Checks series objects for more than one image'''
+            flag = False
             ser1conflictList = []
             for section in self.series1.sections:
                 ser1conflict = []
                 if len(section.imgs) > 1:
                     ser1conflict = [img for img in section.imgs]
+                    flag = True
                 ser1conflictList.append(ser1conflict)
             
             ser2conflictList = []
@@ -369,19 +429,63 @@ class mainFrame(QtGui.QFrame):
                 ser2conflict = []
                 if len(section.imgs) > 1:
                     ser2conflict = [img for img in section.imgs]
+                    flag = True
                 ser2conflictList.append(ser2conflict)
-            print('Image conflicts in %s:' %(self.series1.name))
-            print(ser1conflictList)
-            print('Image conflicts in %s:' %(self.series2.name))
-            print(ser2conflictList)
+            
+            # find the max number of images in a sections: use to set up # of columns in table
+            maxImg = 1
+            for conf in ser1conflictList:
+                if len(conf) > maxImg:
+                    maxImg = len(conf)
+            for conf in ser2conflictList:
+                if len(conf) > maxImg:
+                    maxImg = len(conf)
+            
+            if flag == True: # Does a section contain more than one image? if so, make table
+                msg = QtGui.QMessageBox(self)
+                msg.setText('One or more sections contain more than one image, please make any necessary changes')
+                msg.show()
+                
+                #=== should not be len+len (too many)
+                self.table = QtGui.QTableWidget( (len(ser1conflictList)+len(ser2conflictList)), maxImg, parent=self)
+                self.table.setGeometry(0,0,800,500)
+    
+                # Add multiple image conflicts to table
+                confNames = []
+                count = -1 # cur loc in ser#confList
+                count2 = -1 # row in table
+                for conf in ser1conflictList:
+                    count += 1
+                    if len(conf) > 1:
+                        confNames.append( self.series1.sections[count].name )
+                        count2 += 1
+                        count3 = -1
+                        for img in conf:
+                            count3 += 1
+                            tableItem = QtGui.QTableWidgetItem(str(img)) #===
+                            self.table.setItem(count2, count3, tableItem)
+                count = -1 # cur loc in ser#confList
+                count2 = -1 # row in table
+                for conf in ser2conflictList:
+                    count += 1
+                    if len(conf) > 1:
+                        confNames.append( self.series2.sections[count].name )
+                        count2 += 1
+                        count3 = -1
+                        for img in conf:
+                            count3 += 1
+                            tableItem = QtGui.QTableWidgetItem(str(img)) #===
+                            self.table.setItem(count2, count3, tableItem)
+                
+                self.table.setVerticalHeaderLabels(confNames)
+                self.table.resizeRowsToContents()
+                self.table.resizeColumnsToContents()
+                self.table.show()
             
         def secImgHandler(self): #===
             return
          
         def next(self):
-            msg = QtGui.QMessageBox(self)
-            msg.setText('NEXT') #===
-            msg.show()
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )
@@ -407,9 +511,6 @@ class mainFrame(QtGui.QFrame):
             self.show()
             
         def next(self):
-            msg = QtGui.QMessageBox(self)
-            msg.setText('NEXT') #===
-            msg.show()
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )
@@ -433,9 +534,6 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             
         def next(self):
-            msg = QtGui.QMessageBox(self)
-            msg.setText('NEXT: Output') #===
-            msg.show()
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             self.close()
