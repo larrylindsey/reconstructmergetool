@@ -33,6 +33,9 @@ class mainFrame(QtGui.QFrame):
         self.mergedAttributes = None
         self.mergedSerContours = None
         self.mergedSerZContours = None
+        self.mergedSecAttributes = None
+        self.mergedSecImages = None
+        self.mergedSecContours = None
         
         # Load Functional Frame
         self.initUI()
@@ -245,7 +248,7 @@ class mainFrame(QtGui.QFrame):
             rmt.mergeSeriesContours(self.parent.ser1obj.contours, self.parent.ser2obj.contours, handler=self.serContHandler)
             self.show()
             
-        def serContHandler(self, ser1conts, ser2conts, ser3conts):            
+        def serContHandler(self, ser1conts, ser2conts, ser3conts):
             self.table = QtGui.QTableWidget(len(ser1conts), 2, parent=self)
             self.table.setGeometry(0,0,800,500)
             self.table.setColumnWidth(0, 300)
@@ -403,6 +406,7 @@ class mainFrame(QtGui.QFrame):
             self.series1 = self.parent.ser1obj
             self.series2 = self.parent.ser2obj
             self.table = None
+            self.imgConflicts = [] # list of lists of images for sections. len(inner-list) >1 if there's a conflict
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Images') #===
@@ -410,49 +414,60 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             
             # Find conflicting images
-            imgConflicts = [] # list of lists of images for sections. len(inner-list) >1 if there's a conflict
             for i in range(len(self.series1.sections)):
-                imgConflicts.append( rmt.mergeSectionImgs(self.series1.sections[i],
+                self.imgConflicts.append( rmt.mergeSectionImgs(self.series1.sections[i],
                                      self.series2.sections[i],
                                      handler=self.secImgHandler) )
-            self.prepTable(imgConflicts)
+            self.prepTable()
             self.show()
           
         def secImgHandler(self, s1, s2):
             return [s1.imgs[0], s2.imgs[0]]
         
-        def prepTable(self, imgConflicts):
-            table = QtGui.QTableWidget( len([conf for conf in imgConflicts if len(conf)>1]), 2, parent=self )
+        def prepTable(self):
+            table = QtGui.QTableWidget( len([conf for conf in self.imgConflicts if len(conf)>1]), 2, parent=self )
             table.setGeometry(0,0,800,500)
             table.setColumnWidth(0, 300)
             table.setColumnWidth(1, 300)
             
             sectionNames = []
             count = -1
-            for i in range(len(imgConflicts)):
-                if len(imgConflicts[i]) > 1:
+            for i in range(len(self.imgConflicts)):
+                if len(self.imgConflicts[i]) > 1:
                     count += 1
                     sectionNames.append( str(self.parent.serName)+'.'+str(i))
-                    tableItem = QtGui.QTableWidgetItem( str(imgConflicts[i][0]) )
+                    tableItem = QtGui.QTableWidgetItem( str(self.imgConflicts[i][0]) )
                     table.setItem(count, 0, tableItem)
-                    tableItem = QtGui.QTableWidgetItem( str(imgConflicts[i][1]) )
+                    tableItem = QtGui.QTableWidgetItem( str(self.imgConflicts[i][1]) )
                     table.setItem(count, 1, tableItem)
             table.setVerticalHeaderLabels(sectionNames)
             table.resizeRowsToContents()
             self.table = table
             self.table.show()
+        
         def returnItems(self):
             selItems = self.table.selectedItems()
             for item in selItems:
-                print(self.table.verticalHeaderItem(item.row()).text())
+                sectionNum = int(self.table.verticalHeaderItem(item.row()).text().rsplit('.')[1])
+                if item.column() == 0:
+                    self.imgConflicts[sectionNum] = self.series1.sections[sectionNum].imgs
+                elif item.column() == 1:
+                    self.imgConflicts[sectionNum] = self.series2.sections[sectionNum].imgs
+            
         def next(self):
             self.returnItems()
-            
+            self.parent.mergedSecImages = self.imgConflicts
+            for item in self.parent.mergedSecImages:
+                if len(item) != 1:
+                    msg = QtGui.QMessageBox(self)
+                    msg.setText('Please select one image per row')
+                    msg.show()
+                    return
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )
             self.close()
-            
+              
         def back(self):
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )

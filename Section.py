@@ -92,7 +92,7 @@ class Section:
                     raw_input('ZCont in section') #=== testing ^ question
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)
-        #=== Check for multiple images; still need to match domain1 contour and image transforms (imageOverride issue only?)
+        #=== still need to match domain1 contour and image transforms (imageOverride issue only?)
 #================NO LONGER SUPPORTS MULTIPLE IMAGES==================
 #             srcList = set([img.src for img in images])
 #             if len(srcList) == 1:
