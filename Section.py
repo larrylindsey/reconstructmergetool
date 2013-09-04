@@ -18,6 +18,9 @@ class Section:
         self.alignLocked = self.popalignLocked(root)
         # Private
         self._attribs = ['index','thickness','alignLocked'] # List of all attributes, used for creating an attribute dictionary for output (see output(self))
+        
+        self.checkMultImgs()
+        
     # LENGTH
     def __len__(self):
         '''Allows use of len(<Section>) function. Returns length of contours'''
@@ -39,6 +42,10 @@ class Section:
         '''Allows use of != between multiple objects'''
         return self.output() != other.output() 
 # Accessors
+    def checkMultImgs(self):
+        if len(self.imgs) > 1:
+            print(self.name+': Multiple images found. Only last one kept.')
+            self.imgs = [self.imgs.pop()]
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building xml'''
         attributes = {}
@@ -86,8 +93,6 @@ class Section:
                     Z = ZContour(child, Transform(transform))
                     contours.append(Z)
         #=== Check for multiple images; still need to match domain1 contour and image transforms (imageOverride issue only?)
-        if len(images) > 1:
-            images = [images.pop()]
 #================NO LONGER SUPPORTS MULTIPLE IMAGES==================
 #             srcList = set([img.src for img in images])
 #             if len(srcList) == 1:

@@ -432,7 +432,7 @@ class mainFrame(QtGui.QFrame):
             for i in range(len(imgConflicts)):
                 if len(imgConflicts[i]) > 1:
                     count += 1
-                    sectionNames.append( 'Section.'+str(i))
+                    sectionNames.append( str(self.parent.serName)+'.'+str(i))
                     tableItem = QtGui.QTableWidgetItem( str(imgConflicts[i][0]) )
                     table.setItem(count, 0, tableItem)
                     tableItem = QtGui.QTableWidgetItem( str(imgConflicts[i][1]) )
@@ -441,8 +441,13 @@ class mainFrame(QtGui.QFrame):
             table.resizeRowsToContents()
             self.table = table
             self.table.show()
-            
+        def returnItems(self):
+            selItems = self.table.selectedItems()
+            for item in selItems:
+                print(self.table.verticalHeaderItem(item.row()).text())
         def next(self):
+            self.returnItems()
+            
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )
