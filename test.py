@@ -306,7 +306,7 @@ class mainFrame(QtGui.QFrame):
             self.s1zc = None
             self.s2zc = None
             self.mergedZConts = None
-            
+
             # Update mainFrame data
             self.parent.setWindowTitle('Series ZContours') #===
             self.parent.nextButton.clicked.connect( self.next )
@@ -379,7 +379,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.setWindowTitle('Section Attributes') #===
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-            self.parent.ser1obj.getSectionsXML( self.parent.ser1path )
+            self.parent.ser1obj.getSectionsXML( self.parent.ser1path ) #=== taking too long, need some sort of msg?
             self.parent.ser2obj.getSectionsXML( self.parent.ser2path )
             self.show()
             
@@ -406,82 +406,11 @@ class mainFrame(QtGui.QFrame):
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Images') #===
-            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.nextButton.clicked.connect( self.finishMultImgCheck ) #===
             self.parent.backButton.clicked.connect( self.back )
             
-            self.checkMultipleImage()
-            print('TESTING')
             self.show()
-            
-        def checkMultipleImage(self): #===
-            '''Checks series objects for more than one image'''
-            flag = False
-            ser1conflictList = []
-            for section in self.series1.sections:
-                ser1conflict = []
-                if len(section.imgs) > 1:
-                    ser1conflict = [img for img in section.imgs]
-                    flag = True
-                ser1conflictList.append(ser1conflict)
-            
-            ser2conflictList = []
-            for section in self.series2.sections:
-                ser2conflict = []
-                if len(section.imgs) > 1:
-                    ser2conflict = [img for img in section.imgs]
-                    flag = True
-                ser2conflictList.append(ser2conflict)
-            
-            # find the max number of images in a sections: use to set up # of columns in table
-            maxImg = 1
-            for conf in ser1conflictList:
-                if len(conf) > maxImg:
-                    maxImg = len(conf)
-            for conf in ser2conflictList:
-                if len(conf) > maxImg:
-                    maxImg = len(conf)
-            
-            if flag == True: # Does a section contain more than one image? if so, make table
-                msg = QtGui.QMessageBox(self)
-                msg.setText('One or more sections contain more than one image, please make any necessary changes')
-                msg.show()
-                
-                #=== should not be len+len (too many)
-                self.table = QtGui.QTableWidget( (len(ser1conflictList)+len(ser2conflictList)), maxImg, parent=self)
-                self.table.setGeometry(0,0,800,500)
-    
-                # Add multiple image conflicts to table
-                confNames = []
-                count = -1 # cur loc in ser#confList
-                count2 = -1 # row in table
-                for conf in ser1conflictList:
-                    count += 1
-                    if len(conf) > 1:
-                        confNames.append( self.series1.sections[count].name )
-                        count2 += 1
-                        count3 = -1
-                        for img in conf:
-                            count3 += 1
-                            tableItem = QtGui.QTableWidgetItem(str(img)) #===
-                            self.table.setItem(count2, count3, tableItem)
-                count = -1 # cur loc in ser#confList
-                count2 = -1 # row in table
-                for conf in ser2conflictList:
-                    count += 1
-                    if len(conf) > 1:
-                        confNames.append( self.series2.sections[count].name )
-                        count2 += 1
-                        count3 = -1
-                        for img in conf:
-                            count3 += 1
-                            tableItem = QtGui.QTableWidgetItem(str(img)) #===
-                            self.table.setItem(count2, count3, tableItem)
-                
-                self.table.setVerticalHeaderLabels(confNames)
-                self.table.resizeRowsToContents()
-                self.table.resizeColumnsToContents()
-                self.table.show()
-            
+          
         def secImgHandler(self): #===
             return
          
