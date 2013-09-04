@@ -406,14 +406,42 @@ class mainFrame(QtGui.QFrame):
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Images') #===
-            self.parent.nextButton.clicked.connect( self.finishMultImgCheck ) #===
+            self.parent.nextButton.clicked.connect( self.next ) #===
             self.parent.backButton.clicked.connect( self.back )
             
+            # Find conflicting images
+            imgConflicts = [] # list of lists of images for sections. len(inner-list) >1 if there's a conflict
+            for i in range(len(self.series1.sections)):
+                imgConflicts.append( rmt.mergeSectionImgs(self.series1.sections[i],
+                                     self.series2.sections[i],
+                                     handler=self.secImgHandler) )
+            self.prepTable(imgConflicts)
             self.show()
           
-        def secImgHandler(self): #===
-            return
-         
+        def secImgHandler(self, s1, s2):
+            return [s1.imgs[0], s2.imgs[0]]
+        
+        def prepTable(self, imgConflicts):
+            table = QtGui.QTableWidget( len([conf for conf in imgConflicts if len(conf)>1]), 2, parent=self )
+            table.setGeometry(0,0,800,500)
+            table.setColumnWidth(0, 300)
+            table.setColumnWidth(1, 300)
+            
+            sectionNames = []
+            count = -1
+            for i in range(len(imgConflicts)):
+                if len(imgConflicts[i]) > 1:
+                    count += 1
+                    sectionNames.append( 'Section.'+str(i))
+                    tableItem = QtGui.QTableWidgetItem( str(imgConflicts[i][0]) )
+                    table.setItem(count, 0, tableItem)
+                    tableItem = QtGui.QTableWidgetItem( str(imgConflicts[i][1]) )
+                    table.setItem(count, 1, tableItem)
+            table.setVerticalHeaderLabels(sectionNames)
+            table.resizeRowsToContents()
+            self.table = table
+            self.table.show()
+            
         def next(self):
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )

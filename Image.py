@@ -77,7 +77,7 @@ class Image:
         return str(self.mag), str(self.contrast), str(self.brightness), \
             str(self.red).lower(), str(self.green).lower(), str(self.blue).lower(), str(self.src)
     def getattribs(self):
-        return self.mag, self.contrast, self.brightness, self.red, self.green, self.blue, self.src
+        return self.src, self.mag, self.contrast, self.brightness, self.red, self.green, self.blue
 
 # Mutators
     def popred(self, node):
