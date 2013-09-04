@@ -2,7 +2,6 @@ from PySide import QtGui, QtCore
 import reconstructmergetool as rmt
 import sys
 from Series import *
-from threading import Thread, Lock
 
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
