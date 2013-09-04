@@ -3,7 +3,6 @@ from Image import *
 from Contour import *
 from ZContour import *
 class Section:
-    '''Section object. Does not currently support multiple images.'''
 # Python Functions
     # INITIALIZE
     def __init__(self, root=None, name='Unknown'): #root is xml tree
@@ -88,14 +87,17 @@ class Section:
                     contours.append(Z)
         #=== Check for multiple images; still need to match domain1 contour and image transforms (imageOverride issue only?)
         if len(images) > 1:
-            srcList = set([img.src for img in images])
-            if len(srcList) == 1:
-                images = [images.pop()] #=== used to be [images[0]], changed to [images.pop()]
-            else: #===
-                print('Multiple image sources present in '+self.name)
-            domain1 = [cont for cont in contours if cont.name == 'domain1'][0]
-            if images[0].transform.output() != domain1.transform.output():
-                raw_input('Image transform does not match domain1 transform for '+self.name)
+            images = [images.pop()]
+#================NO LONGER SUPPORTS MULTIPLE IMAGES==================
+#             srcList = set([img.src for img in images])
+#             if len(srcList) == 1:
+#                 images = [images[0]]
+#             else: #===
+#                 print('Multiple image sources present in '+self.name)
+#             domain1 = [cont for cont in contours if cont.name == 'domain1'][0]
+#             if images[0].transform.output() != domain1.transform.output():
+#                 raw_input('Image transform does not match domain1 transform for '+self.name)
+#====================================================================
         return contours, images
     def popindex(self, root):
         if root == None:

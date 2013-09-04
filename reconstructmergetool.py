@@ -341,13 +341,17 @@ def mergeSectionAttributes(sec1, sec2, name=None, handler=secAttHandler):
 
 def mergeSectionImgs(s1, s2, handler=secImgHandler):
     '''Returns imgs to be addeded to new section'''
+#========== section.py no longer keeps >1 image ===========
     # Do they have the same number of images?
-    if len(s1.imgs) != len(s2.imgs):
-        return handler(s1,s2)
+#     if len(s1.imgs) != len(s2.imgs):
+#         return handler(s1,s2)
     # Do the images contain the same data?
-    for i in range( len(s1.imgs) ):
-        if not s1.imgs[i] == s2.imgs[i]:
-            return handler(s1,s2)
+#     for i in range( len(s1.imgs) ):
+#         if not s1.imgs[i] == s2.imgs[i]:
+#             return handler(s1,s2)
+#===========================================================
+    if s1.imgs[0] != s2.imgs[0]:
+        return handler(s1,s2)
     # If all the same, just copy 1st series' images
     return s1.imgs
 

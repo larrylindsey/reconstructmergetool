@@ -26,12 +26,14 @@ class Image:
         '''Allows use of == between multiple objects'''
         if other == None:
             return False
-        return self.output() == other.output()
+#         return self.output() == other.output()
+        return self.transform == other.transform or self.src == other.src
     def __ne__(self, other):
         '''Allows use of != between multiple objects'''
         if other == None:
             return True
-        return self.output() != other.output()
+#         return self.output() != other.output()
+        return self.transform != other.transform or self.src != other.src
 # Accessors
     def output(self):
         '''Returns a dictionary of attributes'''
