@@ -263,9 +263,10 @@ class Series:
             root.append( ET.Element(contour.tag,contour.output()) )
     
         strlist = ET.tostringlist(root)
+        #==========================================================================
         # Needs to be in order: hideTraces/unhideTraces/hideDomains/unhideDomains
             # Fix order:
-        strlist = strlist[0].split(' ') # Separate single string into multple strings for each elem
+        strlist = strlist[0].split(' ') # Separate single string into multiple strings for each elem
         count = 0
         for elem in strlist:
             if 'hideTraces' in elem and 'unhideTraces' not in elem:
@@ -286,6 +287,7 @@ class Series:
             if 'unhideDomains' in elem:
                 strlist.insert(4, strlist.pop(count))
             count += 1
+        #==========================================================================
             # Recombine into list of single str
         tempstr = ''
         for elem in strlist:

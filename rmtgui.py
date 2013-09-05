@@ -33,6 +33,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecAttributes = None
         self.mergedSecImages = None
         self.mergedSecContours = None
+        self.mergedSeries = None #===
         self.outputPath = 'Enter directory for output'
         
         # Load Functional Frame
@@ -41,7 +42,7 @@ class mainFrame(QtGui.QFrame):
     def initUI(self):
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
-        self.setWindowTitle('Reconstructmergetool v.1')
+        self.setWindowTitle('Reconstructmergetool v.BETA')
         self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Plain)
         self.setLineWidth(2)
         self.setMidLineWidth(3)

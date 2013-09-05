@@ -35,6 +35,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecAttributes = None
         self.mergedSecImages = None
         self.mergedSecContours = None
+        self.mergedSeries = None #===
         self.outputPath = 'Enter directory for output'
         
         # Load Functional Frame
@@ -43,7 +44,7 @@ class mainFrame(QtGui.QFrame):
     def initUI(self):
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
-        self.setWindowTitle('Reconstructmergetool v.1')
+        self.setWindowTitle('Reconstructmergetool v.BETA')
         self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Plain)
         self.setLineWidth(2)
         self.setMidLineWidth(3)
@@ -522,18 +523,65 @@ class mainFrame(QtGui.QFrame):
             self.outBar = QtGui.QLineEdit(self)
             self.outBar.setText(self.parent.outputPath)
             
+            # Series name bar
+            self.nameBar = QtGui.QLineEdit(self)
+            self.nameBar.setText( self.parent.serName )
+            
+            # Output path browse button
+            self.outBarBrowse = QtGui.QPushButton(self)
+            self.outBarBrowse.setIconSize(QtCore.QSize(25,25))
+            self.outBarBrowse.setText('Browse')
+            self.outBarBrowse.clicked.connect( self.browseOutPath )
+
             #=== Checkbox for transferring picture files?
             
             
             # Layout
+            hbox = QtGui.QHBoxLayout()
+            hbox.addWidget(self.outBar)
+            hbox.addWidget(self.outBarBrowse)
+            hbox.insertSpacing(0,150)
+            hbox.insertSpacing(-1,150)
             
+            hbox2 = QtGui.QHBoxLayout()
+            hbox2.addWidget(self.nameBar)
+            hbox2.insertSpacing(0,300)
+            hbox2.insertSpacing(-1,300)
             
+            vbox = QtGui.QVBoxLayout()
+            vbox.insertSpacing(0,200)
+
+            vbox.addLayout(hbox)
+            vbox.addLayout(hbox2)
+
+            self.setLayout(vbox)
             self.show()
             
+        def browseOutPath(self):
+            path = QtGui.QFileDialog.getExistingDirectory(self,
+                                                     'Select Output Directory',
+                                                     '/home/')
+            path = str(path)+'/' # extract path and turn unicode -> regstr
+            self.parent.outputPath = path
+            self.outBar.setText(path)
+                
         def next(self):
             # Output merged series, close program (restart program?)
-            
-            self.close()
+            if '/' in self.parent.outputPath:
+                #=== Check for last minute name change
+                if str( self.nameBar.text() ) != str( self.parent.serName ):
+                    self.parent.mergedSeries.name == str( self.nameBar.text() ) #=== still need to create mergeSerObj
+                    print(self.parent.mergedSeries.name)
+                    for section in self.parent.mergedSeries.sections:
+                        section.name == str( self.nameBar.text() )
+                        print(section.name)
+                self.parent.mergedSeries.writeseries( self.parent.outputPath )
+                self.parent.mergedSeries.writesections( self.parent.outputPath )
+                self.close()
+            else:
+                msg = QtGui.QMessageBox(self)
+                msg.setText('Invalid directory, please fix')
+                msg.show()
             
         def back(self):
             # Disconnect buttons and load previous window
