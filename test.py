@@ -35,6 +35,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecAttributes = None
         self.mergedSecImages = None
         self.mergedSecContours = None
+        self.outputPath = 'Enter directory for output'
         
         # Load Functional Frame
         self.initUI()
@@ -517,7 +518,14 @@ class mainFrame(QtGui.QFrame):
             self.parent.nextButton.setText('Finish and close') #===
             self.parent.backButton.clicked.connect( self.back )
             
-            # Output txt line
+            # Output path edit bar
+            self.outBar = QtGui.QLineEdit(self)
+            self.outBar.setText(self.parent.outputPath)
+            
+            #=== Checkbox for transferring picture files?
+            
+            
+            # Layout
             
             
             self.show()
