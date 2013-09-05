@@ -456,18 +456,22 @@ class mainFrame(QtGui.QFrame):
         def next(self):
             self.returnItems()
             self.parent.mergedSecImages = self.imgConflicts
+            
+            # Check for no multiple images
             for item in self.parent.mergedSecImages:
                 if len(item) != 1:
                     msg = QtGui.QMessageBox(self)
                     msg.setText('Please select one image per row')
                     msg.show()
                     return
+            # Disconnect buttons and open next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )
             self.close()
               
         def back(self):
+            # Disconnect buttons and open previous window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionAttributeWidget( self.parent )
@@ -487,12 +491,14 @@ class mainFrame(QtGui.QFrame):
             self.show()
             
         def next(self):
+            # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
-            mainFrame.sectionContourWidget( self.parent )
+            mainFrame.outputWidget( self.parent )
             self.close()
             
         def back(self):
+            # Disconnect buttons and load previous window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionImageWidget( self.parent )
@@ -503,18 +509,26 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
+            self.outPath = None
             
             # Update mainFrame data
             self.parent.setWindowTitle('Output Merged Series') #===
             self.parent.nextButton.clicked.connect( self.next )
+            self.parent.nextButton.setText('Finish and close') #===
             self.parent.backButton.clicked.connect( self.back )
             
+            # Output txt line
+            
+            
+            self.show()
+            
         def next(self):
-            self.parent.nextButton.clicked.disconnect( self.next )
-            self.parent.backButton.clicked.disconnect( self.back )
+            # Output merged series, close program (restart program?)
+            
             self.close()
             
         def back(self):
+            # Disconnect buttons and load previous window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )

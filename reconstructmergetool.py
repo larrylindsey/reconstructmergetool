@@ -372,16 +372,16 @@ def checkOverlappingConts(conts1, conts2):
                 conts1.remove(cont2)
     return ovlp1, ovlp2
 
-def mergeSectionContours(s1,s2, handler=secContHandler):
+def mergeSectionContours(s1,s2, handler=secContHandler): #===
     '''Returns merged contours between two sections'''
     # Lists of all contours in parallel sections
     conts1 = [cont for cont in s1.contours]
     conts2 = [cont for cont in s2.contours]
     conts3 = []
-    while len(conts1) != 0 and len(conts2) != 0:
+    while len(conts1) != 0 and len(conts2) != 0: # Go until lists are empty
         for elem in handler( *checkOverlappingConts(conts1,conts2) ):
             conts3.append( elem )
-    # Append leftover, non-overlapping contours
+    #=== Append leftover, non-overlapping contours
     conts3.extend(conts1)
     conts3.extend(conts2)
     return conts3
