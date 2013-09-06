@@ -13,7 +13,7 @@ class Series:
         self.tag = 'Series'
         
         self.contours = self.popcontours(root)
-        self.sections = [] #Sorted in reconstructmergetool.py, getsections()
+        self.sections = [] #Sorted in reconstructmergetool.getsections()
         
         self.index = self.popindex(root)
         self.viewport = self.popviewport(root)

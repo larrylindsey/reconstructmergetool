@@ -22,9 +22,9 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         
         # Main Data (accessed regularly by subsequent functions)
-        self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
-        self.serName = 'Apple' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
+        self.serName = 'rmtg' #===
         self.ser1obj = None
         self.ser2obj = None
         
@@ -35,7 +35,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecAttributes = None
         self.mergedSecImages = None
         self.mergedSecContours = None
-        self.mergedSeries = None #===
+        self.mergedSeries = None #=== First created (seriesAttributeWidget.next()) w/ no Contours/ZContours
         self.outputPath = 'Enter directory for output'
         
         # Load Functional Frame
@@ -194,6 +194,7 @@ class mainFrame(QtGui.QFrame):
                     att = self.table.verticalHeaderItem(row).text()
                     newAtts[att] = resolvedAtts.pop(0)
                 self.parent.mergedAttributes = newAtts
+                self.parent.mergedSeries = Series(root=ET.Element('Series',newAtts),name=self.parent.serName)
                 
                 # Disconnect buttons and load next window
                 self.parent.nextButton.clicked.disconnect( self.next )
@@ -484,14 +485,122 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self,parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
+            self.table1 = None # Series 1 table
+            self.table2 = None # Merge table
+            self.table3 = None # Series 2 table
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
             
+            # Contour handling functions
+            self.prepContours()
+            #===
+            s1unique = ['a','b','c']
+            confs = ['d','e']
+            ovlps = ['f','g']
+            s2unique = ['h','i','j']
+            self.prepTables(s1unique, confs, ovlps, s2unique)
+            
+            # Layout
+            vbox = QtGui.QVBoxLayout() # Holds all the boxes below
+            vbox1 = QtGui.QVBoxLayout() # Holds the 3 contour tables
+            vbox2 = QtGui.QVBoxLayout() # Section number horizontal
+            hbox1 = QtGui.QHBoxLayout() # Series 1 contours
+            hbox2 = QtGui.QHBoxLayout() # Overlapping contour table
+            hbox3 = QtGui.QHBoxLayout() # Series 2 contours
+            hbox1.addWidget(self.table1)
+            hbox2.addWidget(self.table2)
+            hbox3.addWidget(self.table3)
+            vbox1.addLayout(hbox1)
+            vbox1.addLayout(hbox2)
+            vbox1.addLayout(hbox3)
+            vbox.addLayout(vbox1)
+            vbox.addLayout(vbox2)
+            self.setLayout(vbox)
+            
+            
+            
             self.show()
             
+        def prepContours(self):
+            return
+            allConflicts = []
+            for section in range(len(self.parent.ser1obj.sections)):
+                self.mergeSectionContours(self.parent.ser1obj.sections[section],
+                                          self.parent.ser2obj.sections[section],
+                                          handler=self.secContHandler)
+#=================DOESNT WORK AS DESIGNED in rmt.py=====================               
+#                 rmt.mergeSectionContours(self.parent.ser1obj,
+#                                          self.parent.ser2obj,
+#                                          handler=self.secContHandler)
+#=======================================================================
+
+        def mergeSectionContours(self, section1, section2, handler=None):
+            # Lists of all contours in parallel sections
+            conts1 = [cont for cont in section1.contours]
+            conts2 = [cont for cont in section2.contours]
+            # Populate shapely shapes
+            for contour in conts1: contour.popshape()
+            for contour in conts2: contour.popshape()
+            conts3 = []
+            while len(conts1) != 0 and len(conts2) != 0: # Go until lists are empty
+                for elem in handler( *rmt.checkOverlappingConts(conts1,conts2) ):
+                    conts3.append( elem )
+
+        def prepTables(self, s1unique, confs, ovlps, s2unique):
+            table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
+            table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
+            table3 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
+            
+            table1.setHorizontalHeaderLabels(['Unique 1'])
+            for row in range(len(s1unique)):
+                tableItem = QtGui.QTableWidgetItem( s1unique[row] )
+                table1.setItem(row, 0, tableItem)
+            table2.setHorizontalHeaderLabels(['Conflicts/Overlaps'])
+            for row in range(len(confs)+len(ovlps)):
+                if row < len(confs):
+                    tableItem = QtGui.QTableWidgetItem( confs[row] )
+                    table2.setItem(row, 0, tableItem)
+                elif row >= len(confs):
+                    tableItem = QtGui.QTableWidgetItem( ovlps[row-len(confs)] )
+                    table2.setItem(row, 0, tableItem)
+            table3.setHorizontalHeaderLabels(['Unique 2'])
+            for row in range(len(s2unique)):
+                tableItem = QtGui.QTableWidgetItem( s1unique[row] )
+                table3.setItem(row, 0, tableItem)
+            
+            self.table1 = table1
+            self.table2 = table2
+            self.table3 = table3
+            self.table1.show()
+            self.table2.show()
+            self.table3.show()
+            
+        def secContHandler(self, ovlp1, ovlp2):
+            completeOverlap = []
+            if len(ovlp2) == 0:
+                completeOverlap.append(ovlp1.pop())
+        
+            # Check for same contours and remove (prevents unnecessary user input)
+            for elem in ovlp1:
+                for elem2 in ovlp2:
+                    if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
+                        completeOverlap.append( elem )
+                        ovlp1.remove( elem )
+                        ovlp2.remove( elem2 )
+                        
+            # Check rest of contours
+            conflictList = []
+            for elem in ovlp1:
+                for elem2 in ovlp2:
+                    if elem.overlaps(elem2) != 1 and elem.overlaps(elem2) != 0: # If contours overlap, but not 100% -> user input
+                        conflictList.append( [elem, elem2] )
+            print('compovlp: '+str([cont.name for cont in completeOverlap]))
+            print('conflist: '+str([cont.name for cont in conflictList]))
+            return completeOverlap, conflictList
+        
         def next(self):
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
@@ -511,7 +620,6 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
-            self.outPath = None
             
             # Update mainFrame data
             self.parent.setWindowTitle('Output Merged Series') #===
@@ -568,13 +676,14 @@ class mainFrame(QtGui.QFrame):
         def next(self):
             # Output merged series, close program (restart program?)
             if '/' in self.parent.outputPath:
-                #=== Check for last minute name change
                 if str( self.nameBar.text() ) != str( self.parent.serName ):
-                    self.parent.mergedSeries.name == str( self.nameBar.text() ) #=== still need to create mergeSerObj
-                    print(self.parent.mergedSeries.name)
+                    self.parent.serName = str( self.nameBar.text() )
+                    self.parent.mergedSeries.name = str( self.nameBar.text() )
+                    count=-1
                     for section in self.parent.mergedSeries.sections:
-                        section.name == str( self.nameBar.text() )
-                        print(section.name)
+                        count+=1
+                        section.name = str( self.nameBar.text() )+'.'+str( count )
+                        print(section.name) #===
                 self.parent.mergedSeries.writeseries( self.parent.outputPath )
                 self.parent.mergedSeries.writesections( self.parent.outputPath )
                 self.close()
@@ -589,8 +698,6 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionContourWidget( self.parent )
             self.close()
-            
-            
             
 def main():
     app = QtGui.QApplication(sys.argv)

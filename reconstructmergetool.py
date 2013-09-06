@@ -76,7 +76,8 @@ def getSeriesXML(path_to_series):
     
     root = tree.getroot() #Series
     #Create series object
-    series = Series(root, path_to_series.split('/')[len(path_to_series.split('/'))-1].replace('.ser',''))
+    serName = path_to_series.split('/')[len(path_to_series.split('/'))-1].replace('.ser','')
+    series = Series(root, serName)
     print('DONE')
     print('\tSeries: '+series.name)
     return series
@@ -142,7 +143,7 @@ def secImgHandler(s1,s2):
 
 def secContHandler(ovlp1, ovlp2):
     '''Handles lists of overlapping contours, returns list of handled contours. Checks for 100% ovlp first'''
-    output = []
+    output = [] 
     if len(ovlp2) == 0:
         output.append(ovlp1.pop())
 
@@ -275,9 +276,9 @@ def mergeSection(sec1, sec2, name=None, \
                  imageOverride = None, \
                  contOverride = None):
     '''Takes in two sections, returns a 3rd merged section'''
-    # Populate shapely polygons
-    for contour in sec1.contours: contour.popshape()
-    for contour in sec2.contours: contour.popshape()
+#     # Populate shapely polygons =====================Moved to mergeSectionContours
+#     for contour in sec1.contours: contour.popshape()
+#     for contour in sec2.contours: contour.popshape()
      
     # create section w/ merged attributes
     if attOverride != None:
@@ -356,7 +357,7 @@ def mergeSectionImgs(s1, s2, handler=secImgHandler):
     return s1.imgs
 
 def checkOverlappingConts(conts1, conts2):
-    '''Returns lists of mutually overlapping contours'''
+    '''Returns lists of mutually overlapping contours. Must have same name'''
     ovlp1 = [conts1.pop()]
     ovlp2 = []
     # Check sec2 for conts that ovlp with ovlp1
@@ -377,6 +378,9 @@ def mergeSectionContours(s1,s2, handler=secContHandler): #===
     # Lists of all contours in parallel sections
     conts1 = [cont for cont in s1.contours]
     conts2 = [cont for cont in s2.contours]
+    # Populate shapely shapes
+    for contour in conts1: contour.popshape()
+    for contour in conts2: contour.popshape()
     conts3 = []
     while len(conts1) != 0 and len(conts2) != 0: # Go until lists are empty
         for elem in handler( *checkOverlappingConts(conts1,conts2) ):
