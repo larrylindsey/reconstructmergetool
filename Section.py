@@ -42,6 +42,9 @@ class Section:
         '''Allows use of != between multiple objects'''
         return self.output() != other.output() 
 # Accessors
+    def popshapes(self):
+        for contour in self.contours:
+            contour.popshape()
     def checkMultImgs(self):
         if len(self.imgs) > 1:
             print(self.name+': Multiple images found. Only last one kept.')
