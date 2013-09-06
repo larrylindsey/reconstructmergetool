@@ -268,10 +268,6 @@ def mergeSection(sec1, sec2, name=None, \
                  imageOverride = None, \
                  contOverride = None):
     '''Takes in two sections, returns a 3rd merged section'''
-#     # Populate shapely polygons =====================Moved to mergeSectionContours
-#     for contour in sec1.contours: contour.popshape()
-#     for contour in sec2.contours: contour.popshape()
-     
     # create section w/ merged attributes
     if attOverride != None:
         if int(attOverride) == 1:
