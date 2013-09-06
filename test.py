@@ -165,7 +165,8 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
-            self.table = None
+            self.table1 = None
+            self.table2 = None
             self.conflicts = None
             
             # Update mainFrame data
@@ -176,8 +177,15 @@ class mainFrame(QtGui.QFrame):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
             
-            # merge series
+            # Merge series
             rmt.mergeSeriesAttributes(self.parent.ser1obj, self.parent.ser2obj, handler=self.serAttHandler)
+            
+            # Layout
+#             vbox = QtGui.QVBoxLayout()
+#             hbox = QtGui.QHBoxLayout()
+#             hbox.addWidget(self.table1)
+#             hbox.addWidget(self.table2)
+#             vbox.addLayout(hbox)
             
             self.show()
             
@@ -488,6 +496,7 @@ class mainFrame(QtGui.QFrame):
             self.table1 = None # Series 1 table
             self.table2 = None # Merge table
             self.table3 = None # Series 2 table
+            self.table4 = None # Section selection table
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
@@ -505,19 +514,14 @@ class mainFrame(QtGui.QFrame):
             
             # Layout
             vbox = QtGui.QVBoxLayout() # Holds all the boxes below
-            vbox1 = QtGui.QVBoxLayout() # Holds the 3 contour tables
-            vbox2 = QtGui.QVBoxLayout() # Section number horizontal
-            hbox1 = QtGui.QHBoxLayout() # Series 1 contours
-            hbox2 = QtGui.QHBoxLayout() # Overlapping contour table
-            hbox3 = QtGui.QHBoxLayout() # Series 2 contours
-            hbox1.addWidget(self.table1)
-            hbox2.addWidget(self.table2)
-            hbox3.addWidget(self.table3)
-            vbox1.addLayout(hbox1)
-            vbox1.addLayout(hbox2)
-            vbox1.addLayout(hbox3)
-            vbox.addLayout(vbox1)
-            vbox.addLayout(vbox2)
+            hbox1 = QtGui.QHBoxLayout() # For the 3 tables
+            hbox2 = QtGui.QHBoxLayout() # For the section selection table
+            hbox1.addWidget(self.table1) # Series 1
+            hbox1.addWidget(self.table2) # Conflicts/merges
+            hbox1.addWidget(self.table3) # Series 2
+            hbox2.addWidget(self.table4) # section selection
+            vbox.addLayout(hbox1)
+            vbox.addLayout(hbox2)
             self.setLayout(vbox)
             
             
@@ -553,7 +557,9 @@ class mainFrame(QtGui.QFrame):
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
             table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
             table3 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
+            table4 = QtGui.QTableWidget(1, len(self.parent.ser1obj.sections), parent=self)
             
+            # Load labels/items into tables
             table1.setHorizontalHeaderLabels(['Unique 1'])
             for row in range(len(s1unique)):
                 tableItem = QtGui.QTableWidgetItem( s1unique[row] )
@@ -571,12 +577,26 @@ class mainFrame(QtGui.QFrame):
                 tableItem = QtGui.QTableWidgetItem( s1unique[row] )
                 table3.setItem(row, 0, tableItem)
             
+            # Resize tables
+            table1.resizeColumnsToContents()
+            table1.resizeRowsToContents()
+            table2.resizeColumnsToContents()
+            table2.resizeRowsToContents()
+            table3.resizeColumnsToContents()
+            table3.resizeRowsToContents()
+            table4.resizeColumnsToContents()
+            table4.resizeRowsToContents()
+            
+            print(table1.horizontalHeaderItem(0).sizeHint())
+            # Assign tables and show
             self.table1 = table1
             self.table2 = table2
             self.table3 = table3
+            self.table4 = table4
             self.table1.show()
             self.table2.show()
             self.table3.show()
+            self.table4.show()
             
         def secContHandler(self, ovlp1, ovlp2):
             completeOverlap = []
@@ -602,6 +622,7 @@ class mainFrame(QtGui.QFrame):
             return completeOverlap, conflictList
         
         def next(self):
+            
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
