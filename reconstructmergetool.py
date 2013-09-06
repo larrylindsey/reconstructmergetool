@@ -141,9 +141,33 @@ def secImgHandler(s1,s2):
             s3imgs = s2.imgs
     return s3imgs
 
-def secContHandler(compOvlp, confOvlp):
-    '''Receives a list of c'''
-    return
+def secContHandler(uniqueA, compOvlp, confOvlp, uniqueB):
+    '''Returns list of contours to be added to merged series'''
+    outputContours = []
+    
+    # Add unique contours to output
+    outputContours.extend(uniqueA)
+    outputContours.extend(uniqueB)
+    
+    # Add a single copy of compOvlp pair to output
+    for pair in compOvlp:
+        outputContours.append(pair[0])
+    
+    # Handle conflicting overlaps
+    for pair in confOvlp:
+        print('Conflicting contour overlap')
+        print(pair[0])
+        print(pair[1])
+        sel = raw_input('Please enter 1, 2, or both to select what to output: ')
+        if sel == '1':
+            outputContours.append(pair[0])
+        elif sel == '2':
+            outputContours.append(pair[1])
+        else:
+            outputContours.append(pair[0])
+            outputContours.append(pair[1])
+    
+    return outputContours
 
 def mergeSeries(serObj1, serObj2, name=None, \
                 mergeSerAttfxn = serAttHandler, \
@@ -317,9 +341,9 @@ def mergeSectionImgs(s1, s2, handler=secImgHandler):
 
 def checkOverlappingContours(contsA, contsB):
     '''Returns lists of mutually overlapping contours. ONLY CHECKS SAME NAME.''' 
-    ovlpsA = [] # Contours of section A that have overlaps in section B
-    ovlpsB = [] # Contours of section B that have overlaps in section A
-    #===================================
+    ovlpsA = [] # Section A contours that have overlaps in section B
+    ovlpsB = [] # Section B contours that have overlaps in section A
+
     for contA in contsA:
         ovlpA = []
         ovlpB = []
@@ -329,29 +353,14 @@ def checkOverlappingContours(contsA, contsB):
                 ovlpB.append(contB)
         ovlpsA.extend(ovlpA)
         ovlpsB.extend(ovlpB)
-    #===================================
-#     while len(contsA) != 0 and len(contsB) != 0:
-#         ovlpA = [contsA.pop()]
-#         ovlpB = []
-#         
-#         # Check for conts in section B that ovlp with the item in ovlpA[0]
-#         for contB in contsB:
-#             if contB.name == ovlpA[0].name and contB.overlaps(ovlpA[0]) != 0:
-#                 ovlpB.append(contB)
-#                 contsB.remove(contB)
-#                 
-#         # Now find overlaps in sectionA that ovlp with ovlpB conts
-#         for contB in ovlpB:
-#             for contA in contsA:
-#                 if contA.name == contB.name and contA.overlaps(contB) != 0:
-#                     ovlpA.append(contA)
-#                     contsA.remove(contA)
-#         
-#         # If matches are found, add to appropriate ovlps group for this section           
-#         if len(ovlpB) > 0:
-#             ovlpsA.extend(ovlpA)
-#             ovlpsB.extend(ovlpB)
-    print('chk: '+str(ovlpsA)+' '+str(ovlpsB))
+    
+    # Remove all non-unique contours from contsA and contsB
+    for cont in ovlpsA:
+        if cont in contsA:
+            contsA.remove(cont)
+    for cont in ovlpsB:
+        if cont in contsB:
+            contsB.remove(cont)
     return ovlpsA, ovlpsB
 
 def separateOverlappingContours(ovlpsA, ovlpsB): #=== probably a more efficient way of doing this?
@@ -360,14 +369,14 @@ def separateOverlappingContours(ovlpsA, ovlpsB): #=== probably a more efficient 
     compOvlps = [] # list of completely overlapping contour pairs
     confOvlps = [] # list of conflicting overlapping contour pairs
     
-    # Check for completely overlapping contours 1st
+    # Check for COMPLETELY overlapping contours 1st
     for contA in ovlpsA:
         for contB in ovlpsB:
             if contA.name == contB.name:
                 if contA.overlaps(contB) == 1:
                     compOvlps.append([contA, contB])
                 
-    # Check for conflicting overlapping contours
+    # Check for CONFLICTING overlapping contours
     for contA in ovlpsA:
         for contB in ovlpsB:
             if contA.name == contB.name:
@@ -392,13 +401,14 @@ def mergeSectionContours(sA,sB, handler=secContHandler): #===
     
     # Separate into completely overlapping or incompletely overlapping
     compOvlp, confOvlp = separateOverlappingContours(ovlpsA, ovlpsB)
-    
+
     # Identify unique contours
-    uniqueA, uniqueB = checkUniqueContours()
+    uniqueA, uniqueB = contsA, contsB
     
+    # Handle conflicts
+    mergedConts = handler(uniqueA, compOvlp, confOvlp, uniqueB)
     
-#     mergedConts = handler(uniqueA, compOvlp, confOvlp, uniqueB)
-    return
+    return mergedConts
     
 
 def bethBellMerge(path_FPNCT_BB, path_FPNCT_JNB): #===
