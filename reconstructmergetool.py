@@ -319,29 +319,39 @@ def checkOverlappingContours(contsA, contsB):
     '''Returns lists of mutually overlapping contours. ONLY CHECKS SAME NAME.''' 
     ovlpsA = [] # Contours of section A that have overlaps in section B
     ovlpsB = [] # Contours of section B that have overlaps in section A
-    
-    while len(contsA) != 0 and len(contsB) != 0:
-        ovlpA = [contsA.pop()]
+    #===================================
+    for contA in contsA:
+        ovlpA = []
         ovlpB = []
-        
-        # Check for conts in section B that ovlp with the item in ovlpA[0]
         for contB in contsB:
-            if contB.name == ovlpA[0].name and contB.overlaps(ovlpA[0]) != 0:
+            if contA.name == contB.name and contA.overlaps(contB) != 0:
+                ovlpA.append(contA)
                 ovlpB.append(contB)
-                contsB.remove(contB)
-                
-        # Now find overlaps in sectionA that ovlp with ovlpB conts
-        for contB in ovlpB:
-            for contA in contsA:
-                if contA.name == contB.name and contA.overlaps(contB) != 0:
-                    ovlpA.append(contA)
-                    contsA.remove(contA)
-        
-        # If matches are found, add to appropriate ovlps group for this section           
-        if len(ovlpB) > 0:
-            ovlpsA.extend(ovlpA)
-            ovlpsB.extend(ovlpB)
-        
+        ovlpsA.extend(ovlpA)
+        ovlpsB.extend(ovlpB)
+    #===================================
+#     while len(contsA) != 0 and len(contsB) != 0:
+#         ovlpA = [contsA.pop()]
+#         ovlpB = []
+#         
+#         # Check for conts in section B that ovlp with the item in ovlpA[0]
+#         for contB in contsB:
+#             if contB.name == ovlpA[0].name and contB.overlaps(ovlpA[0]) != 0:
+#                 ovlpB.append(contB)
+#                 contsB.remove(contB)
+#                 
+#         # Now find overlaps in sectionA that ovlp with ovlpB conts
+#         for contB in ovlpB:
+#             for contA in contsA:
+#                 if contA.name == contB.name and contA.overlaps(contB) != 0:
+#                     ovlpA.append(contA)
+#                     contsA.remove(contA)
+#         
+#         # If matches are found, add to appropriate ovlps group for this section           
+#         if len(ovlpB) > 0:
+#             ovlpsA.extend(ovlpA)
+#             ovlpsB.extend(ovlpB)
+    print('chk: '+str(ovlpsA)+' '+str(ovlpsB))
     return ovlpsA, ovlpsB
 
 def separateOverlappingContours(ovlpsA, ovlpsB): #=== probably a more efficient way of doing this?
@@ -379,10 +389,13 @@ def mergeSectionContours(sA,sB, handler=secContHandler): #===
     
     # Find overlapping contours
     ovlpsA, ovlpsB = checkOverlappingContours(contsA, contsB)
-    compOvlp, confOvlp = separateOverlappingContours(ovlpsA, ovlpsB)
-    
     
     # Separate into completely overlapping or incompletely overlapping
+    compOvlp, confOvlp = separateOverlappingContours(ovlpsA, ovlpsB)
+    
+    # Identify unique contours
+    uniqueA, uniqueB = checkUniqueContours()
+    
     
 #     mergedConts = handler(uniqueA, compOvlp, confOvlp, uniqueB)
     return
