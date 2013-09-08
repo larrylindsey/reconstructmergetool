@@ -22,11 +22,11 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         
         # Main Data (accessed regularly by subsequent functions)
-        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
+        self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser' #===
+        self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser' #===
         self.serName = 'rmtg' #===
-        self.ser1obj = None
-        self.ser2obj = None
+        self.ser1obj = rmt.getSeries(self.ser1path)
+        self.ser2obj = rmt.getSeries(self.ser2path)
         
         # More Data
         self.mergedAttributes = None
@@ -496,7 +496,7 @@ class mainFrame(QtGui.QFrame):
             self.table1 = None # Series 1 table
             self.table2 = None # Merge table
             self.table3 = None # Series 2 table
-            self.table4 = None # Section selection table
+            self.slider = None # Section selection slider
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
@@ -511,7 +511,7 @@ class mainFrame(QtGui.QFrame):
             ovlps = ['f','g']
             s2unique = ['h','i','j']
             self.prepTables(s1unique, confs, ovlps, s2unique)
-            
+            self.prepSlider()
             # Layout
             vbox = QtGui.QVBoxLayout() # Holds all the boxes below
             hbox1 = QtGui.QHBoxLayout() # For the 3 tables
@@ -519,7 +519,7 @@ class mainFrame(QtGui.QFrame):
             hbox1.addWidget(self.table1) # Series 1
             hbox1.addWidget(self.table2) # Conflicts/merges
             hbox1.addWidget(self.table3) # Series 2
-            hbox2.addWidget(self.table4) # section selection
+            hbox2.addWidget(self.slider) # section selection
             vbox.addLayout(hbox1)
             vbox.addLayout(hbox2)
             self.setLayout(vbox)
@@ -552,12 +552,14 @@ class mainFrame(QtGui.QFrame):
             while len(conts1) != 0 and len(conts2) != 0: # Go until lists are empty
                 for elem in handler( *rmt.checkOverlappingConts(conts1,conts2) ):
                     conts3.append( elem )
-
+        def prepSlider(self):
+            slider = QtGui.QSlider(self)
+            slider.setOrientation(QtCore.Qt.Horizontal)
+            self.slider = slider
         def prepTables(self, s1unique, confs, ovlps, s2unique):
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
             table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
             table3 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
-            table4 = QtGui.QTableWidget(1, len(self.parent.ser1obj.sections), parent=self)
             
             # Load labels/items into tables
             table1.setHorizontalHeaderLabels(['Unique 1'])
@@ -577,26 +579,15 @@ class mainFrame(QtGui.QFrame):
                 tableItem = QtGui.QTableWidgetItem( s1unique[row] )
                 table3.setItem(row, 0, tableItem)
             
-            # Resize tables
-            table1.resizeColumnsToContents()
-            table1.resizeRowsToContents()
-            table2.resizeColumnsToContents()
-            table2.resizeRowsToContents()
-            table3.resizeColumnsToContents()
-            table3.resizeRowsToContents()
-            table4.resizeColumnsToContents()
-            table4.resizeRowsToContents()
-            
-            print(table1.horizontalHeaderItem(0).sizeHint())
+            #=== Resize tables
+
             # Assign tables and show
             self.table1 = table1
             self.table2 = table2
             self.table3 = table3
-            self.table4 = table4
             self.table1.show()
             self.table2.show()
             self.table3.show()
-            self.table4.show()
             
         def secContHandler(self, ovlp1, ovlp2):
             completeOverlap = []
@@ -723,6 +714,7 @@ class mainFrame(QtGui.QFrame):
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
-    mainFrame.serLoadWidget(rmtFrame)   
+#     mainFrame.serLoadWidget(rmtFrame)   
+    mainFrame.sectionContourWidget(rmtFrame)
     sys.exit( app.exec_() )
 main()
