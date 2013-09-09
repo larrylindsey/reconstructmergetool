@@ -6,11 +6,8 @@ from Series import *
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
-#     when to load series into objects?
-#     Reworking GUI to use functions already in reconstructmergetool
-#     Serconts, serzconts, secatts, secimgs, secconts, etc.
+#     list of sectionContourWidgets in mainFrame, put sec slider in mainFrame
 #     QPushButton.setAcceptDrops(True) for load series
-#     Allow multiple images option
 
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
