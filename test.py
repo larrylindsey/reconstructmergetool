@@ -22,11 +22,11 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         
         # Main Data (accessed regularly by subsequent functions)
-        self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser' #===
-        self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
         self.serName = 'rmtg' #===
-        self.ser1obj = rmt.getSeries(self.ser1path)
-        self.ser2obj = rmt.getSeries(self.ser2path)
+        self.ser1obj = rmt.getSeries(self.ser1path) #===
+        self.ser2obj = rmt.getSeries(self.ser2path) #===
         
         # More Data
         self.mergedAttributes = None
@@ -44,7 +44,7 @@ class mainFrame(QtGui.QFrame):
     def initUI(self):
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
-        self.setWindowTitle('Reconstructmergetool v.BETA')
+        self.setWindowTitle('Reconstructmergetool v.BETA') #===
         self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Plain)
         self.setLineWidth(2)
         self.setMidLineWidth(3)
@@ -497,65 +497,63 @@ class mainFrame(QtGui.QFrame):
             self.table2 = None # Merge table
             self.table3 = None # Series 2 table
             self.slider = None # Section selection slider
+            self.label = None # Section selection label
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
-            self.parent.nextButton.clicked.connect( self.next )
-            self.parent.backButton.clicked.connect( self.back )
             
-            # Contour handling functions
-            self.prepContours()
-            #===
-            s1unique = ['a','b','c']
-            confs = ['d','e']
-            ovlps = ['f','g']
-            s2unique = ['h','i','j']
+            #=== Contour handling functions
+            s1unique = ['a','b','c'] #===
+            confs = ['d','e'] #===
+            ovlps = ['f','g'] #===
+            s2unique = ['h','i','j'] #===
+            #=============================
+            
             self.prepTables(s1unique, confs, ovlps, s2unique)
             self.prepSlider()
+            self.prepButtonFunctionality()
+            
+            self.prepLayout()
+            self.show()
+            
+        def prepButtonFunctionality(self):
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            self.slider.sliderReleased.connect( self.changeSection ) # Only changes section when released
+            self.slider.sliderMoved.connect( self.changeSectionLabel ) # Updates section label when moved
+            
+        def prepLayout(self):
             # Layout
             vbox = QtGui.QVBoxLayout() # Holds all the boxes below
             hbox1 = QtGui.QHBoxLayout() # For the 3 tables
             hbox2 = QtGui.QHBoxLayout() # For the section selection table
+            hbox3 = QtGui.QHBoxLayout()
             hbox1.addWidget(self.table1) # Series 1
             hbox1.addWidget(self.table2) # Conflicts/merges
             hbox1.addWidget(self.table3) # Series 2
-            hbox2.addWidget(self.slider) # section selection
+            hbox2.addWidget(self.slider) # Section selection
+            hbox3.addWidget(self.label) # Current section label
             vbox.addLayout(hbox1)
             vbox.addLayout(hbox2)
+            vbox.addLayout(hbox3)
             self.setLayout(vbox)
             
-            
-            
-            self.show()
-            
-        def prepContours(self):
-            return
-            allConflicts = []
-            for section in range(len(self.parent.ser1obj.sections)):
-                self.mergeSectionContours(self.parent.ser1obj.sections[section],
-                                          self.parent.ser2obj.sections[section],
-                                          handler=self.secContHandler)
-#=================DOESNT WORK AS DESIGNED in rmt.py=====================               
-#                 rmt.mergeSectionContours(self.parent.ser1obj,
-#                                          self.parent.ser2obj,
-#                                          handler=self.secContHandler)
-#=======================================================================
-
-        def mergeSectionContours(self, section1, section2, handler=None):
-            # Lists of all contours in parallel sections
-            conts1 = [cont for cont in section1.contours]
-            conts2 = [cont for cont in section2.contours]
-            # Populate shapely shapes
-            for contour in conts1: contour.popshape()
-            for contour in conts2: contour.popshape()
-            conts3 = []
-            while len(conts1) != 0 and len(conts2) != 0: # Go until lists are empty
-                for elem in handler( *rmt.checkOverlappingConts(conts1,conts2) ):
-                    conts3.append( elem )
-        def prepSlider(self):
+        def prepSlider(self): #=== needs to display current section, signal function, change sections
+            # Slider
             slider = QtGui.QSlider(self)
+            minTick = int(self.parent.ser1obj.sections[0].name[-1]) # section # of first section in section list
+            maxTick = len(self.parent.ser1obj.sections) # number of sections in section list
+            slider.setRange(minTick, maxTick)
             slider.setOrientation(QtCore.Qt.Horizontal)
-            slider.setTickPosition(QtGui.QSlider.TicksBelow)
+            slider.setTickPosition(QtGui.QSlider.TicksBothSides)
+            slider.setTickInterval(1)
+            
+            # Label
+            label = QtGui.QLabel(self)
+            label.setText('Section\n'+str(slider.value()))
+            label.setAlignment(QtCore.Qt.AlignHCenter)
+            
+            self.label = label
             self.slider = slider
             
         def prepTables(self, s1unique, confs, ovlps, s2unique):
@@ -582,40 +580,26 @@ class mainFrame(QtGui.QFrame):
                 table3.setItem(row, 0, tableItem)
             
             #=== Resize tables
-
-            # Assign tables and show
+            table1.setColumnWidth(0,240)
+            table2.setColumnWidth(0,240)
+            table3.setColumnWidth(0,240)
+            
+            # Assign tab les
             self.table1 = table1
             self.table2 = table2
             self.table3 = table3
-            self.table1.show()
-            self.table2.show()
-            self.table3.show()
             
-        def secContHandler(self, ovlp1, ovlp2):
-            completeOverlap = []
-            if len(ovlp2) == 0:
-                completeOverlap.append(ovlp1.pop())
-        
-            # Check for same contours and remove (prevents unnecessary user input)
-            for elem in ovlp1:
-                for elem2 in ovlp2:
-                    if elem.overlaps(elem2) == 1: # If contours are the same -> merge and output
-                        completeOverlap.append( elem )
-                        ovlp1.remove( elem )
-                        ovlp2.remove( elem2 )
-                        
-            # Check rest of contours
-            conflictList = []
-            for elem in ovlp1:
-                for elem2 in ovlp2:
-                    if elem.overlaps(elem2) != 1 and elem.overlaps(elem2) != 0: # If contours overlap, but not 100% -> user input
-                        conflictList.append( [elem, elem2] )
-            print('compovlp: '+str([cont.name for cont in completeOverlap]))
-            print('conflist: '+str([cont.name for cont in conflictList]))
-            return completeOverlap, conflictList
-        
+        def changeSection(self): #===
+            '''Loads appropriate section when the slider is released on a new position'''
+            print('Current sec: '+str(self.slider.value()))
+            
+        def changeSectionLabel(self): #===
+            '''Updates the section label while the slider is being moved'''
+            print('moved')
+            newPos = self.slider.sliderPosition()
+            self.label.setText('Section\n'+str(newPos))
+            
         def next(self):
-            
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
