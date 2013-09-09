@@ -58,15 +58,31 @@ class mainFrame(QtGui.QFrame):
         # Back button
         self.backButton = QtGui.QPushButton(self)
         self.backButton.setText('Back')
-
+        
+        #=== Slider
+        self.slider = QtGui.QSlider(self)
+        minTick = int(0) #===
+        maxTick = int(100) #===
+        self.slider.setRange(minTick, maxTick)
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider.setTickPosition(QtGui.QSlider.TicksBothSides)
+        self.slider.setTickInterval(1)
+        self.label = QtGui.QLabel(self)
+        self.label.setText('Section '+str(self.slider.value()))
+        self.label.setAlignment(QtCore.Qt.AlignHCenter)
+        
         # Layout: Puts buttons in bottom-right corner
         hbox = QtGui.QHBoxLayout() # Horizontal
         hbox.addStretch(1) # Push down
         hbox.addWidget(self.backButton)
         hbox.addWidget(self.nextButton)
+        vbox2 = QtGui.QVBoxLayout() #===
+        vbox2.addWidget(self.slider) #===
+        vbox2.addWidget(self.label) #===
         
         vbox = QtGui.QVBoxLayout() # Vertical
         vbox.addStretch(1) # Push right
+        vbox.addLayout(vbox2) #===
         vbox.addLayout(hbox)
         self.setLayout(vbox)
         
@@ -507,8 +523,8 @@ class mainFrame(QtGui.QFrame):
             self.table1 = None # Series 1 table
             self.table2 = None # Merge table
             self.table3 = None # Series 2 table
-            self.slider = None # Section selection slider
-            self.label = None # Section selection label
+#             self.slider = None # Section selection slider
+#             self.label = None # Section selection label
             self.currentSection = None
             
             # Update mainFrame data
@@ -518,7 +534,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.tempContours.append(self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
                                                      self.parent.ser2obj.sections[0],
                                                      handler=self.secContHandler)))
-            self.prepSlider()
+#             self.prepSlider()
             self.prepButtonFunctionality()
             
             self.prepLayout()
@@ -531,8 +547,8 @@ class mainFrame(QtGui.QFrame):
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-            self.slider.sliderReleased.connect( self.changeSection ) # Only changes section when released
-            self.slider.sliderMoved.connect( self.changeSectionLabel ) # Updates section label when moved
+#             self.slider.sliderReleased.connect( self.changeSection ) # Only changes section when released
+#             self.slider.sliderMoved.connect( self.changeSectionLabel ) # Updates section label when moved
             
         def prepLayout(self):
             # Layout
@@ -543,11 +559,11 @@ class mainFrame(QtGui.QFrame):
             hbox1.addWidget(self.table1) # Series 1
             hbox1.addWidget(self.table2) # Conflicts/merges
             hbox1.addWidget(self.table3) # Series 2
-            hbox2.addWidget(self.slider) # Section selection
-            hbox3.addWidget(self.label) # Current section label
+#             hbox2.addWidget(self.slider) # Section selection
+#             hbox3.addWidget(self.label) # Current section label
             vbox.addLayout(hbox1)
-            vbox.addLayout(hbox2)
-            vbox.addLayout(hbox3)
+#             vbox.addLayout(hbox2)
+#             vbox.addLayout(hbox3)
             self.setLayout(vbox)
             
         def prepSlider(self): #=== doesnt properly respond to clicking on ticks
