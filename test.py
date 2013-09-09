@@ -37,7 +37,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecAttributes = None
         self.mergedSecImages = None
         self.mergedSecContours = None
-        self.tempContours = None
+        self.tempContours = []
         self.mergedSeries = None #=== First created (seriesAttributeWidget.next()) w/ no Contours/ZContours
         self.outputPath = 'Enter directory for output'
         
@@ -510,15 +510,16 @@ class mainFrame(QtGui.QFrame):
             self.table3 = None # Series 2 table
             self.slider = None # Section selection slider
             self.label = None # Section selection label
+            self.currentSection = None
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
             
-            # Prepare UI things
-#             for section in range(len(self.parent.ser1obj.sections)):
-            self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
-                                                     self.parent.ser2obj.sections[0],
-                                                     handler=self.secContHandler))
+            # Load widget for each section into self.parent.tempContours
+            for section in range(len(self.parent.ser1obj.sections)):
+                self.parent.tempContours.append(self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
+                                                         self.parent.ser2obj.sections[0],
+                                                         handler=self.secContHandler)))
             self.prepSlider()
             self.prepButtonFunctionality()
             
@@ -566,6 +567,7 @@ class mainFrame(QtGui.QFrame):
             label.setText('Section '+str(slider.value()))
             label.setAlignment(QtCore.Qt.AlignHCenter)
             
+            self.currentSection = minTick
             self.label = label
             self.slider = slider
             
@@ -618,16 +620,21 @@ class mainFrame(QtGui.QFrame):
             self.table1 = table1
             self.table2 = table2
             self.table3 = table3
-#             return self
+            return self
             
         def changeSection(self): #===
             '''Loads appropriate section when the slider is released on a new position'''
             print('Current sec: '+str(self.slider.value()))
-#             self.currentSection =
+            self.parent.tempContours[self.currentSection] = self # Save current status
+            self.hide()
+            self = self.parent.tempContours[self.slider.value()-1] # Change to new section
+            self.show()
+            self.currentSection = self.slider.value() # Update new current section value
             
         def changeSectionLabel(self):
             '''Updates the section label while the slider is being moved'''
-            print('moved')
+            print('Hovering: '+str(self.slider.sliderPosition())) # currently hovering
+            print('Previously Hovered: '+str(self.slider.value())) # currently selected
             newPos = self.slider.sliderPosition()
             self.label.setText('Section '+str(newPos))
             
