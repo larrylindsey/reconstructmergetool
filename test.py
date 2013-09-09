@@ -21,9 +21,11 @@ class mainFrame(QtGui.QFrame):
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
         
-        # Main Data (accessed regularly by subsequent functions)
+        # Main Data
         self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
         self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
+#         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
+#         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
         self.serName = 'rmtg' #===
         self.ser1obj = rmt.getSeries(self.ser1path) #===
         self.ser2obj = rmt.getSeries(self.ser2path) #===
@@ -35,6 +37,7 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecAttributes = None
         self.mergedSecImages = None
         self.mergedSecContours = None
+        self.tempContours = None
         self.mergedSeries = None #=== First created (seriesAttributeWidget.next()) w/ no Contours/ZContours
         self.outputPath = 'Enter directory for output'
         
@@ -165,8 +168,7 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
-            self.table1 = None
-            self.table2 = None
+            self.table = None
             self.conflicts = None
             
             # Update mainFrame data
@@ -227,16 +229,18 @@ class mainFrame(QtGui.QFrame):
             self.table.setColumnWidth(1, 300)
             self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
             self.table.setVerticalHeaderLabels( attLabels )
-
+            self.table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
             # Load attributes into their slots: To keep them in order (since dictionaries are unordered)
             # ...they are pulled out of the dictionary by the key in the verticalHeaderColumn
             for row in range(len(conflicts)):
                 att = self.table.verticalHeaderItem(row).text() # attribute to be extracted
                 # Series 1
                 tableItem = QtGui.QTableWidgetItem( ser1atts[att] )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 self.table.setItem(row, 0, tableItem)
                 # Series 2
                 tableItem = QtGui.QTableWidgetItem( ser2atts[att] )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 self.table.setItem(row, 1, tableItem)
             self.table.show() 
         
@@ -264,13 +268,15 @@ class mainFrame(QtGui.QFrame):
             self.table.setColumnWidth(0, 300)
             self.table.setColumnWidth(1, 300)
             self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
-
+            self.table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
             for row in range( len(ser1conts) ):
                 # Series 1
                 tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 self.table.setItem(row, 0, tableItem)
                 # Series 2
                 tableItem = QtGui.QTableWidgetItem( ser2conts[row].name )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 self.table.setItem(row, 1, tableItem)
             
             self.table.show()
@@ -343,14 +349,17 @@ class mainFrame(QtGui.QFrame):
             table.setGeometry(0,0,800,500)
             table.setColumnWidth(0, 300)
             table.setColumnWidth(1, 300)
+            table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
             for row in range( max(len(ser1zconts),len(ser2zconts)) ):
                 # Series 1
                 if row < len(ser1zconts): # Prevent index out of range
                     tableItem = QtGui.QTableWidgetItem( ser1zconts[row].name )
+                    tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                     table.setItem(row, 0, tableItem)
                 # Series 2
                 if row < len(ser2zconts):
                     tableItem = QtGui.QTableWidgetItem( ser2zconts[row].name )
+                    tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                     table.setItem(row, 1, tableItem)
             self.table = table
             self.table.show()
@@ -447,11 +456,14 @@ class mainFrame(QtGui.QFrame):
                     count += 1
                     sectionNames.append( str(self.parent.serName)+'.'+str(i))
                     tableItem = QtGui.QTableWidgetItem( str(self.imgConflicts[i][0]) )
+                    tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                     table.setItem(count, 0, tableItem)
                     tableItem = QtGui.QTableWidgetItem( str(self.imgConflicts[i][1]) )
+                    tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                     table.setItem(count, 1, tableItem)
             table.setVerticalHeaderLabels(sectionNames)
             table.resizeRowsToContents()
+            table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
             self.table = table
             self.table.show()
         
@@ -498,12 +510,12 @@ class mainFrame(QtGui.QFrame):
             self.table3 = None # Series 2 table
             self.slider = None # Section selection slider
             self.label = None # Section selection label
-            self.currentSection = None # represents the current section
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
             
             # Prepare UI things
+#             for section in range(len(self.parent.ser1obj.sections)):
             self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
                                                      self.parent.ser2obj.sections[0],
                                                      handler=self.secContHandler))
@@ -551,7 +563,7 @@ class mainFrame(QtGui.QFrame):
             
             # Label
             label = QtGui.QLabel(self)
-            label.setText('Section\n'+str(slider.value()))
+            label.setText('Section '+str(slider.value()))
             label.setAlignment(QtCore.Qt.AlignHCenter)
             
             self.label = label
@@ -560,44 +572,53 @@ class mainFrame(QtGui.QFrame):
         def prepTables(self, s1unique, ovlps, confs, s2unique): #===
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
             table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
-            table3 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
+            table3 = QtGui.QTableWidget(len(s2unique), 1, parent=self)
             
             # Load labels/items into tables
             table1.setHorizontalHeaderLabels(['Unique 1'])
             for row in range(len(s1unique)):
                 tableItem = QtGui.QTableWidgetItem( s1unique[row].name )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table1.setItem(row, 0, tableItem)
                 
             table2.setHorizontalHeaderLabels(['Conflicts/Overlaps'])
             row = 0
-            for elem in confs: #=== change bg color to indicate conflict
+            for elem in confs:
                 tableItem = QtGui.QTableWidgetItem( elem[0].name )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('pink')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table2.setItem(row, 0, tableItem)
                 row+=1
             for elem in ovlps:
                 tableItem = QtGui.QTableWidgetItem( elem[0].name)
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightGreen')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table2.setItem(row, 0, tableItem)
                 row+=1
                     
             table3.setHorizontalHeaderLabels(['Unique 2'])
             for row in range(len(s2unique)):
-                tableItem = QtGui.QTableWidgetItem( s1unique[row].name )
+                tableItem = QtGui.QTableWidgetItem( s2unique[row].name )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table3.setItem(row, 0, tableItem)
             
-            #=== Resize tables
+            # Resize tables
             table1.setColumnWidth(0,240)
             table2.setColumnWidth(0,240)
             table3.setColumnWidth(0,240)
             
-            #=== change appropriate item bg colors
-            #=== change selection type
+            # Change selection properties
             for table in [table1,table2,table3]:
                 table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
+                table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
             
             # Assign tables to self
             self.table1 = table1
             self.table2 = table2
             self.table3 = table3
+#             return self
             
         def changeSection(self): #===
             '''Loads appropriate section when the slider is released on a new position'''
@@ -608,7 +629,7 @@ class mainFrame(QtGui.QFrame):
             '''Updates the section label while the slider is being moved'''
             print('moved')
             newPos = self.slider.sliderPosition()
-            self.label.setText('Section\n'+str(newPos))
+            self.label.setText('Section '+str(newPos))
             
         def next(self):
             # Disconnect buttons and load next window
