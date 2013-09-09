@@ -555,7 +555,9 @@ class mainFrame(QtGui.QFrame):
         def prepSlider(self):
             slider = QtGui.QSlider(self)
             slider.setOrientation(QtCore.Qt.Horizontal)
+            slider.setTickPosition(QtGui.QSlider.TicksBelow)
             self.slider = slider
+            
         def prepTables(self, s1unique, confs, ovlps, s2unique):
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
             table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
