@@ -498,24 +498,25 @@ class mainFrame(QtGui.QFrame):
             self.table3 = None # Series 2 table
             self.slider = None # Section selection slider
             self.label = None # Section selection label
+            self.currentSection = None # represents the current section
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
             
-            #=== Contour handling functions
-            s1unique = ['a','b','c'] #===
-            confs = ['d','e'] #===
-            ovlps = ['f','g'] #===
-            s2unique = ['h','i','j'] #===
-            #=============================
-            
-            self.prepTables(s1unique, confs, ovlps, s2unique)
+            # Prepare UI things
+            self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
+                                                     self.parent.ser2obj.sections[0],
+                                                     handler=self.secContHandler))
             self.prepSlider()
             self.prepButtonFunctionality()
             
             self.prepLayout()
             self.show()
-            
+        
+        def secContHandler(self, uniqueA, compOvlp, confOvlp, uniqueB):
+            '''rmtgui version of section contour handler'''
+            return uniqueA, compOvlp, confOvlp, uniqueB
+
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
@@ -538,7 +539,7 @@ class mainFrame(QtGui.QFrame):
             vbox.addLayout(hbox3)
             self.setLayout(vbox)
             
-        def prepSlider(self): #=== needs to display current section, signal function, change sections
+        def prepSlider(self):
             # Slider
             slider = QtGui.QSlider(self)
             minTick = int(self.parent.ser1obj.sections[0].name[-1]) # section # of first section in section list
@@ -556,7 +557,7 @@ class mainFrame(QtGui.QFrame):
             self.label = label
             self.slider = slider
             
-        def prepTables(self, s1unique, confs, ovlps, s2unique):
+        def prepTables(self, s1unique, ovlps, confs, s2unique): #===
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
             table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
             table3 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
@@ -564,19 +565,23 @@ class mainFrame(QtGui.QFrame):
             # Load labels/items into tables
             table1.setHorizontalHeaderLabels(['Unique 1'])
             for row in range(len(s1unique)):
-                tableItem = QtGui.QTableWidgetItem( s1unique[row] )
+                tableItem = QtGui.QTableWidgetItem( s1unique[row].name )
                 table1.setItem(row, 0, tableItem)
+                
             table2.setHorizontalHeaderLabels(['Conflicts/Overlaps'])
-            for row in range(len(confs)+len(ovlps)):
-                if row < len(confs):
-                    tableItem = QtGui.QTableWidgetItem( confs[row] )
-                    table2.setItem(row, 0, tableItem)
-                elif row >= len(confs):
-                    tableItem = QtGui.QTableWidgetItem( ovlps[row-len(confs)] )
-                    table2.setItem(row, 0, tableItem)
+            row = 0
+            for elem in confs: #=== change bg color to indicate conflict
+                tableItem = QtGui.QTableWidgetItem( elem[0].name )
+                table2.setItem(row, 0, tableItem)
+                row+=1
+            for elem in ovlps:
+                tableItem = QtGui.QTableWidgetItem( elem[0].name)
+                table2.setItem(row, 0, tableItem)
+                row+=1
+                    
             table3.setHorizontalHeaderLabels(['Unique 2'])
             for row in range(len(s2unique)):
-                tableItem = QtGui.QTableWidgetItem( s1unique[row] )
+                tableItem = QtGui.QTableWidgetItem( s1unique[row].name )
                 table3.setItem(row, 0, tableItem)
             
             #=== Resize tables
@@ -584,7 +589,12 @@ class mainFrame(QtGui.QFrame):
             table2.setColumnWidth(0,240)
             table3.setColumnWidth(0,240)
             
-            # Assign tab les
+            #=== change appropriate item bg colors
+            #=== change selection type
+            for table in [table1,table2,table3]:
+                table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
+            
+            # Assign tables to self
             self.table1 = table1
             self.table2 = table2
             self.table3 = table3
@@ -592,8 +602,9 @@ class mainFrame(QtGui.QFrame):
         def changeSection(self): #===
             '''Loads appropriate section when the slider is released on a new position'''
             print('Current sec: '+str(self.slider.value()))
+#             self.currentSection =
             
-        def changeSectionLabel(self): #===
+        def changeSectionLabel(self):
             '''Updates the section label while the slider is being moved'''
             print('moved')
             newPos = self.slider.sliderPosition()

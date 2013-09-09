@@ -354,9 +354,11 @@ def checkOverlappingContours(contsA, contsB):
     for cont in ovlpsA:
         if cont in contsA:
             contsA.remove(cont)
+    
     for cont in ovlpsB:
         if cont in contsB:
             contsB.remove(cont)
+
     return ovlpsA, ovlpsB
 
 def separateOverlappingContours(ovlpsA, ovlpsB): #=== probably a more efficient way of doing this?
@@ -388,7 +390,7 @@ def mergeSectionContours(sA,sB, handler=secContHandler): #===
     sA.popshapes()
     sB.popshapes()
     
-    # Copy contour lists for both sections
+    # Copy contour lists for both sections; these lists are altered
     contsA = [cont for cont in sA.contours]
     contsB = [cont for cont in sB.contours]
     
@@ -396,7 +398,7 @@ def mergeSectionContours(sA,sB, handler=secContHandler): #===
     ovlpsA, ovlpsB = checkOverlappingContours(contsA, contsB)
     
     # Separate into completely overlapping or incompletely overlapping
-    compOvlp, confOvlp = separateOverlappingContours(ovlpsA, ovlpsB)
+    compOvlp, confOvlp = separateOverlappingContours(ovlpsA, ovlpsB) #===
 
     # Identify unique contours
     uniqueA, uniqueB = contsA, contsB
