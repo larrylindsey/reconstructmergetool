@@ -22,8 +22,10 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         
         # Main Data
-        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
+        self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser'
+        self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser'
+#         self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
+#         self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
 #         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
 #         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
         self.serName = 'rmtg' #===
@@ -516,10 +518,9 @@ class mainFrame(QtGui.QFrame):
             self.parent.setWindowTitle('Section Contours') #===
             
             # Load widget for each section into self.parent.tempContours
-            for section in range(len(self.parent.ser1obj.sections)):
-                self.parent.tempContours.append(self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
-                                                         self.parent.ser2obj.sections[0],
-                                                         handler=self.secContHandler)))
+            self.parent.tempContours.append(self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
+                                                     self.parent.ser2obj.sections[0],
+                                                     handler=self.secContHandler)))
             self.prepSlider()
             self.prepButtonFunctionality()
             
@@ -552,7 +553,7 @@ class mainFrame(QtGui.QFrame):
             vbox.addLayout(hbox3)
             self.setLayout(vbox)
             
-        def prepSlider(self):
+        def prepSlider(self): #=== doesnt properly respond to clicking on ticks
             # Slider
             slider = QtGui.QSlider(self)
             minTick = int(self.parent.ser1obj.sections[0].name[-1]) # section # of first section in section list
