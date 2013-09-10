@@ -43,12 +43,7 @@ class mainFrame(QtGui.QFrame):
         self.ser2obj = rmt.getSeries(self.ser2path) #===
 
         # Reconstruct Object Data
-        self.mergedAttributes = None        # Save current status
-#         self.currentContWidg = self.slider.value()-1
-#         # Change to new section
-#         self.contourWidgets[self.currentContWidg].show()
-#         
-#         self.currentWidget.show()
+        self.mergedAttributes = None
         self.mergedSerContours = None
         self.mergedSerZContours = None
         
@@ -57,7 +52,6 @@ class mainFrame(QtGui.QFrame):
         self.mergedSecContours = None
         self.contourWidgets = [] #===
         self.currentWidget = None
-        self.currentContWidg = 0 #===
         
         self.mergedSeries = None #=== First created (seriesAttributeWidget.next()) w/ no Contours/ZContours
         self.outputPath = 'Enter directory for output'
@@ -104,7 +98,10 @@ class mainFrame(QtGui.QFrame):
         # Slider
         if type(self.ser1obj) != None and type(self.ser2obj) != None:
             minTick = int(self.ser1obj.sections[0].name[-1]) # section # of first section in section list
-            maxTick = len(self.ser1obj.sections) # number of sections in section list
+            if minTick == 0:
+                maxTick = len(self.ser1obj.sections)-1 # number of sections in section list
+            else:
+                maxTick = len(self.ser1obj.sections)
             self.slider.setRange(minTick, maxTick)
         
         self.slider.setOrientation(QtCore.Qt.Horizontal)
@@ -121,12 +118,12 @@ class mainFrame(QtGui.QFrame):
     def changeSection(self): #===
         '''Loads appropriate section when the slider is released on a new position'''
         print('Switched to section: '+str(self.slider.value()))
-        self.contourWidgets[self.currentContWidg].hide()
-        print('Section '+str(self.currentContWidg)+' hidden')
-        self.currentContWidg = self.slider.value()
-        print('Section '+str(self.currentContWidg)+' showing')
-        self.contourWidgets[self.currentContWidg].show()
-            
+        self.currentWidget.hide()
+        print('section '+str(self.currentWidget.section)+' hiden')
+        self.currentWidget = self.contourWidgets[self.slider.value()]
+        print('section '+str(self.currentWidget.section)+' showing')
+        self.currentWidget.show()
+   
     def changeSectionLabel(self): #===
         '''Updates the section label while the slider is being moved'''
         print('Hovering: '+str(self.slider.sliderPosition())) # currently hovering
@@ -550,7 +547,13 @@ class mainFrame(QtGui.QFrame):
             # Disconnect buttons and open next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
-            mainFrame.sectionContourWidget( self.parent )
+            
+            for sec in self.parent.ser1obj.sections: #===
+                print(sec.name)
+                self.parent.contourWidgets.append( mainFrame.sectionContourWidget(self.parent, int(sec.name[-1]) )) #===
+            self.parent.currentWidget = self.parent.contourWidgets[0]
+            print(self.parent.currentWidget)
+                
             self.close()
               
         def back(self):
@@ -754,9 +757,6 @@ def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
 #     mainFrame.serLoadWidget(rmtFrame) #===
-    for sec in range(len(rmtFrame.ser1obj.sections)): #===
-        rmtFrame.contourWidgets.append( mainFrame.sectionContourWidget(rmtFrame, sec) ) #===
-    rmtFrame.currentWidget = rmtFrame.contourWidgets[0]
-    rmtFrame.currentWidget.show()
+    mainFrame.sectionImageWidget(rmtFrame)
     sys.exit( app.exec_() )
 main()
