@@ -321,11 +321,13 @@ class mainFrame(QtGui.QFrame):
             
             self.prepLayout()
             self.show()
+        
         def prepLayout(self):
             # Layout
             vbox = QtGui.QVBoxLayout() # Holds all the boxes below
             hbox1 = QtGui.QHBoxLayout() # For the 2 tables
             hbox1.addWidget(self.table1) # Series 1
+            hbox1.addWidget(self.table3) # Merged series contours
             hbox1.addWidget(self.table2) # Series 2
             vbox.addLayout(hbox1)
             self.setLayout(vbox)
@@ -333,33 +335,41 @@ class mainFrame(QtGui.QFrame):
         def serContHandler(self, ser1conts, ser2conts, ser3conts):
             table1 = QtGui.QTableWidget(len(ser1conts), 1, parent=self)
             table2 = QtGui.QTableWidget(len(ser2conts), 1, parent=self)
+            table3 = QtGui.QTableWidget(len(ser3conts), 1, parent = self)
             
-            for table in [table1, table2]:
-#                 table.setColumnWidth(0, 300)
-#                 table.setColumnWidth(1, 300)
+            for table in [table1, table2, table3]:
+                table.setColumnWidth(0, 240)
                 table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
             table1.setHorizontalHeaderLabels( [self.parent.ser1obj.name] )
             table2.setHorizontalHeaderLabels( [self.parent.ser2obj.name] )
+            table3.setHorizontalHeaderLabels( ['Merged Series Contours'])
             
             for row in range( len(ser1conts) ):
-                # Series 1
                 tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table1.setItem(row, 0, tableItem)
-                # Series 2
+            for row in range( len(ser2conts) ):
                 tableItem = QtGui.QTableWidgetItem( ser2conts[row].name )
                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table2.setItem(row, 0, tableItem)
-            
+            for row in range( len(ser3conts) ):
+                tableItem = QtGui.QTableWidgetItem( ser3conts[row].name )
+                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightGreen')))
+                tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                table3.setItem(row, 0, tableItem)
+                
             self.table1 = table1
             self.table2 = table2
+            self.table3 = table3
 #             self.table1.show()
 #             self.table2.show()
             self.s1c = ser1conts
             self.s2c = ser2conts
             self.mergedConts = ser3conts
             
-        def returnItems(self):
+        def returnItems(self): #=== multiple tables added
             selItems = self.table.selectedItems()
             selConts = []
             for item in selItems:
