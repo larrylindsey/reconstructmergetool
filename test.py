@@ -2,6 +2,7 @@ from PySide import QtGui, QtCore
 import reconstructmergetool as rmt
 import sys
 from Series import *
+import time
 
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
@@ -17,33 +18,6 @@ class mainFrame(QtGui.QFrame):
     Data-wise: It contains all the important info regarding the series that are being merged.'''
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
-        
-        # Main Data
-        self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser'
-        self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser'
-#         self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
-#         self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
-#         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
-#         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
-        self.serName = 'rmtg' #===
-        self.ser1obj = rmt.getSeries(self.ser1path) #===
-        self.ser2obj = rmt.getSeries(self.ser2path) #===
-        
-        # More Data
-        self.mergedAttributes = None
-        self.mergedSerContours = None
-        self.mergedSerZContours = None
-        self.mergedSecAttributes = None
-        self.mergedSecImages = None
-        self.mergedSecContours = None
-        self.tempContours = []
-        self.mergedSeries = None #=== First created (seriesAttributeWidget.next()) w/ no Contours/ZContours
-        self.outputPath = 'Enter directory for output'
-        
-        # Load Functional Frame
-        self.initUI()
-        
-    def initUI(self):
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
         self.setWindowTitle('Reconstructmergetool v.BETA') #===
@@ -51,26 +25,58 @@ class mainFrame(QtGui.QFrame):
         self.setLineWidth(2)
         self.setMidLineWidth(3)
         
-        # Next button
+        # Widgets
         self.nextButton = QtGui.QPushButton(self)
-        self.nextButton.setText('Next')
-
-        # Back button
         self.backButton = QtGui.QPushButton(self)
-        self.backButton.setText('Back')
-        
-        #=== Slider
         self.slider = QtGui.QSlider(self)
-        minTick = int(0) #===
-        maxTick = int(100) #===
-        self.slider.setRange(minTick, maxTick)
-        self.slider.setOrientation(QtCore.Qt.Horizontal)
-        self.slider.setTickPosition(QtGui.QSlider.TicksBothSides)
-        self.slider.setTickInterval(1)
         self.label = QtGui.QLabel(self)
-        self.label.setText('Section '+str(self.slider.value()))
-        self.label.setAlignment(QtCore.Qt.AlignHCenter)
         
+        # Main Data
+#         self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser'
+#         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser'
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
+#         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
+#         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
+        self.serName = 'rmtg' #===
+        self.ser1obj = rmt.getSeries(self.ser1path) #===
+        self.ser2obj = rmt.getSeries(self.ser2path) #===
+
+        # Reconstruct Object Data
+        self.mergedAttributes = None        # Save current status
+#         self.currentContWidg = self.slider.value()-1
+#         # Change to new section
+#         self.contourWidgets[self.currentContWidg].show()
+#         
+#         self.currentWidget.show()
+        self.mergedSerContours = None
+        self.mergedSerZContours = None
+        
+        self.mergedSecAttributes = None
+        self.mergedSecImages = None
+        self.mergedSecContours = None
+        self.contourWidgets = [] #===
+        self.currentWidget = None
+        self.currentContWidg = 0 #===
+        
+        self.mergedSeries = None #=== First created (seriesAttributeWidget.next()) w/ no Contours/ZContours
+        self.outputPath = 'Enter directory for output'
+        
+        # Load Functional Frame
+        self.initUI()
+        
+    def initUI(self):
+        self.prepNandBbuttons()
+        self.prepSlider()
+        self.prepLayout()
+        
+        # shown when needed
+        self.slider.hide()
+        self.label.hide()
+
+        self.show()
+    
+    def prepLayout(self):
         # Layout: Puts buttons in bottom-right corner
         hbox = QtGui.QHBoxLayout() # Horizontal
         hbox.addStretch(1) # Push down
@@ -86,9 +92,48 @@ class mainFrame(QtGui.QFrame):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
         
-        # Show mainFrame()
-        self.show()
-    
+    def prepNandBbuttons(self):
+        # Next button
+        self.nextButton.setText('Next')
+
+        # Back button
+        self.backButton.setText('Back')
+          
+    def prepSlider(self): #===
+        # doesnt properly respond to clicking on ticks
+        # Slider
+        if type(self.ser1obj) != None and type(self.ser2obj) != None:
+            minTick = int(self.ser1obj.sections[0].name[-1]) # section # of first section in section list
+            maxTick = len(self.ser1obj.sections) # number of sections in section list
+            self.slider.setRange(minTick, maxTick)
+        
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider.setTickPosition(QtGui.QSlider.TicksBothSides)
+        self.slider.setTickInterval(1)
+         
+        # Label
+        self.label.setText('Section '+str(self.slider.value()))
+        self.label.setAlignment(QtCore.Qt.AlignHCenter)
+        
+        self.slider.sliderReleased.connect( self.changeSection )
+        self.slider.sliderMoved.connect( self.changeSectionLabel )
+        
+    def changeSection(self): #===
+        '''Loads appropriate section when the slider is released on a new position'''
+        print('Switched to section: '+str(self.slider.value()))
+        self.contourWidgets[self.currentContWidg].hide()
+        print('Section '+str(self.currentContWidg)+' hidden')
+        self.currentContWidg = self.slider.value()
+        print('Section '+str(self.currentContWidg)+' showing')
+        self.contourWidgets[self.currentContWidg].show()
+            
+    def changeSectionLabel(self): #===
+        '''Updates the section label while the slider is being moved'''
+        print('Hovering: '+str(self.slider.sliderPosition())) # currently hovering
+        print('Previously Hovered: '+str(self.slider.value())) # currently selected
+        newPos = self.slider.sliderPosition()
+        self.label.setText('Section '+str(newPos))
+           
     class serLoadWidget(QtGui.QWidget):
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
@@ -516,29 +561,24 @@ class mainFrame(QtGui.QFrame):
             self.close()
     
     class sectionContourWidget(QtGui.QWidget):
-        def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self,parent)
+        def __init__(self, parent=None, section=None):
+            QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
             self.table1 = None # Series 1 table
             self.table2 = None # Merge table
             self.table3 = None # Series 2 table
-#             self.slider = None # Section selection slider
-#             self.label = None # Section selection label
-            self.currentSection = None
+            self.section = section
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
             
             # Load widget for each section into self.parent.tempContours
-            self.parent.tempContours.append(self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[0],
-                                                     self.parent.ser2obj.sections[0],
-                                                     handler=self.secContHandler)))
-#             self.prepSlider()
+            self.prepTables(*rmt.mergeSectionContours(self.parent.ser1obj.sections[self.section],
+                                                     self.parent.ser2obj.sections[self.section],
+                                                     handler=self.secContHandler))
             self.prepButtonFunctionality()
-            
             self.prepLayout()
-            self.show()
         
         def secContHandler(self, uniqueA, compOvlp, confOvlp, uniqueB):
             '''rmtgui version of section contour handler'''
@@ -547,43 +587,19 @@ class mainFrame(QtGui.QFrame):
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-#             self.slider.sliderReleased.connect( self.changeSection ) # Only changes section when released
-#             self.slider.sliderMoved.connect( self.changeSectionLabel ) # Updates section label when moved
             
         def prepLayout(self):
+            self.parent.slider.show()
+            self.parent.label.show()
+            
             # Layout
             vbox = QtGui.QVBoxLayout() # Holds all the boxes below
             hbox1 = QtGui.QHBoxLayout() # For the 3 tables
-            hbox2 = QtGui.QHBoxLayout() # For the section selection table
-            hbox3 = QtGui.QHBoxLayout()
             hbox1.addWidget(self.table1) # Series 1
             hbox1.addWidget(self.table2) # Conflicts/merges
             hbox1.addWidget(self.table3) # Series 2
-#             hbox2.addWidget(self.slider) # Section selection
-#             hbox3.addWidget(self.label) # Current section label
             vbox.addLayout(hbox1)
-#             vbox.addLayout(hbox2)
-#             vbox.addLayout(hbox3)
             self.setLayout(vbox)
-            
-        def prepSlider(self): #=== doesnt properly respond to clicking on ticks
-            # Slider
-            slider = QtGui.QSlider(self)
-            minTick = int(self.parent.ser1obj.sections[0].name[-1]) # section # of first section in section list
-            maxTick = len(self.parent.ser1obj.sections) # number of sections in section list
-            slider.setRange(minTick, maxTick)
-            slider.setOrientation(QtCore.Qt.Horizontal)
-            slider.setTickPosition(QtGui.QSlider.TicksBothSides)
-            slider.setTickInterval(1)
-            
-            # Label
-            label = QtGui.QLabel(self)
-            label.setText('Section '+str(slider.value()))
-            label.setAlignment(QtCore.Qt.AlignHCenter)
-            
-            self.currentSection = minTick
-            self.label = label
-            self.slider = slider
             
         def prepTables(self, s1unique, ovlps, confs, s2unique): #===
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
@@ -635,22 +651,6 @@ class mainFrame(QtGui.QFrame):
             self.table2 = table2
             self.table3 = table3
             return self
-            
-        def changeSection(self): #===
-            '''Loads appropriate section when the slider is released on a new position'''
-            print('Current sec: '+str(self.slider.value()))
-            self.parent.tempContours[self.currentSection] = self # Save current status
-            self.hide()
-            self = self.parent.tempContours[self.slider.value()-1] # Change to new section
-            self.show()
-            self.currentSection = self.slider.value() # Update new current section value
-            
-        def changeSectionLabel(self):
-            '''Updates the section label while the slider is being moved'''
-            print('Hovering: '+str(self.slider.sliderPosition())) # currently hovering
-            print('Previously Hovered: '+str(self.slider.value())) # currently selected
-            newPos = self.slider.sliderPosition()
-            self.label.setText('Section '+str(newPos))
             
         def next(self):
             # Disconnect buttons and load next window
@@ -753,7 +753,10 @@ class mainFrame(QtGui.QFrame):
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
-#     mainFrame.serLoadWidget(rmtFrame)   
-    mainFrame.sectionContourWidget(rmtFrame)
+#     mainFrame.serLoadWidget(rmtFrame) #===
+    for sec in range(len(rmtFrame.ser1obj.sections)): #===
+        rmtFrame.contourWidgets.append( mainFrame.sectionContourWidget(rmtFrame, sec) ) #===
+    rmtFrame.currentWidget = rmtFrame.contourWidgets[0]
+    rmtFrame.currentWidget.show()
     sys.exit( app.exec_() )
 main()
