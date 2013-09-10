@@ -707,8 +707,56 @@ class mainFrame(QtGui.QFrame):
         
         def showDetails(self, confA, confB): #===
             '''Gives more detail of the contours in conflict'''
-            print(confA)
-            print(confB)
+            res = QtGui.QWidget(self)
+            res.setGeometry(0,0,800,500)
+            res.setAutoFillBackground(True)
+            
+            # Label
+            label = QtGui.QLabel(self)
+            label.setText('Conflict: '+str(confA.name))
+#             label.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+            
+            # Text
+            tBoxA = QtGui.QLabel(self)
+            tBoxB = QtGui.QLabel(self)
+            tBoxA.setText(str(confA))
+            tBoxB.setText(str(confB))
+            tBoxA.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+            tBoxB.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+            
+            # Buttons
+            confAbut = QtGui.QPushButton(self)
+            confAbut.setText('Keep A')
+            confBbut = QtGui.QPushButton(self)
+            confBbut.setText('Keep B')
+            bothBut = QtGui.QPushButton(self)
+            bothBut.setText('Keep A & B')
+            
+            # Layout
+            vbox = QtGui.QVBoxLayout() # For entire detail window
+            
+            labelBox = QtGui.QHBoxLayout()
+            labelBox.addWidget(label)
+            labelBox.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+            labelBox.setSizeConstraint(QtGui.QLayout.SetFixedSize)
+            
+            sectionBox = QtGui.QHBoxLayout()
+            
+            secAbox = QtGui.QVBoxLayout() # For sectionA detail & button
+            secAbox.addWidget(tBoxA)
+            secAbox.addWidget(confAbut)
+            sectionBox.addLayout(secAbox)
+            
+            secBbox = QtGui.QVBoxLayout() # For sectionB detail & button
+            secBbox.addWidget(tBoxB)
+            secBbox.addWidget(confBbut)
+            sectionBox.addLayout(secBbox)
+            
+            vbox.addLayout(labelBox)
+            vbox.addLayout(sectionBox)
+            
+            res.setLayout(vbox)
+            res.show()
                
         def next(self):
             # Disconnect buttons and load next window
