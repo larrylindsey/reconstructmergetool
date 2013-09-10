@@ -34,8 +34,8 @@ class mainFrame(QtGui.QFrame):
         # Main Data
 #         self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser'
 #         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser'
-        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/rmtg.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/rmtg.ser' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
 #         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
 #         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
         self.serName = 'rmtg' #===
@@ -119,9 +119,16 @@ class mainFrame(QtGui.QFrame):
         '''Loads appropriate section when the slider is released on a new position'''
         print('Switched to section: '+str(self.slider.value()))
         self.currentWidget.hide()
-        print('section '+str(self.currentWidget.section)+' hiden')
-        self.currentWidget = self.contourWidgets[self.slider.value()]
-        print('section '+str(self.currentWidget.section)+' showing')
+        print('section '+str(self.currentWidget.section)+' hidden')
+        for sec in self.contourWidgets:
+            if sec.section == self.slider.value():      
+                self.currentWidget = sec
+                print('section '+str(self.currentWidget.section)+' showing')
+                self.currentWidget.show()
+                return
+        sec = mainFrame.sectionContourWidget( self, self.slider.value() )
+        self.contourWidgets.append(sec)
+        self.currentWidget = sec
         self.currentWidget.show()
    
     def changeSectionLabel(self): #===
@@ -576,11 +583,10 @@ class mainFrame(QtGui.QFrame):
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             
-            for sec in self.parent.ser1obj.sections: #===
-                print(sec.name)
-                self.parent.contourWidgets.append( mainFrame.sectionContourWidget(self.parent, int(sec.name[-1]) )) #===
+#             for sec in self.parent.ser1obj.sections: #===
+            self.parent.contourWidgets.append( mainFrame.sectionContourWidget(self.parent, 0 )) #===
             self.parent.currentWidget = self.parent.contourWidgets[0]
-            print(self.parent.currentWidget)
+            self.parent.currentWidget.show()
                 
             self.close()
               
@@ -618,7 +624,7 @@ class mainFrame(QtGui.QFrame):
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-            
+            self.table2.itemDoubleClicked.connect( self.resolveConflict ) #===
         def prepLayout(self):
             self.parent.slider.show()
             self.parent.label.show()
@@ -667,15 +673,11 @@ class mainFrame(QtGui.QFrame):
                 tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table3.setItem(row, 0, tableItem)
             
-            # Resize tables
-            table1.setColumnWidth(0,240)
-            table2.setColumnWidth(0,240)
-            table3.setColumnWidth(0,240)
-            
-            # Change selection properties
+            # Apply changes to tables
             for table in [table1,table2,table3]:
                 table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
                 table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+                table.setColumnWidth(0,240)
             
             # Assign tables to self
             self.table1 = table1
@@ -683,6 +685,9 @@ class mainFrame(QtGui.QFrame):
             self.table3 = table3
             return self
             
+        def resolveConflict(self): #===
+            return
+        
         def next(self):
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
@@ -696,7 +701,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionImageWidget( self.parent )
             self.close()
-            
+           
     class outputWidget(QtGui.QWidget):
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
