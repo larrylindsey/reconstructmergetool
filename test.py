@@ -306,7 +306,8 @@ class mainFrame(QtGui.QFrame):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
             self.setGeometry(0,0,800,500)
-            self.table = None
+            self.table1 = None
+            self.table2 = None
             self.s1c = None
             self.s2c = None
             self.mergedConts = None
@@ -317,26 +318,43 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             
             rmt.mergeSeriesContours(self.parent.ser1obj.contours, self.parent.ser2obj.contours, handler=self.serContHandler)
+            
+            self.prepLayout()
             self.show()
+        def prepLayout(self):
+            # Layout
+            vbox = QtGui.QVBoxLayout() # Holds all the boxes below
+            hbox1 = QtGui.QHBoxLayout() # For the 2 tables
+            hbox1.addWidget(self.table1) # Series 1
+            hbox1.addWidget(self.table2) # Series 2
+            vbox.addLayout(hbox1)
+            self.setLayout(vbox)
             
         def serContHandler(self, ser1conts, ser2conts, ser3conts):
-            self.table = QtGui.QTableWidget(len(ser1conts), 2, parent=self)
-            self.table.setGeometry(0,0,800,500)
-            self.table.setColumnWidth(0, 300)
-            self.table.setColumnWidth(1, 300)
-            self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
-            self.table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
+            table1 = QtGui.QTableWidget(len(ser1conts), 1, parent=self)
+            table2 = QtGui.QTableWidget(len(ser2conts), 1, parent=self)
+            
+            for table in [table1, table2]:
+#                 table.setColumnWidth(0, 300)
+#                 table.setColumnWidth(1, 300)
+                table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
+            table1.setHorizontalHeaderLabels( [self.parent.ser1obj.name] )
+            table2.setHorizontalHeaderLabels( [self.parent.ser2obj.name] )
+            
             for row in range( len(ser1conts) ):
                 # Series 1
                 tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
-                self.table.setItem(row, 0, tableItem)
+                table1.setItem(row, 0, tableItem)
                 # Series 2
                 tableItem = QtGui.QTableWidgetItem( ser2conts[row].name )
                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
-                self.table.setItem(row, 1, tableItem)
+                table2.setItem(row, 0, tableItem)
             
-            self.table.show()
+            self.table1 = table1
+            self.table2 = table2
+#             self.table1.show()
+#             self.table2.show()
             self.s1c = ser1conts
             self.s2c = ser2conts
             self.mergedConts = ser3conts
