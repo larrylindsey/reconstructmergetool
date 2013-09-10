@@ -607,6 +607,12 @@ class mainFrame(QtGui.QFrame):
             self.table3 = None # Series 2 table
             self.section = section
             
+            # Original contours returned from rmt.mergeSectionContours()
+            self.uniqueA = None
+            self.compOvlp = None
+            self.confOvlp = None
+            self.uniqueB = None
+            
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
             
@@ -619,12 +625,17 @@ class mainFrame(QtGui.QFrame):
         
         def secContHandler(self, uniqueA, compOvlp, confOvlp, uniqueB):
             '''rmtgui version of section contour handler'''
+            self.uniqueA = uniqueA
+            self.compOvlp = compOvlp
+            self.confOvlp = confOvlp
+            self.uniqueB = uniqueB
             return uniqueA, compOvlp, confOvlp, uniqueB
 
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
             self.table2.itemDoubleClicked.connect( self.resolveConflict ) #===
+        
         def prepLayout(self):
             self.parent.slider.show()
             self.parent.label.show()
@@ -685,9 +696,20 @@ class mainFrame(QtGui.QFrame):
             self.table3 = table3
             return self
             
-        def resolveConflict(self): #===
-            return
+        def resolveConflict(self, item): #===
+            row = item.row()
+            if item.background().color().name() == '#ffc0cb': # If background color = pink (i.e. is a conflict)
+                self.showDetails( *self.returnConfConts(row) )
         
+        def returnConfConts(self, row):
+            '''Returns a Contour object that is represented in row of the table'''
+            return self.confOvlp[row][0], self.confOvlp[row][1]
+        
+        def showDetails(self, confA, confB): #===
+            '''Gives more detail of the contours in conflict'''
+            print(confA)
+            print(confB)
+               
         def next(self):
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
@@ -729,7 +751,6 @@ class mainFrame(QtGui.QFrame):
             self.outBarBrowse.clicked.connect( self.browseOutPath )
 
             #=== Checkbox for transferring picture files?
-            
             
             # Layout
             hbox = QtGui.QHBoxLayout()
