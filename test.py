@@ -614,11 +614,8 @@ class mainFrame(QtGui.QFrame):
             self.uniqueB = None
             
             # Contours to be output into the merged series, CHANGE THESE WITH FUNCTIONS
-            self.uniqueAout = []
-            self.compOvlpout = []
-            self.confOvlpout = []
-            self.uniqueBout = []
-            
+            self.confOvlpout = [] # for resolved conflicts
+            self.allOutContours = None
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
@@ -846,20 +843,47 @@ class mainFrame(QtGui.QFrame):
             res.show()    
         
         def loadOutLists(self): #===
-#             self.uniqueAout = []
-#             self.compOvlpout = []
-#             self.confOvlpout = []
-#             self.uniqueBout = []
+            self.allOutContours = []
+            t1items = self.table1.selectedItems()
+            t2items = self.table2.selectedItems()
+            t3items = self.table3.selectedItems()
             
-            print(self.table1.selectedItems())
-            print(self.table2.selectedItems())
-            print(self.table3.selectedItems())
-            return
+            # Unique A
+            for item in t1items:
+                row = item.row()
+                cont = self.uniqueA[row]
+                self.allOutContours.append(cont)
+                
+            # Comp ovlp
+            for item in t2items:
+                green = '#90ee90'
+                if item.background().color().name() == green: # Added when confl is resolved
+                    row = item.row()-len(self.confOvlp)
+                    cont = self.compOvlp[row][0]
+                    self.allOutContours.append(cont)
+            
+            # Conflict ovlp; only adds selected AND resolved conflicts
+            for item in t2items:
+                row = item.row()
+                if row < len(self.confOvlp):
+                    for resConf in self.confOvlpout:
+                        if resConf == self.confOvlp[row][0]:
+                            self.allOutContours.append(resConf)
+                        if resConf == self.confOvlp[row][1]:
+                            self.allOutContours.append(resConf)
+                        
+            # Unique B
+            for item in t3items:
+                row = item.row()
+                cont = self.uniqueB[row]
+                self.allOutContours.append(cont)
+
+            print('Output: '+str([cont.name for cont in self.allOutContours]))
         
         def itemToYellow(self, item):
             item.setBackground(QtGui.QBrush(QtGui.QColor('#ffff66')))
 
-        def next(self):
+        def next(self): #=== add a double-check button to make sure all sections are complete
             for widg in self.parent.contourWidgets:
                 widg.loadOutLists()
             # Hide section slider
@@ -954,14 +978,15 @@ class mainFrame(QtGui.QFrame):
                 msg.setText('Invalid directory, please fix')
                 msg.show()
             
-        def back(self):
+        def back(self): #===
             # Reload contourWidget and slider
             self.parent.slider.show()
             self.parent.label.show()
             self.parent.currentWidget.show()
             
-            # Disconnect buttons and load previous window
+            #=== Disconnect buttons, reconnect prev buttons, and load previous window
             self.parent.nextButton.clicked.disconnect( self.next )
+            self.parent.nextButton.setText('Next')
             self.parent.backButton.clicked.disconnect( self.back )
             self.close()
             
