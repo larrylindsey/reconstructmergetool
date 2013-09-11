@@ -49,7 +49,7 @@ class mainFrame(QtGui.QFrame):
         
         self.mergedSecAttributes = None
         self.mergedSecImages = None
-        self.mergedSecContours = None
+        self.mergedSecContours = []
         self.contourWidgets = [] #===
         self.currentWidget = None
         
@@ -119,16 +119,23 @@ class mainFrame(QtGui.QFrame):
         '''Loads appropriate section when the slider is released on a new position'''
         print('Switched to section: '+str(self.slider.value()))
         self.currentWidget.hide()
+        self.nextButton.clicked.disconnect( self.currentWidget.next ) #===
+        self.backButton.clicked.disconnect( self.currentWidget.back ) #===
         print('section '+str(self.currentWidget.section)+' hidden')
         for sec in self.contourWidgets:
             if sec.section == self.slider.value():      
                 self.currentWidget = sec
                 print('section '+str(self.currentWidget.section)+' showing')
                 self.currentWidget.show()
+                self.nextButton.clicked.connect( self.currentWidget.next ) #===
+                self.backButton.clicked.connect( self.currentWidget.back ) #===
                 return
         sec = mainFrame.sectionContourWidget( self, self.slider.value() )
         self.contourWidgets.append(sec)
+        print('appended widget for section '+str(sec.section))
         self.currentWidget = sec
+        self.nextButton.clicked.connect( self.currentWidget.next ) #===
+        self.backButton.clicked.connect( self.currentWidget.back ) #===
         self.currentWidget.show()
    
     def changeSectionLabel(self): #===
@@ -751,7 +758,7 @@ class mainFrame(QtGui.QFrame):
         def showConfDetails(self, confA, confB, row):
             '''Gives more detail of the contours in conflict'''
             item = self.table2.item(row, 0)
-            def pickConfA(): #===
+            def pickConfA():
                 '''Adds contour A to the output contour list'''
                 if confA not in self.confOvlpout: self.confOvlpout.append(confA)
                 if confB in self.confOvlpout: self.confOvlpout.remove(confB)
@@ -759,7 +766,7 @@ class mainFrame(QtGui.QFrame):
                 item.setTextAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
                 res.close()
                 
-            def pickConfB(): #===
+            def pickConfB():
                 '''Adds contour B to the output contour list'''
                 if confB not in self.confOvlpout: self.confOvlpout.append(confB)
                 if confA in self.confOvlpout: self.confOvlpout.remove(confA)
@@ -767,7 +774,7 @@ class mainFrame(QtGui.QFrame):
                 item.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
                 res.close()
                 
-            def pickBoth(): #===
+            def pickBoth():
                 if confA not in self.confOvlpout: self.confOvlpout.append(confA)
                 if confB not in self.confOvlpout: self.confOvlpout.append(confB)
                 item.setText('-------------> '+confA.name+' <-------------') #=== confA.name?
@@ -842,7 +849,7 @@ class mainFrame(QtGui.QFrame):
             res.setLayout(vbox)
             res.show()    
         
-        def loadOutLists(self): #===
+        def loadOutList(self): #===
             self.allOutContours = []
             t1items = self.table1.selectedItems()
             t2items = self.table2.selectedItems()
@@ -878,14 +885,18 @@ class mainFrame(QtGui.QFrame):
                 cont = self.uniqueB[row]
                 self.allOutContours.append(cont)
 
-            print('Output: '+str([cont.name for cont in self.allOutContours]))
+            print('Output: '+str([cont.name for cont in self.allOutContours])) #===
         
         def itemToYellow(self, item):
             item.setBackground(QtGui.QBrush(QtGui.QColor('#ffff66')))
 
         def next(self): #=== add a double-check button to make sure all sections are complete
+            #=== Load output lists and create list of merged contour lists
             for widg in self.parent.contourWidgets:
-                widg.loadOutLists()
+                widg.loadOutList()
+                self.parent.mergedSecContours.extend(widg.allOutContours)
+            print(self.parent.mergedSecContours)
+            
             # Hide section slider
             self.parent.slider.hide()
             self.parent.label.hide()
