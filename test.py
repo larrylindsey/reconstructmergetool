@@ -607,12 +607,18 @@ class mainFrame(QtGui.QFrame):
             self.table3 = None # Series 2 table
             self.section = section
             
-            # Original contours returned from rmt.mergeSectionContours()
-            #=== Do not change these as this is what will be accessed if 'defaults' button pressed 
+            # Original contours, DO NOT CHANGE IN FUNCTIONS 
             self.uniqueA = None
             self.compOvlp = None
             self.confOvlp = None
             self.uniqueB = None
+            
+            # Contours to be output into the merged series, CHANGE THESE WITH FUNCTIONS
+            self.uniqueAout = []
+            self.compOvlpout = []
+            self.confOvlpout = []
+            self.uniqueBout = []
+            
             
             # Update mainFrame data
             self.parent.setWindowTitle('Section Contours') #===
@@ -636,7 +642,9 @@ class mainFrame(QtGui.QFrame):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
             self.table2.itemDoubleClicked.connect( self.resolveConflict ) #=== Double click item to resolve conflict
-        
+            self.table1.itemDoubleClicked.connect( self.showDetail )
+            self.table3.itemDoubleClicked.connect( self.showDetail )
+            
         def prepLayout(self):
             self.parent.slider.show()
             self.parent.label.show()
@@ -702,15 +710,73 @@ class mainFrame(QtGui.QFrame):
             pink = '#ffc0cb'
             yellow = '#ffff66'
             if item.background().color().name() in [pink, yellow]: # If background color = pink (i.e. is a conflict)
-                self.showDetails( *self.returnConfConts(row) )
-            self.itemToYellow(item)
+                self.showConfDetails( *self.returnConfConts(row) )
+                self.itemToYellow(item)
+            else:
+                self.showDetail(item)
             
         def returnConfConts(self, row):
             '''Returns a Contour object that is represented in row of the table'''
-            return self.confOvlp[row][0], self.confOvlp[row][1]
+            return self.confOvlp[row][0], self.confOvlp[row][1], row
+
+        def showDetail(self, item):
+            '''Provides a small window to display more details about a table item'''
+            row = item.row()-len(self.confOvlp)
+            table = item.tableWidget()
+            # Get contour object
+            if table == self.table1: cont = self.uniqueA[row]
+            elif table == self.table2: cont = self.compOvlp[row][0]
+            elif table == self.table3: cont = self.uniqueB[row]
+            
+            # Window
+            win = QtGui.QWidget(self)
+            win.setGeometry(250, 100, 300, 300)
+            win.setAutoFillBackground(True)
+            
+            # Contour information
+            label = QtGui.QLabel(self)
+            label.setText(str(cont))
+            label.setAlignment(QtCore.Qt.AlignCenter)
+            
+            # Close button
+            closeBut = QtGui.QPushButton(self)
+            closeBut.setText('Close')
+            closeBut.clicked.connect( win.close )
+            
+            # Layout
+            vbox = QtGui.QVBoxLayout()
+            vbox.addWidget(label)
+            vbox.addWidget(closeBut)
+            win.setLayout(vbox)
+            win.show()
         
-        def showDetails(self, confA, confB): #===
+        def showConfDetails(self, confA, confB, row): #===
             '''Gives more detail of the contours in conflict'''
+            item = self.table2.item(row, 0)
+            def pickConfA(): #===
+                '''Adds contour A to the output contour list'''
+                if confA not in self.confOvlpout: self.confOvlpout.append(confA)
+                if confB in self.confOvlpout: self.confOvlpout.remove(confB)
+                item.setText(confA.name)
+                item.setTextAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+                res.close()
+                
+            def pickConfB(): #===
+                '''Adds contour B to the output contour list'''
+                if confB not in self.confOvlpout: self.confOvlpout.append(confB)
+                if confA in self.confOvlpout: self.confOvlpout.remove(confA)
+                item.setText(confB.name)
+                item.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+                res.close()
+                
+            def pickBoth(): #===
+                if confA not in self.confOvlpout: self.confOvlpout.append(confA)
+                if confB not in self.confOvlpout: self.confOvlpout.append(confB)
+                item.setText('-------------> '+confA.name+' <-------------') #=== confA.name?
+                item.setTextAlignment(QtCore.Qt.AlignCenter)
+                res.close()
+                
+            # Conflict Resolution window
             res = QtGui.QWidget(self)
             res.setGeometry(0,0,800,500)
             res.setAutoFillBackground(True)
@@ -732,6 +798,7 @@ class mainFrame(QtGui.QFrame):
             tBoxA.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
             confAbut = QtGui.QPushButton(self) # Contour A button
             confAbut.setText('Keep A') #=== change size
+            confAbut.clicked.connect( pickConfA ) #===
             secAbox.addWidget(tBoxA)
             secAbox.addWidget(confAbut)
             sectionBox.addLayout(secAbox)
@@ -742,33 +809,61 @@ class mainFrame(QtGui.QFrame):
             tBoxB.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
             confBbut = QtGui.QPushButton(self) # Contour B button
             confBbut.setText('Keep B') #=== change size
+            confBbut.clicked.connect( pickConfB )
             secBbox.addWidget(tBoxB)
             secBbox.addWidget(confBbut)
             sectionBox.addLayout(secBbox)
             
-            # 'Cancel' & 'Keep Both buttons'
+            # 'Cancel' & 'Keep Both' buttons
             archButtonBox = QtGui.QVBoxLayout()
+            bothButBox = QtGui.QHBoxLayout()
             bothBut = QtGui.QPushButton(self)
             bothBut.setText('Keep Both Contours')
+            bothBut.clicked.connect( pickBoth )
+            bothButBox.addSpacing(250)
+            bothButBox.addWidget(bothBut)
+            bothButBox.addSpacing(250)
+            cancelButBox = QtGui.QHBoxLayout()
             cancelBut = QtGui.QPushButton(self)
             cancelBut.setText('Cancel')
-            archButtonBox.addWidget(bothBut)
-            archButtonBox.addWidget(cancelBut)
-            archButtonBox.insertSpacing(-1,100) #===
+            cancelBut.clicked.connect( res.close )
+            cancelButBox.addSpacing(250)
+            cancelButBox.addWidget(cancelBut)
+            cancelButBox.addSpacing(250)
+            archButtonBox.addSpacing(50)
+            archButtonBox.addLayout(bothButBox)
+            archButtonBox.addLayout(cancelButBox)
+            archButtonBox.insertSpacing(-1,100) # prevents the huge space between label and contour info
             
-            # Add to outside most layoutBox
+            # Combine layouts
             vbox = QtGui.QVBoxLayout() # For entire detail window
             vbox.addLayout(labelBox)
             vbox.addLayout(sectionBox)
             vbox.addLayout(archButtonBox)
             
             res.setLayout(vbox)
-            res.show()
+            res.show()    
+        
+        def loadOutLists(self):
+#             self.uniqueAout = []
+#             self.compOvlpout = []
+#             self.confOvlpout = []
+#             self.uniqueBout = []
             
+            print(self.table1.selectedItems())
+            print(self.table2.selectedItems())
+            print(self.table3.selectedItems())
+            return
+        
         def itemToYellow(self, item):
             item.setBackground(QtGui.QBrush(QtGui.QColor('#ffff66')))
 
         def next(self):
+            for widg in self.parent.contourWidgets:
+                widg.loadOutLists()
+            # Hide section slider
+            self.parent.slider.hide()
+            self.parent.label.hide()
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
@@ -859,10 +954,14 @@ class mainFrame(QtGui.QFrame):
                 msg.show()
             
         def back(self):
+            # Reload contourWidget and slider
+            self.parent.slider.show()
+            self.parent.label.show()
+            self.parent.currentWidget.show()
+            
             # Disconnect buttons and load previous window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
-            mainFrame.sectionContourWidget( self.parent )
             self.close()
             
 def main():
