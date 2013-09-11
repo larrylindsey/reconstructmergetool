@@ -634,7 +634,7 @@ class mainFrame(QtGui.QFrame):
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-            self.table2.itemDoubleClicked.connect( self.resolveConflict ) #===
+            self.table2.itemDoubleClicked.connect( self.resolveConflict ) #=== Double click item to resolve conflict
         
         def prepLayout(self):
             self.parent.slider.show()
@@ -698,9 +698,12 @@ class mainFrame(QtGui.QFrame):
             
         def resolveConflict(self, item): #===
             row = item.row()
-            if item.background().color().name() == '#ffc0cb': # If background color = pink (i.e. is a conflict)
+            pink = '#ffc0cb'
+            yellow = '#ffff66'
+            if item.background().color().name() in [pink, yellow]: # If background color = pink (i.e. is a conflict)
                 self.showDetails( *self.returnConfConts(row) )
-        
+            self.itemToYellow(item)
+            
         def returnConfConts(self, row):
             '''Returns a Contour object that is represented in row of the table'''
             return self.confOvlp[row][0], self.confOvlp[row][1]
@@ -730,7 +733,7 @@ class mainFrame(QtGui.QFrame):
             confBbut = QtGui.QPushButton(self)
             confBbut.setText('Keep B')
             bothBut = QtGui.QPushButton(self)
-            bothBut.setText('Keep A & B')
+            bothBut.setText('Keep Both Contours')
             
             # Layout
             vbox = QtGui.QVBoxLayout() # For entire detail window
@@ -754,10 +757,14 @@ class mainFrame(QtGui.QFrame):
             
             vbox.addLayout(labelBox)
             vbox.addLayout(sectionBox)
+            vbox.addWidget(bothBut)
             
             res.setLayout(vbox)
             res.show()
-               
+            
+        def itemToYellow(self, item):
+            item.setBackground(QtGui.QBrush(QtGui.QColor('#ffff66')))
+
         def next(self):
             # Disconnect buttons and load next window
             self.parent.nextButton.clicked.disconnect( self.next )
