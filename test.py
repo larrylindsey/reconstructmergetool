@@ -641,8 +641,9 @@ class mainFrame(QtGui.QFrame):
         def prepButtonFunctionality(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
-            self.table2.itemDoubleClicked.connect( self.resolveConflict ) #=== Double click item to resolve conflict
+            # What happens when you double click a table item?
             self.table1.itemDoubleClicked.connect( self.showDetail )
+            self.table2.itemDoubleClicked.connect( self.resolveConflict )
             self.table3.itemDoubleClicked.connect( self.showDetail )
             
         def prepLayout(self):
@@ -658,7 +659,7 @@ class mainFrame(QtGui.QFrame):
             vbox.addLayout(hbox1)
             self.setLayout(vbox)
             
-        def prepTables(self, s1unique, ovlps, confs, s2unique): #===
+        def prepTables(self, s1unique, ovlps, confs, s2unique):
             table1 = QtGui.QTableWidget(len(s1unique), 1, parent=self)
             table2 = QtGui.QTableWidget(len(confs)+len(ovlps), 1, parent=self)
             table3 = QtGui.QTableWidget(len(s2unique), 1, parent=self)
@@ -667,7 +668,7 @@ class mainFrame(QtGui.QFrame):
             table1.setHorizontalHeaderLabels(['Unique 1'])
             for row in range(len(s1unique)):
                 tableItem = QtGui.QTableWidgetItem( s1unique[row].name )
-                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+#                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table1.setItem(row, 0, tableItem)
                 
@@ -689,7 +690,7 @@ class mainFrame(QtGui.QFrame):
             table3.setHorizontalHeaderLabels(['Unique 2'])
             for row in range(len(s2unique)):
                 tableItem = QtGui.QTableWidgetItem( s2unique[row].name )
-                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+#                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table3.setItem(row, 0, tableItem)
             
@@ -705,7 +706,7 @@ class mainFrame(QtGui.QFrame):
             self.table3 = table3
             return self
             
-        def resolveConflict(self, item): #===
+        def resolveConflict(self, item):
             row = item.row()
             pink = '#ffc0cb'
             yellow = '#ffff66'
@@ -750,7 +751,7 @@ class mainFrame(QtGui.QFrame):
             win.setLayout(vbox)
             win.show()
         
-        def showConfDetails(self, confA, confB, row): #===
+        def showConfDetails(self, confA, confB, row):
             '''Gives more detail of the contours in conflict'''
             item = self.table2.item(row, 0)
             def pickConfA(): #===
@@ -844,7 +845,7 @@ class mainFrame(QtGui.QFrame):
             res.setLayout(vbox)
             res.show()    
         
-        def loadOutLists(self):
+        def loadOutLists(self): #===
 #             self.uniqueAout = []
 #             self.compOvlpout = []
 #             self.confOvlpout = []
