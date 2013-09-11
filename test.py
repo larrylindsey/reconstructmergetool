@@ -608,6 +608,7 @@ class mainFrame(QtGui.QFrame):
             self.section = section
             
             # Original contours returned from rmt.mergeSectionContours()
+            #=== Do not change these as this is what will be accessed if 'defaults' button pressed 
             self.uniqueA = None
             self.compOvlp = None
             self.confOvlp = None
@@ -713,51 +714,53 @@ class mainFrame(QtGui.QFrame):
             res = QtGui.QWidget(self)
             res.setGeometry(0,0,800,500)
             res.setAutoFillBackground(True)
-            
-            # Label
-            label = QtGui.QLabel(self)
-            label.setText('Conflict: '+str(confA.name))
-#             label.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-            
-            # Text
-            tBoxA = QtGui.QLabel(self)
-            tBoxB = QtGui.QLabel(self)
-            tBoxA.setText(str(confA))
-            tBoxB.setText(str(confB))
-            tBoxA.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-            tBoxB.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-            
-            # Buttons
-            confAbut = QtGui.QPushButton(self)
-            confAbut.setText('Keep A')
-            confBbut = QtGui.QPushButton(self)
-            confBbut.setText('Keep B')
-            bothBut = QtGui.QPushButton(self)
-            bothBut.setText('Keep Both Contours')
-            
-            # Layout
-            vbox = QtGui.QVBoxLayout() # For entire detail window
-            
+
+            # Conflict Label (Name of conflicting contours)
             labelBox = QtGui.QHBoxLayout()
+            label = QtGui.QLabel(self) # Label
+            label.setText('Conflict: '+str(confA.name))
             labelBox.addWidget(label)
             labelBox.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
             labelBox.setSizeConstraint(QtGui.QLayout.SetFixedSize)
             
+            # Sections box
             sectionBox = QtGui.QHBoxLayout()
-            
+            #--- Section A
             secAbox = QtGui.QVBoxLayout() # For sectionA detail & button
+            tBoxA = QtGui.QLabel(self) # Text box
+            tBoxA.setText(str(confA))
+            tBoxA.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+            confAbut = QtGui.QPushButton(self) # Contour A button
+            confAbut.setText('Keep A') #=== change size
             secAbox.addWidget(tBoxA)
             secAbox.addWidget(confAbut)
             sectionBox.addLayout(secAbox)
-            
+            #--- Section B
             secBbox = QtGui.QVBoxLayout() # For sectionB detail & button
+            tBoxB = QtGui.QLabel(self) # Text box
+            tBoxB.setText(str(confB))
+            tBoxB.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+            confBbut = QtGui.QPushButton(self) # Contour B button
+            confBbut.setText('Keep B') #=== change size
             secBbox.addWidget(tBoxB)
             secBbox.addWidget(confBbut)
             sectionBox.addLayout(secBbox)
             
+            # 'Cancel' & 'Keep Both buttons'
+            archButtonBox = QtGui.QVBoxLayout()
+            bothBut = QtGui.QPushButton(self)
+            bothBut.setText('Keep Both Contours')
+            cancelBut = QtGui.QPushButton(self)
+            cancelBut.setText('Cancel')
+            archButtonBox.addWidget(bothBut)
+            archButtonBox.addWidget(cancelBut)
+            archButtonBox.insertSpacing(-1,100) #===
+            
+            # Add to outside most layoutBox
+            vbox = QtGui.QVBoxLayout() # For entire detail window
             vbox.addLayout(labelBox)
             vbox.addLayout(sectionBox)
-            vbox.addWidget(bothBut)
+            vbox.addLayout(archButtonBox)
             
             res.setLayout(vbox)
             res.show()
