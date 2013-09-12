@@ -119,23 +119,17 @@ class mainFrame(QtGui.QFrame):
         '''Loads appropriate section when the slider is released on a new position'''
         print('Switched to section: '+str(self.slider.value()))
         self.currentWidget.hide()
-        self.nextButton.clicked.disconnect( self.currentWidget.next ) #===
-        self.backButton.clicked.disconnect( self.currentWidget.back ) #===
         print('section '+str(self.currentWidget.section)+' hidden')
         for sec in self.contourWidgets:
             if sec.section == self.slider.value():      
                 self.currentWidget = sec
                 print('section '+str(self.currentWidget.section)+' showing')
                 self.currentWidget.show()
-                self.nextButton.clicked.connect( self.currentWidget.next ) #===
-                self.backButton.clicked.connect( self.currentWidget.back ) #===
                 return
         sec = mainFrame.sectionContourWidget( self, self.slider.value() )
         self.contourWidgets.append(sec)
         print('appended widget for section '+str(sec.section))
         self.currentWidget = sec
-        self.nextButton.clicked.connect( self.currentWidget.next ) #===
-        self.backButton.clicked.connect( self.currentWidget.back ) #===
         self.currentWidget.show()
    
     def changeSectionLabel(self): #===
