@@ -134,6 +134,8 @@ class mainFrame(QtGui.QFrame):
         sec = mainFrame.sectionContourWidget( self, self.slider.value() )
         self.contourWidgets.append(sec)
         print('appended widget for section '+str(sec.section))
+        self.slider.show() #===
+        self.label.show() #===
         self.currentWidget = sec
         self.currentWidget.show()
    
@@ -148,7 +150,10 @@ class mainFrame(QtGui.QFrame):
         if len(self.contourWidgets) == 0: # Make contour widget if doesnt exist
                 self.contourWidgets.append( self.sectionContourWidget(self, 0 ))
                 self.currentWidget = self.contourWidgets[0]
-           
+        else:
+            self.slider.show()
+            self.label.show()
+        self.currentWidget.show()
     class serLoadWidget(QtGui.QWidget):
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
@@ -439,7 +444,7 @@ class mainFrame(QtGui.QFrame):
             mainFrame.seriesAttributeWidget(self.parent)
             self.close()
     
-    class seriesZContourWidget(QtGui.QWidget):
+    class seriesZContourWidget(QtGui.QWidget): #=== Beta changes
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -507,13 +512,18 @@ class mainFrame(QtGui.QFrame):
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
             
-        def back(self):
-            # Disconnect buttons and load prev window
-            self.parent.nextButton.clicked.disconnect( self.next )
-            self.parent.backButton.clicked.disconnect( self.back )
-            mainFrame.seriesContourWidget( self.parent )
+        def back(self): #=== BETA
+            self.parent.nextButton.clicked.disconnect(self.next)
+            self.parent.backButton.clicked.disconnect(self.back)
+            mainFrame.serLoadWidget(self.parent)
             self.close()
-    
+#             #=========================================================
+#             # Disconnect buttons and load prev window
+#             self.parent.nextButton.clicked.disconnect( self.next )
+#             self.parent.backButton.clicked.disconnect( self.back )
+#             mainFrame.seriesContourWidget( self.parent )
+#             self.close()
+#             #==========================================================
     class sectionAttributeWidget(QtGui.QWidget): #=== removed from beta, just keep sec1
         #=== should be basically the same as seriesAttributeWidget()
         def __init__(self, parent=None):
@@ -562,7 +572,6 @@ class mainFrame(QtGui.QFrame):
             for section in parent.mergedSecList:
                 section.imgs = parent.ser1obj.sections[section.index].imgs
             print('mergedImgs: '+str([section.imgs for section in [section for section in parent.mergedSecList] ]))
-#             parent.nextButton.clicked.connect( self.next ) # creates secContWidget
             self.next()
 #============================================================================
 #             QtGui.QWidget.__init__(self, parent)
@@ -638,13 +647,11 @@ class mainFrame(QtGui.QFrame):
 #             # Disconnect buttons and open next window
 #             self.parent.nextButton.clicked.disconnect( self.next )
 #             self.parent.backButton.clicked.disconnect( self.back )
+#
+#             self.parent.checkContourWidget()
+#             self.close()
 #========================================================================
-
-            
-            
             self.parent.checkContourWidget()
-            self.parent.currentWidget.show()
-                
             self.close()
               
         def back(self):
@@ -654,7 +661,7 @@ class mainFrame(QtGui.QFrame):
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
     
-    class sectionContourWidget(QtGui.QWidget):
+    class sectionContourWidget(QtGui.QWidget): #=== beta changes
         def __init__(self, parent=None, section=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -953,14 +960,15 @@ class mainFrame(QtGui.QFrame):
             mainFrame.outputWidget( self.parent )
             self.close()
             
-        def back(self):
-            # Hide slider/labe
+        def back(self): #=== beta
+            # Hide slider/label
             self.parent.slider.hide()
             self.parent.label.hide()
             # Disconnect buttons and load previous window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
-            mainFrame.sectionImageWidget( self.parent )
+#             mainFrame.sectionImageWidget( self.parent ) #=== Beta
+            mainFrame.seriesZContourWidget( self.parent ) #=== Beta
             self.close()
            
     class outputWidget(QtGui.QWidget):
