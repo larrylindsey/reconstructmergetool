@@ -584,9 +584,10 @@ class mainFrame(QtGui.QFrame):
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
             
-#             for sec in self.parent.ser1obj.sections: #===
-            self.parent.contourWidgets.append( mainFrame.sectionContourWidget(self.parent, 0 )) #===
-            self.parent.currentWidget = self.parent.contourWidgets[0]
+            
+            if len(self.parent.contourWidgets) == 0: # Make contour widget if doesnt exist
+                self.parent.contourWidgets.append( mainFrame.sectionContourWidget(self.parent, 0 ))
+                self.parent.currentWidget = self.parent.contourWidgets[0]
             self.parent.currentWidget.show()
                 
             self.close()
@@ -879,17 +880,14 @@ class mainFrame(QtGui.QFrame):
                 cont = self.uniqueB[row]
                 self.allOutContours.append(cont)
 
-            print('Output: '+str([cont.name for cont in self.allOutContours])) #===
+#             print('Output: '+str([cont.name for cont in self.allOutContours])) #===
         
         def itemToYellow(self, item):
             item.setBackground(QtGui.QBrush(QtGui.QColor('#ffff66')))
 
         def next(self): #=== add a double-check button to make sure all sections are complete
-            #=== Load output lists and create list of merged contour lists
-            for widg in self.parent.contourWidgets:
-                widg.loadOutList()
-                self.parent.mergedSecContours.extend(widg.allOutContours)
-            print(self.parent.mergedSecContours)
+            self.loadOutList()
+            self.parent.mergedSecContours.append(self.allOutContours)
             
             # Hide section slider
             self.parent.slider.hide()
@@ -901,6 +899,9 @@ class mainFrame(QtGui.QFrame):
             self.close()
             
         def back(self):
+            # Hide slider/labe
+            self.parent.slider.hide()
+            self.parent.label.hide()
             # Disconnect buttons and load previous window
             self.parent.nextButton.clicked.disconnect( self.next )
             self.parent.backButton.clicked.disconnect( self.back )
