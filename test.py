@@ -7,8 +7,12 @@ import time
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
-#     list of sectionContourWidgets in mainFrame, put sec slider in mainFrame
+#     Search for all of the '#===' to find problems/development areas
 #     QPushButton.setAcceptDrops(True) for load series
+#     Filters for contour name
+#     Restore default for seccontwidg()
+#     Repeat for other sections check box or button
+#     Arrows/Scroll/Click in slider doesnt work
 
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
@@ -94,7 +98,7 @@ class mainFrame(QtGui.QFrame):
         self.backButton.setText('Back')
           
     def prepSlider(self): #===
-        # doesnt properly respond to clicking on ticks
+        #=== doesnt properly respond to clicking on ticks
         # Slider
         if type(self.ser1obj) != None and type(self.ser2obj) != None:
             minTick = int(self.ser1obj.sections[0].name[-1]) # section # of first section in section list
@@ -115,7 +119,7 @@ class mainFrame(QtGui.QFrame):
         self.slider.sliderReleased.connect( self.changeSection )
         self.slider.sliderMoved.connect( self.changeSectionLabel )
         
-    def changeSection(self): #===
+    def changeSection(self):
         '''Loads appropriate section when the slider is released on a new position'''
         print('Switched to section: '+str(self.slider.value()))
         self.currentWidget.hide()
@@ -132,12 +136,17 @@ class mainFrame(QtGui.QFrame):
         self.currentWidget = sec
         self.currentWidget.show()
    
-    def changeSectionLabel(self): #===
+    def changeSectionLabel(self):
         '''Updates the section label while the slider is being moved'''
-        print('Hovering: '+str(self.slider.sliderPosition())) # currently hovering
-        print('Previously Hovered: '+str(self.slider.value())) # currently selected
+        print('Hovering: '+str(self.slider.sliderPosition()))
+        print('Previously Hovered: '+str(self.slider.value()))
         newPos = self.slider.sliderPosition()
         self.label.setText('Section '+str(newPos))
+    
+    def checkContourWidget(self):
+        if len(self.contourWidgets) == 0: # Make contour widget if doesnt exist
+                self.contourWidgets.append( self.sectionContourWidget(self, 0 ))
+                self.currentWidget = self.contourWidgets[0]
            
     class serLoadWidget(QtGui.QWidget):
         def __init__(self, parent=None):
@@ -228,7 +237,7 @@ class mainFrame(QtGui.QFrame):
                 self.parent.nextButton.clicked.disconnect( self.checkNextButton )
                 self.close()
 
-    class seriesAttributeWidget(QtGui.QWidget):
+    class seriesAttributeWidget(QtGui.QWidget): #=== removed from beta, just keep ser1 (time stamp?)
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -309,7 +318,7 @@ class mainFrame(QtGui.QFrame):
                 self.table.setItem(row, 1, tableItem)
             self.table.show() 
         
-    class seriesContourWidget(QtGui.QWidget):
+    class seriesContourWidget(QtGui.QWidget): #=== removed from beta, just keep ser1 (time stamp?)
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -510,7 +519,7 @@ class mainFrame(QtGui.QFrame):
             mainFrame.seriesZContourWidget( self.parent )
             self.close()
                    
-    class sectionImageWidget(QtGui.QWidget):
+    class sectionImageWidget(QtGui.QWidget): #=== removed from beta, just keep ser1 (time stamp?)
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
@@ -585,9 +594,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             
             
-            if len(self.parent.contourWidgets) == 0: # Make contour widget if doesnt exist
-                self.parent.contourWidgets.append( mainFrame.sectionContourWidget(self.parent, 0 ))
-                self.parent.currentWidget = self.parent.contourWidgets[0]
+            self.parent.checkContourWidget()
             self.parent.currentWidget.show()
                 
             self.close()
@@ -880,12 +887,12 @@ class mainFrame(QtGui.QFrame):
                 cont = self.uniqueB[row]
                 self.allOutContours.append(cont)
 
-#             print('Output: '+str([cont.name for cont in self.allOutContours])) #===
+            print('Section '+str(self.section)+' output: '+str([cont.name for cont in self.allOutContours])) #===
         
         def itemToYellow(self, item):
             item.setBackground(QtGui.QBrush(QtGui.QColor('#ffff66')))
 
-        def next(self): #=== add a double-check button to make sure all sections are complete
+        def next(self): #=== add a double-check message to make sure all sections are complete
             self.loadOutList()
             self.parent.mergedSecContours.append(self.allOutContours)
             
