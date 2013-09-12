@@ -7,6 +7,7 @@ import time
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
+#     Clean up this messy code, back buttons in beta version
 #     Search for all of the '#===' to find problems/development areas
 #     QPushButton.setAcceptDrops(True) for load series
 #     Filters for contour name
@@ -147,6 +148,7 @@ class mainFrame(QtGui.QFrame):
         self.label.setText('Section '+str(newPos))
     
     def checkContourWidget(self):
+        '''Shows the current secContWidget(), creates one if none exist'''
         if len(self.contourWidgets) == 0: # Make contour widget if doesnt exist
                 self.contourWidgets.append( self.sectionContourWidget(self, 0 ))
                 self.currentWidget = self.contourWidgets[0]
@@ -154,6 +156,7 @@ class mainFrame(QtGui.QFrame):
             self.slider.show()
             self.label.show()
         self.currentWidget.show()
+    
     class serLoadWidget(QtGui.QWidget):
         def __init__(self, parent=None):
             QtGui.QWidget.__init__(self, parent)
@@ -513,10 +516,6 @@ class mainFrame(QtGui.QFrame):
             self.close()
             
         def back(self): #=== BETA
-            self.parent.nextButton.clicked.disconnect(self.next)
-            self.parent.backButton.clicked.disconnect(self.back)
-            mainFrame.serLoadWidget(self.parent)
-            self.close()
 #             #=========================================================
 #             # Disconnect buttons and load prev window
 #             self.parent.nextButton.clicked.disconnect( self.next )
@@ -524,6 +523,11 @@ class mainFrame(QtGui.QFrame):
 #             mainFrame.seriesContourWidget( self.parent )
 #             self.close()
 #             #==========================================================
+            self.parent.nextButton.clicked.disconnect(self.next)
+            self.parent.backButton.clicked.disconnect(self.back)
+            mainFrame.serLoadWidget(self.parent)
+            self.close()
+
     class sectionAttributeWidget(QtGui.QWidget): #=== removed from beta, just keep sec1
         #=== should be basically the same as seriesAttributeWidget()
         def __init__(self, parent=None):
@@ -661,7 +665,7 @@ class mainFrame(QtGui.QFrame):
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
     
-    class sectionContourWidget(QtGui.QWidget): #=== beta changes
+    class sectionContourWidget(QtGui.QWidget): #=== Beta changes
         def __init__(self, parent=None, section=None):
             QtGui.QWidget.__init__(self, parent)
             self.parent = parent
