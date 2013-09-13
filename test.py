@@ -13,7 +13,12 @@ product is established and ready to be copied to rmtgui.py'''
 #     Restore default for seccontwidg()
 #     Repeat for other sections check box or button
 #     Arrows/Scroll/Click in slider doesnt work
-
+class widgetWindow(QtGui.QWidget):
+    def __init__(self, parent = None):
+        QtGui.QWidget.__init__(self, parent)
+        self.parent = parent
+        self.setGeometry(0,0,800,500)
+      
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
     RMTgui class that is open throughout the entire program.
@@ -38,10 +43,11 @@ class mainFrame(QtGui.QFrame):
         # Main Data
 #         self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser'
 #         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser'
-        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
 #         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
 #         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
+
         self.serName = 'rmtg' #===
         self.ser1obj = rmt.getSeries(self.ser1path) #===
         self.ser2obj = rmt.getSeries(self.ser2path) #===
@@ -145,7 +151,7 @@ class mainFrame(QtGui.QFrame):
         print('Previously Hovered: '+str(self.slider.value()))
         newPos = self.slider.sliderPosition()
         self.label.setText('Section '+str(newPos))
-    
+
     def dispContourWidget(self):
         '''Shows the current secContWidget(), creates one if none exist'''
         if len(self.contourWidgets) == 0: # Make contour widget if doesnt exist
@@ -156,11 +162,9 @@ class mainFrame(QtGui.QFrame):
             self.label.show()
         self.currentWidget.show()
             
-    class serLoadWidget(QtGui.QWidget):
+    class serLoadWidget(widgetWindow):
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
             self.parent.backButton.setFlat(True)
             
             # Functional objects
@@ -265,11 +269,9 @@ class mainFrame(QtGui.QFrame):
             else:
                 self.next()
 
-    class seriesAttributeWidget(QtGui.QWidget):
+    class seriesAttributeWidget(widgetWindow):
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
             self.table = None
             self.conflicts = None
               
@@ -346,11 +348,9 @@ class mainFrame(QtGui.QFrame):
                 self.table.setItem(row, 1, tableItem)
             self.table.show() 
         
-    class seriesContourWidget(QtGui.QWidget):
+    class seriesContourWidget(widgetWindow):
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
             self.table1 = None
             self.table2 = None
             self.s1c = None
@@ -445,11 +445,9 @@ class mainFrame(QtGui.QFrame):
             mainFrame.seriesAttributeWidget(self.parent)
             self.close()
     
-    class seriesZContourWidget(QtGui.QWidget):
+    class seriesZContourWidget(widgetWindow):
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
             self.table = None
             self.s1zc = None
             self.s2zc = None
@@ -520,12 +518,10 @@ class mainFrame(QtGui.QFrame):
             mainFrame.seriesContourWidget( self.parent )
             self.close()
 
-    class sectionAttributeWidget(QtGui.QWidget):
+    class sectionAttributeWidget(widgetWindow):
         #=== should be basically the same as seriesAttributeWidget()
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
              
             # Update mainFrame data
             self.parent.setWindowTitle('Section Attributes') #===
@@ -547,11 +543,10 @@ class mainFrame(QtGui.QFrame):
             mainFrame.seriesZContourWidget( self.parent )
             self.close()
                    
-    class sectionImageWidget(QtGui.QWidget):
+    class sectionImageWidget(widgetWindow):
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
+
             self.series1 = self.parent.ser1obj
             self.series2 = self.parent.ser2obj
             self.table = None
@@ -631,11 +626,9 @@ class mainFrame(QtGui.QFrame):
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
     
-    class sectionContourWidget(QtGui.QWidget):
+    class sectionContourWidget(widgetWindow):
         def __init__(self, parent=None, section=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
             self.table1 = None # Series 1 table
             self.table2 = None # Merge table
             self.table3 = None # Series 2 table
@@ -941,11 +934,9 @@ class mainFrame(QtGui.QFrame):
 
             self.close()
            
-    class outputWidget(QtGui.QWidget):
+    class outputWidget(widgetWindow):
         def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
-            self.parent = parent
-            self.setGeometry(0,0,800,500)
+            widgetWindow.__init__(self, parent)
             
             # Update mainFrame data
             self.parent.setWindowTitle('Output Merged Series') #===
@@ -1038,10 +1029,7 @@ def main():
 main()
 
 #=========Classes that will probably make code cleaner
-#     class widgetWindow(QtGui.QWidget):
-#         def __init__(self, parent = None):
-#             self.parent = parent
-#             self.setGeometry(0,0,800,500)
+
 #     
 #     class singleColumnTable(QtGui.QTableWidget):
 #         def __init__(self, length=None, noCol = 1, parent = None):
