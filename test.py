@@ -24,7 +24,7 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
-        self.setWindowTitle('Reconstructmergetool v.BETA')
+        self.setWindowTitle('Reconstructmergetool v.DEV')
         self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Plain)
         self.setLineWidth(2)
         self.setMidLineWidth(3)
@@ -391,12 +391,12 @@ class mainFrame(QtGui.QFrame):
             
             for row in range( len(ser1conts) ):
                 tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
-                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+#                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table1.setItem(row, 0, tableItem)
             for row in range( len(ser2conts) ):
                 tableItem = QtGui.QTableWidgetItem( ser2conts[row].name )
-                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+#                 tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 tableItem.setTextAlignment(QtCore.Qt.AlignCenter)
                 table2.setItem(row, 0, tableItem)
             for row in range( len(ser3conts) ):
@@ -413,7 +413,8 @@ class mainFrame(QtGui.QFrame):
             self.mergedConts = ser3conts
             
         def returnItems(self): #=== multiple tables added
-            selItems = self.table.selectedItems()
+            selItems = self.table1.selectedItems()
+            selItems.extend(self.table2.selectedItems())
             selConts = []
             for item in selItems:
                 if item.column() == 0:
@@ -423,9 +424,9 @@ class mainFrame(QtGui.QFrame):
             return selConts
 
         def next(self):
-            if ( len(self.mergedConts) + len(self.table.selectedItems()) ) != 20:
+            if ( len(self.mergedConts) + len(self.table1.selectedItems()) + len(self.table2.selectedItems())) != 20:
                 msg = QtGui.QMessageBox(self)
-                msg.setText('Please select one item per row')
+                msg.setText('Please select a total of 20 items')
                 msg.show()
             else:
                 # Add the selectedItems() to self.mergedAtts
