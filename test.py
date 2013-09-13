@@ -18,7 +18,17 @@ class widgetWindow(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.parent = parent
         self.setGeometry(0,0,800,500)
-      
+        
+class singleColumnTable(QtGui.QTableWidget):
+    def __init__(self, length=None, noCol = 1, parent = None):
+        QtGui.QTableWidget.__init__(length, noCol, parent)
+        self.show()
+    def returnItems(self):
+        return
+    def showItemDetail(self, item):
+        detail = str(item)
+        return detail
+        
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
     RMTgui class that is open throughout the entire program.
@@ -1023,15 +1033,9 @@ class mainFrame(QtGui.QFrame):
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
-    mainFrame.serLoadWidget(rmtFrame) #===
-#     mainFrame.sectionImageWidget(rmtFrame)
+    mainFrame.serLoadWidget(rmtFrame)
+
     sys.exit( app.exec_() )
 main()
 
-#=========Classes that will probably make code cleaner
 
-#     
-#     class singleColumnTable(QtGui.QTableWidget):
-#         def __init__(self, length=None, noCol = 1, parent = None):
-#             QtGui.QTableWidget.__init__(length, noCol, parent)
-#             self.show()
