@@ -23,12 +23,88 @@ class widgetWindow(QtGui.QWidget):
 class singleColumnTable(QtGui.QTableWidget):
     def __init__(self, length=None, noCol = 1, parent = None):
         QtGui.QTableWidget.__init__(length, noCol, parent)
-    def returnItems(self):
+    
+    # Functions for loading
+    def loadConts(self, contList): #===
+        '''Loads objects from contList to table as tableItem'''
+        row = 0
+        for cont in contList:
+            item = self.cont2item(cont)
+            self.setItem(row, 0, item)
+            row+=1
+    
+    def cont2item(self, cont, background='white'): #===
+        '''Returns contour as a tableWidgetItem with specified background'''
+        item = QtGui.QTableWidgetItem( cont.name )
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        item.setBackground(QtGui.QBrush(QtGui.QColor(background)))
+        return item
+    
+    def loadAtts(self, attList): #===
+        '''Loads objects from attList to table as tableItem'''
+        row = 0
+        for att in attList:
+            item = self.att2item(att)
+            self.setItem(row, 0, item)
+            row+=1
+    
+    def att2item(self, att, background='white'): #===
         return
-    def showItemDetail(self, item):
-        detail = str(item)
-        return detail
+    
+    def loadLabels(self, labelList): #===
+        return
+       
+    # Functions for retrieving  
+    def selItems(self):
+        '''Returns list of selected items'''
+        return self.selectedItems()
+    
+    def allItems(self):
+        '''Returns all items in the table'''
+        return self.returnAllItems()
+    
+    def item2cont(self, item, ref):
+        '''Returns the contour object associated with item from ref'''
+        return ref[ item.row() ]
+    
+    def item2att(self, item, ref):
+        '''Returns a dictionary entry associated with item from ref'''
+        return ref[ item.row() ]
+       
+    def itemsAsAttributes(self):
+        '''Returns items as a dictionary of attributes'''
+        return
+    
+    def itemsAsImages(self):
+        '''Returns items as image objects'''
+        return
+    
+    def showItemDetail(self, obj):
+        '''Opens a display window with details for the object. __str__ must be defined in object'''
+        detail = str(obj) # Str representation of object
         
+        # Window
+        win = QtGui.QWidget(self)
+        win.setGeometry(250, 100, 300, 300)
+        win.setAutoFillBackground(True)
+        
+        # Contour information
+        label = QtGui.QLabel(self)
+        label.setText(detail)
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        
+        # Close button
+        closeBut = QtGui.QPushButton(self)
+        closeBut.setText('Close')
+        closeBut.clicked.connect( win.close )
+        
+        # Layout
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(label)
+        vbox.addWidget(closeBut)
+        win.setLayout(vbox)
+        win.show()
+    
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
     RMTgui class that is open throughout the entire program.
@@ -69,13 +145,13 @@ class mainFrame(QtGui.QFrame):
 
         # Reconstruct Object Data
         self.mergedAttributes = []
-        self.mergedSerContours = []
+        self.mergedSerContours = [] #===
         self.mergedSerZContours = []
         
-        self.mergedSecList = []
-        self.mergedSecAttributes = []
+        self.mergedSecList = [] #===
+        self.mergedSecAttributes = [] #===
         self.mergedSecImages = []
-        self.mergedSecContours = []
+        self.mergedSecContours = [] #===
         self.contourWidgets = []
         self.currentWidget = None
         
@@ -296,27 +372,38 @@ class mainFrame(QtGui.QFrame):
     class seriesAttributeWidget(widgetWindow):
         def __init__(self, parent=None):
             widgetWindow.__init__(self, parent)
-            self.table = None
+            self.table1 = None
+            self.table2 = None
             self.conflicts = None
               
             # Update mainFrame data
             self.parent.setWindowTitle('Series Attributes') #===
-            self.parent.backButton.setFlat(False)
-            self.parent.nextButton.clicked.connect( self.next )
-            self.parent.backButton.clicked.connect( self.back )
+            
+            self.prepFuncObjs()
+            
+            self.prepLayout()
               
             # Merge series
             rmt.mergeSeriesAttributes(self.parent.ser1obj, self.parent.ser2obj, handler=self.serAttHandler)
-              
-            # Layout
-#             vbox = QtGui.QVBoxLayout()
-#             hbox = QtGui.QHBoxLayout()
-#             hbox.addWidget(self.table1)
-#             hbox.addWidget(self.table2)
-#             vbox.addLayout(hbox)
-              
+
             self.show()
-   
+            
+        def prepLayout(self):
+            # Layout
+            vbox = QtGui.QVBoxLayout()
+            hbox = QtGui.QHBoxLayout()
+            hbox.addWidget(self.table1)
+            hbox.addWidget(self.table2)
+            vbox.addLayout(hbox)
+            
+        def prepFuncObjs(self):
+            self.parent.backButton.setFlat(False)
+            self.parent.nextButton.clicked.connect( self.next )
+            self.parent.backButton.clicked.connect( self.back )
+            
+            self.table1 = QtGui.QTableWidget()
+            self.table2 = QtGui.QTableWidget()
+        
         def next(self):
             if len(self.table.selectedItems()) != len(self.conflicts):
                 msg = QtGui.QMessageBox(self)
@@ -331,6 +418,7 @@ class mainFrame(QtGui.QFrame):
                     newAtts[att] = resolvedAtts.pop(0)
                 self.parent.mergedAttributes = newAtts
                 self.parent.mergedSeries = Series(root=ET.Element('Series',newAtts),name=self.parent.serName)
+                print('Series created') #===
                 
                 # Disconnect buttons and load next window
                 self.parent.nextButton.clicked.disconnect( self.next )
@@ -344,7 +432,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.serLoadWidget( self.parent )
             self.close()
-        
+            
         def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
             attLabels = [str(conflict) for conflict in conflicts]
             self.conflicts = conflicts
@@ -362,11 +450,11 @@ class mainFrame(QtGui.QFrame):
                 att = self.table.verticalHeaderItem(row).text() # attribute to be extracted
                 # Series 1
                 tableItem = QtGui.QTableWidgetItem( ser1atts[att] )
-                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+#                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 self.table.setItem(row, 0, tableItem)
                 # Series 2
                 tableItem = QtGui.QTableWidgetItem( ser2atts[att] )
-                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
+#                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
                 self.table.setItem(row, 1, tableItem)
             self.table.show() 
         
@@ -438,7 +526,7 @@ class mainFrame(QtGui.QFrame):
             selItems = self.table1.selectedItems()
             selItems.extend(self.table2.selectedItems())
             selConts = []
-            for item in selItems:
+            for item in selItems: # Convert tableItem objects to contour objects
                 if item.column() == 0:
                     selConts.append( self.s1c[item.row()] )
                 if item.column() == 1:
@@ -1024,14 +1112,14 @@ class mainFrame(QtGui.QFrame):
             
         def combineMergedStuff(self): #=== Test for completion
             '''Combines all the merged stuff for output'''
-            print('1: '+str(self.mergedSeries))
-            print('2: '+str(self.mergedAttributes))
-            print('3: '+str(self.mergedSerContours))
-            print('4: '+str(self.mergedSerZContours))
-            print('5: '+str(self.mergedSecList))
-            print('6: '+str(self.mergedSecAttributes))
-            print('7: '+str(self.mergedSecImages))
-            print('8: '+str(self.mergedSecContours))
+            print('1: '+str(self.parent.mergedSeries))
+            print('2: '+str(self.parent.mergedAttributes))
+            print('3: '+str(self.parent.mergedSerContours))
+            print('4: '+str(self.parent.mergedSerZContours))
+            print('5: '+str(self.parent.mergedSecList))
+            print('6: '+str(self.parent.mergedSecAttributes))
+            print('7: '+str(self.parent.mergedSecImages))
+            print('8: '+str(self.parent.mergedSecContours))
             
         def outputName(self):
             if str( self.nameBar.text() ) != str( self.parent.serName ):
