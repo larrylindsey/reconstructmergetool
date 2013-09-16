@@ -23,7 +23,6 @@ class widgetWindow(QtGui.QWidget):
 class singleColumnTable(QtGui.QTableWidget):
     def __init__(self, length=None, noCol = 1, parent = None):
         QtGui.QTableWidget.__init__(length, noCol, parent)
-        self.show()
     def returnItems(self):
         return
     def showItemDetail(self, item):
@@ -52,16 +51,21 @@ class mainFrame(QtGui.QFrame):
         self.label = QtGui.QLabel(self)
         
         # Main Data
-#         self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser'
-#         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser'
+#         self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser' #===
+#         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser' #===
 #         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
 #         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
         self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
         self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
+#         self.ser1path = 'Enter path or browse for Series 1'
+#         self.ser2path = 'Enter path or browse for Series 2'
 
-        self.serName = 'rmtg' #===
-        self.ser1obj = rmt.getSeries(self.ser1path) #===
-        self.ser2obj = rmt.getSeries(self.ser2path) #===
+#         self.serName = 'rmtg' #===
+        self.serName = 'Enter name of new series'
+#         self.ser1obj = rmt.getSeries(self.ser1path) #===
+#         self.ser2obj = rmt.getSeries(self.ser2path) #===
+        self.ser1obj = None
+        self.ser2obj = None
 
         # Reconstruct Object Data
         self.mergedAttributes = []
@@ -83,7 +87,7 @@ class mainFrame(QtGui.QFrame):
         
     def initUI(self):
         self.prepNandBbuttons()
-        self.prepSlider()
+#         self.prepSlider() #=== moved to sectionAttributeWidget
         self.prepLayout()
         
         # shown when needed
@@ -269,8 +273,9 @@ class mainFrame(QtGui.QFrame):
             self.parent.ser1path = self.s1bar.text()
             self.parent.ser2path = self.s2bar.text()
             self.parent.serName = self.sNameBar.text().replace('.ser','')
+            self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path) #===
+            self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path) #===
             
-
             # Merge series widget
             self.parent.nextButton.clicked.disconnect( self.checkNextButton )
             self.parent.seriesAttributeWidget(self.parent)
@@ -296,8 +301,6 @@ class mainFrame(QtGui.QFrame):
               
             # Update mainFrame data
             self.parent.setWindowTitle('Series Attributes') #===
-            self.parent.ser1obj = rmt.getSeriesXML(self.parent.ser1path)
-            self.parent.ser2obj = rmt.getSeriesXML(self.parent.ser2path)
             self.parent.backButton.setFlat(False)
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
@@ -406,7 +409,7 @@ class mainFrame(QtGui.QFrame):
                 table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
             table1.setHorizontalHeaderLabels( [self.parent.ser1obj.name] )
             table2.setHorizontalHeaderLabels( [self.parent.ser2obj.name] )
-            table3.setHorizontalHeaderLabels( ['Merged Series Contours'])
+            table3.setHorizontalHeaderLabels( ['Identical Contours'] )
             
             for row in range( len(ser1conts) ):
                 tableItem = QtGui.QTableWidgetItem( ser1conts[row].name )
@@ -548,6 +551,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             self.parent.ser1obj.getSectionsXML( self.parent.ser1path ) #=== taking too long, need some sort of msg?
             self.parent.ser2obj.getSectionsXML( self.parent.ser2path )
+            self.parent.prepSlider() #===
             self.show()
 
         def next(self):
@@ -755,7 +759,7 @@ class mainFrame(QtGui.QFrame):
             yellow = '#ffff66'
             if item.background().color().name() in [pink, yellow]: # If background color = pink (i.e. is a conflict)
                 self.showConfDetails( *self.returnConfConts(row) )
-                self.itemToYellow(item)
+#                 self.itemToYellow(item) #=== changed to update only when conflict resolved
             else:
                 self.showDetail(item)
             
@@ -803,6 +807,7 @@ class mainFrame(QtGui.QFrame):
                 if confB in self.confOvlpout: self.confOvlpout.remove(confB)
                 item.setText(confA.name)
                 item.setTextAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+                self.itemToYellow(item) #===
                 res.close()
                 
             def pickConfB():
@@ -811,6 +816,7 @@ class mainFrame(QtGui.QFrame):
                 if confA in self.confOvlpout: self.confOvlpout.remove(confA)
                 item.setText(confB.name)
                 item.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+                self.itemToYellow(item) #===
                 res.close()
                 
             def pickBoth():
@@ -818,6 +824,7 @@ class mainFrame(QtGui.QFrame):
                 if confB not in self.confOvlpout: self.confOvlpout.append(confB)
                 item.setText('-------------> '+confA.name+' <-------------') #=== confA.name?
                 item.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.itemToYellow(item) #===
                 res.close()
                 
             # Conflict Resolution window
@@ -957,7 +964,17 @@ class mainFrame(QtGui.QFrame):
             widgetWindow.__init__(self, parent)
             
             # Update mainFrame data
-            self.parent.setWindowTitle('Output Merged Series') #===
+            self.parent.setWindowTitle('Merged Series Output') #===
+            
+            self.outBar = None
+            self.nameBar = None
+            self.outBarBrowse = None
+            
+            self.prepFuncObjs()
+            self.prepLayout()
+            self.show()
+            
+        def prepFuncObjs(self):
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.nextButton.setText('Finish and close') #===
             self.parent.backButton.clicked.connect( self.back )
@@ -975,9 +992,8 @@ class mainFrame(QtGui.QFrame):
             self.outBarBrowse.setIconSize(QtCore.QSize(25,25))
             self.outBarBrowse.setText('Browse')
             self.outBarBrowse.clicked.connect( self.browseOutPath )
-
-            #=== Checkbox for transferring picture files?
             
+        def prepLayout(self):
             # Layout
             hbox = QtGui.QHBoxLayout()
             hbox.addWidget(self.outBar)
@@ -997,7 +1013,6 @@ class mainFrame(QtGui.QFrame):
             vbox.addLayout(hbox2)
 
             self.setLayout(vbox)
-            self.show()
             
         def browseOutPath(self):
             path = QtGui.QFileDialog.getExistingDirectory(self,
@@ -1006,21 +1021,42 @@ class mainFrame(QtGui.QFrame):
             path = str(path)+'/' # extract path and turn unicode -> regstr
             self.parent.outputPath = path
             self.outBar.setText(path)
-                
+            
+        def combineMergedStuff(self): #=== Test for completion
+            '''Combines all the merged stuff for output'''
+            print('1: '+str(self.mergedSeries))
+            print('2: '+str(self.mergedAttributes))
+            print('3: '+str(self.mergedSerContours))
+            print('4: '+str(self.mergedSerZContours))
+            print('5: '+str(self.mergedSecList))
+            print('6: '+str(self.mergedSecAttributes))
+            print('7: '+str(self.mergedSecImages))
+            print('8: '+str(self.mergedSecContours))
+            
+        def outputName(self):
+            if str( self.nameBar.text() ) != str( self.parent.serName ):
+                self.parent.serName = str( self.nameBar.text() )
+                self.parent.mergedSeries.name = str( self.nameBar.text() )
+                    
+                count=-1
+                for section in self.parent.mergedSeries.sections:
+                    count+=1
+                    section.name = str( self.nameBar.text() )+'.'+str( count )
+                    print(section.name)
+                    
         def next(self):
             # Output merged series, close program (restart program?)
             if '/' in self.parent.outputPath:
-                if str( self.nameBar.text() ) != str( self.parent.serName ):
-                    self.parent.serName = str( self.nameBar.text() )
-                    self.parent.mergedSeries.name = str( self.nameBar.text() )
-                    count=-1
-                    for section in self.parent.mergedSeries.sections:
-                        count+=1
-                        section.name = str( self.nameBar.text() )+'.'+str( count )
-                        print(section.name) #===
+                if self.parent.outputPath[-1] != '/':
+                    self.parent.outputPath+='/'
+                
+                self.outputName()
+                self.combineMergedStuff()
+                
                 self.parent.mergedSeries.writeseries( self.parent.outputPath )
                 self.parent.mergedSeries.writesections( self.parent.outputPath )
                 self.close()
+                quit() 
             else:
                 msg = QtGui.QMessageBox(self)
                 msg.setText('Invalid directory, please fix')
