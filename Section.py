@@ -89,7 +89,7 @@ class Section:
                     C = Contour(child, imgflag, Transform(transform))
                     if imgflag: # Contour has an image, create pointer to image
                         C.img = I
-                    if len(contours.points) != 1: #=== invalid contour
+                    if len(C.points) != 1: #=== invalid contour
                         contours.append(C)
                     imgflag = None     
         
