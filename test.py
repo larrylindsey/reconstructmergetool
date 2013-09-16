@@ -6,13 +6,13 @@ from Series import *
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
-#     Clean up this messy code, back buttons in beta version
 #     Search for all of the '#===' to find problems/development areas
 #     QPushButton.setAcceptDrops(True) for load series
 #     Filters for contour name
 #     Restore default for seccontwidg()
 #     Repeat for other sections check box or button
 #     Arrows/Scroll/Click in slider doesnt work
+
 class widgetWindow(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
@@ -146,9 +146,11 @@ class mainFrame(QtGui.QFrame):
                 self.currentWidget = sec
                 print('section '+str(self.currentWidget.section)+' showing')
                 self.currentWidget.show()
+                self.sortContWidgList() #===
                 return
         sec = mainFrame.sectionContourWidget( self, self.slider.value() )
         self.contourWidgets.append(sec)
+        self.sortContWidgList() #===
         print('appended widget for section '+str(sec.section))
         self.slider.show()
         self.label.show()
@@ -171,6 +173,9 @@ class mainFrame(QtGui.QFrame):
             self.slider.show()
             self.label.show()
         self.currentWidget.show()
+    
+    def sortContWidgList(self): #===
+        self.contourWidgets = sorted(self.contourWidgets, key=lambda sectionContourWidget: sectionContourWidget.section)
             
     class serLoadWidget(widgetWindow):
         def __init__(self, parent=None):
@@ -238,6 +243,8 @@ class mainFrame(QtGui.QFrame):
         def buttonFunctionality(self):
             '''Adds functionality to the objects created in self.prepFuncObjs()'''
             self.parent.nextButton.clicked.connect( self.checkNextButton )
+            self.s1bar.setAcceptDrops(True) #===
+            self.s2bar.setAcceptDrops(True) #===
             self.s1browse.clicked.connect( self.browseSer )
             self.s2browse.clicked.connect( self.browseSer )
             
@@ -923,7 +930,6 @@ class mainFrame(QtGui.QFrame):
         def next(self): #=== add a double-check message to make sure all sections are complete
             self.loadOutList()
             self.parent.mergedSecContours.append(self.allOutContours)
-            
             # Hide section slider
             self.parent.slider.hide()
             self.parent.label.hide()
@@ -932,6 +938,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.outputWidget( self.parent )
             self.close()
+
             
         def back(self):
             # Hide slider/label
