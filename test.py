@@ -62,7 +62,7 @@ class singleColumnTable(QtGui.QTableWidget):
     def loadLabels(self, labelList): #===
         return
        
-    # Functions for retrieving  
+
     def selItems(self):
         '''Returns list of selected items'''
         return self.selectedItems()
@@ -71,7 +71,7 @@ class singleColumnTable(QtGui.QTableWidget):
         '''Returns all items in the table'''
         items = []
         for row in range(self.length):
-            items.append(self.itemAt(0,row))
+            items.append( self.item(0,row) )
         return items
     
     def item2cont(self, item, ref):
@@ -455,14 +455,14 @@ class mainFrame(QtGui.QFrame):
             mainFrame.serLoadWidget( self.parent )
             self.close()
             
-        def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
+        def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts): #=== put in actual data/details
             self.table1 = singleColumnTable(len(ser1atts)-len(conflicts), parent=self)
             self.table2 = singleColumnTable(len(ser2atts)-len(conflicts), parent=self)
             self.table3 = singleColumnTable(len(ser3atts), parent=self)
             self.conflicts = conflicts
             self.ser3atts = ser3atts
 
-            attLabels = [str(conflict) for conflict in conflicts]
+            attLabels = [ str(conflict) for conflict in conflicts ]
 
             self.table1.setHeader(self.parent.ser1obj.name)
             self.table2.setHeader(self.parent.ser2obj.name)
@@ -475,9 +475,11 @@ class mainFrame(QtGui.QFrame):
                 self.table3.addItem( self.table3.att2item(conf, background='pink') )
             for ident in ser3atts:
                 self.table3.addItem( self.table3.att2item(ident, background='lightGreen') )
-            for uniqA in [att for att in ser1atts if att not in self.table3.allItems()]:
-                print(uniqA)
-                self.table1.addItem( self.table1.att2item(uniqA) )
+            
+            for attA in ser1atts:
+                self.table1.addItem( self.table1.att2item(attA))
+            for attB in ser2atts:
+                self.table2.addItem( self.table2.att2item(attB))
         
     class seriesContourWidget(widgetWindow):
         def __init__(self, parent=None):
