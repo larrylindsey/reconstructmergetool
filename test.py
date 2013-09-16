@@ -22,8 +22,11 @@ class widgetWindow(QtGui.QWidget):
         
 class singleColumnTable(QtGui.QTableWidget):
     def __init__(self, length=None, noCol = 1, parent = None):
-        QtGui.QTableWidget.__init__(length, noCol, parent)
-    
+        QtGui.QTableWidget.__init__(self, length, noCol, parent)
+        self.setSelectionMode( QtGui.QAbstractItemView.SelectionMode.MultiSelection )
+        self.length = length
+        self.currentRow = 0
+        
     # Functions for loading
     def loadConts(self, contList): #===
         '''Loads objects from contList to table as tableItem'''
@@ -32,6 +35,7 @@ class singleColumnTable(QtGui.QTableWidget):
             item = self.cont2item(cont)
             self.setItem(row, 0, item)
             row+=1
+        self.currentRow = row
     
     def cont2item(self, cont, background='white'): #===
         '''Returns contour as a tableWidgetItem with specified background'''
@@ -47,9 +51,13 @@ class singleColumnTable(QtGui.QTableWidget):
             item = self.att2item(att)
             self.setItem(row, 0, item)
             row+=1
+        self.currentRow = row
     
     def att2item(self, att, background='white'): #===
-        return
+        item = QtGui.QTableWidgetItem( str(att) )
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        item.setBackground(QtGui.QBrush(QtGui.QColor(background)))
+        return item
     
     def loadLabels(self, labelList): #===
         return
@@ -59,9 +67,12 @@ class singleColumnTable(QtGui.QTableWidget):
         '''Returns list of selected items'''
         return self.selectedItems()
     
-    def allItems(self):
+    def allItems(self): #=== need to return actual items?
         '''Returns all items in the table'''
-        return self.returnAllItems()
+        items = []
+        for row in range(self.length):
+            items.append(self.itemAt(0,row))
+        return items
     
     def item2cont(self, item, ref):
         '''Returns the contour object associated with item from ref'''
@@ -104,7 +115,14 @@ class singleColumnTable(QtGui.QTableWidget):
         vbox.addWidget(closeBut)
         win.setLayout(vbox)
         win.show()
-    
+        
+    def setHeader(self, header):
+        self.setHorizontalHeaderLabels([header])
+    def setWidth(self, width):
+        self.setColumnWidth(0, width)
+    def addItem(self, item):
+        self.setItem(self.currentRow, 0, item)
+        self.currentRow+=1
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
     RMTgui class that is open throughout the entire program.
@@ -131,13 +149,15 @@ class mainFrame(QtGui.QFrame):
 #         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser' #===
 #         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
 #         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
-        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser'
+        self.ser2path = '/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser'
+#        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
+#        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
 #         self.ser1path = 'Enter path or browse for Series 1'
 #         self.ser2path = 'Enter path or browse for Series 2'
 
-#         self.serName = 'rmtg' #===
-        self.serName = 'Enter name of new series'
+        self.serName = 'rmtg' #===
+#        self.serName = 'Enter name of new series'
 #         self.ser1obj = rmt.getSeries(self.ser1path) #===
 #         self.ser2obj = rmt.getSeries(self.ser2path) #===
         self.ser1obj = None
@@ -374,37 +394,39 @@ class mainFrame(QtGui.QFrame):
             widgetWindow.__init__(self, parent)
             self.table1 = None
             self.table2 = None
+            self.table3 = None
             self.conflicts = None
+            self.ser3atts = None
               
             # Update mainFrame data
             self.parent.setWindowTitle('Series Attributes') #===
             
             self.prepFuncObjs()
-            
-            self.prepLayout()
-              
-            # Merge series
             rmt.mergeSeriesAttributes(self.parent.ser1obj, self.parent.ser2obj, handler=self.serAttHandler)
-
+            self.prepLayout()
+        
             self.show()
             
         def prepLayout(self):
             # Layout
-            vbox = QtGui.QVBoxLayout()
             hbox = QtGui.QHBoxLayout()
-            hbox.addWidget(self.table1)
-            hbox.addWidget(self.table2)
-            vbox.addLayout(hbox)
+            vbox1 = QtGui.QVBoxLayout()
+            vbox1.addWidget(self.table1)
+            vbox2 = QtGui.QVBoxLayout()
+            vbox2.addWidget(self.table2)
+            vbox3 = QtGui.QVBoxLayout()
+            vbox3.addWidget(self.table3)
+            hbox.addLayout(vbox1)
+            hbox.addLayout(vbox3)
+            hbox.addLayout(vbox2)
+            self.setLayout(hbox)
             
         def prepFuncObjs(self):
             self.parent.backButton.setFlat(False)
             self.parent.nextButton.clicked.connect( self.next )
             self.parent.backButton.clicked.connect( self.back )
             
-            self.table1 = QtGui.QTableWidget()
-            self.table2 = QtGui.QTableWidget()
-        
-        def next(self):
+        def next(self): #===
             if len(self.table.selectedItems()) != len(self.conflicts):
                 msg = QtGui.QMessageBox(self)
                 msg.setText('Please select one item per row')
@@ -434,29 +456,28 @@ class mainFrame(QtGui.QFrame):
             self.close()
             
         def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts):
-            attLabels = [str(conflict) for conflict in conflicts]
+            self.table1 = singleColumnTable(len(ser1atts)-len(conflicts), parent=self)
+            self.table2 = singleColumnTable(len(ser2atts)-len(conflicts), parent=self)
+            self.table3 = singleColumnTable(len(ser3atts), parent=self)
             self.conflicts = conflicts
-            # Present conflicts in a 2 column table, can select individual attributes or all for a series
-            self.table = QtGui.QTableWidget(len(conflicts), 2, parent=self)
-            self.table.setGeometry(0,0,800,500)
-            self.table.setColumnWidth(0, 300)
-            self.table.setColumnWidth(1, 300)
-            self.table.setHorizontalHeaderLabels( [self.parent.ser1obj.name, self.parent.ser2obj.name] )
-            self.table.setVerticalHeaderLabels( attLabels )
-            self.table.setSelectionMode(QtGui.QAbstractItemView.SelectionMode.MultiSelection)
-            # Load attributes into their slots: To keep them in order (since dictionaries are unordered)
-            # ...they are pulled out of the dictionary by the key in the verticalHeaderColumn
-            for row in range(len(conflicts)):
-                att = self.table.verticalHeaderItem(row).text() # attribute to be extracted
-                # Series 1
-                tableItem = QtGui.QTableWidgetItem( ser1atts[att] )
-#                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
-                self.table.setItem(row, 0, tableItem)
-                # Series 2
-                tableItem = QtGui.QTableWidgetItem( ser2atts[att] )
-#                tableItem.setBackground(QtGui.QBrush(QtGui.QColor('lightCyan')))
-                self.table.setItem(row, 1, tableItem)
-            self.table.show() 
+            self.ser3atts = ser3atts
+
+            attLabels = [str(conflict) for conflict in conflicts]
+
+            self.table1.setHeader(self.parent.ser1obj.name)
+            self.table2.setHeader(self.parent.ser2obj.name)
+            self.table3.setHeader('Conflicts/Identical Attributes')
+            
+            for table in [self.table1, self.table2, self.table3]:
+                table.setWidth(220)
+            
+            for conf in conflicts:
+                self.table3.addItem( self.table3.att2item(conf, background='pink') )
+            for ident in ser3atts:
+                self.table3.addItem( self.table3.att2item(ident, background='lightGreen') )
+            for uniqA in [att for att in ser1atts if att not in self.table3.allItems()]:
+                print(uniqA)
+                self.table1.addItem( self.table1.att2item(uniqA) )
         
     class seriesContourWidget(widgetWindow):
         def __init__(self, parent=None):
