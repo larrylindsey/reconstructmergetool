@@ -6,6 +6,7 @@ from Series import *
 '''TEST.PY functions as a test page for rmtgui.py. Changes are first made to test.py until a working
 product is established and ready to be copied to rmtgui.py'''
 # To Do:
+#     Wait cursor after Series ZContours
 #     Search for all of the '#===' to find problems/development areas
 #     QPushButton.setAcceptDrops(True) for load series
 #     Filters for contour name
@@ -118,7 +119,7 @@ class mainFrame(QtGui.QFrame):
         #=== doesnt properly respond to clicking on ticks
         # Slider
         if type(self.ser1obj) != None and type(self.ser2obj) != None:
-            minTick = int(self.ser1obj.sections[0].name[-1]) # section # of first section in section list
+            minTick = int(self.ser1obj.sections[0].name[-1]) # section no. of first section in section list
             if minTick == 0:
                 maxTick = len(self.ser1obj.sections)-1 # number of sections in section list
             else:
@@ -175,7 +176,8 @@ class mainFrame(QtGui.QFrame):
         self.currentWidget.show()
     
     def sortContWidgList(self): #===
-        self.contourWidgets = sorted(self.contourWidgets, key=lambda sectionContourWidget: sectionContourWidget.section)
+        self.contourWidgets = sorted(self.contourWidgets,
+                                     key=lambda sectionContourWidget: sectionContourWidget.section)
             
     class serLoadWidget(widgetWindow):
         def __init__(self, parent=None):
@@ -938,8 +940,7 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.outputWidget( self.parent )
             self.close()
-
-            
+  
         def back(self):
             # Hide slider/label
             self.parent.slider.hide()

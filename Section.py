@@ -77,7 +77,7 @@ class Section:
         contours = []
         images = []
         if root == None:
-            return contours, images
+            return contours, images # Empty if no root
         for transform in root:
             imgflag = None
             for child in transform:
@@ -87,26 +87,14 @@ class Section:
                     images.append(I)
                 elif child.tag == 'Contour':
                     C = Contour(child, imgflag, Transform(transform))
-                    if imgflag: #===
+                    if imgflag: # Contour has an image, create pointer to image
                         C.img = I
-                    contours.append(C)
-                    imgflag = None
-                elif child.tag == 'ZContour': # No ZContours in Sections?
-                    raw_input('ZCont in section') #=== testing ^ question
-                    Z = ZContour(child, Transform(transform))
-                    contours.append(Z)
-        #=== still need to match domain1 contour and image transforms (imageOverride issue only?)
-#================NO LONGER SUPPORTS MULTIPLE IMAGES==================
-#             srcList = set([img.src for img in images])
-#             if len(srcList) == 1:
-#                 images = [images[0]]
-#             else: #===
-#                 print('Multiple image sources present in '+self.name)
-#             domain1 = [cont for cont in contours if cont.name == 'domain1'][0]
-#             if images[0].transform.output() != domain1.transform.output():
-#                 raw_input('Image transform does not match domain1 transform for '+self.name)
-#====================================================================
+                    if len(contours.points) != 1: #=== invalid contour
+                        contours.append(C)
+                    imgflag = None     
+        
         return contours, images
+    
     def popindex(self, root):
         if root == None:
             return None
