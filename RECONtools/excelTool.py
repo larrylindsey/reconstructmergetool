@@ -27,3 +27,11 @@ def buildProtList(series, filterBank):
                 if exp.match(contour) != None:
                     protList.append(contour)
     return list(set(protList))
+
+def buildProtDict(protList):
+    '''Creates a dictionary of protrusion names, each associated with a list of objects representing data'''
+    protDict = {}
+    for prot in protList:
+        protDict[prot] = []
+    return protDict
+
