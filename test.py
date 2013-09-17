@@ -427,20 +427,20 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.connect( self.back )
             
         def next(self): #===
-            if len(self.table.selectedItems()) != len(self.conflicts):
-                msg = QtGui.QMessageBox(self)
-                msg.setText('Please select one item per row')
-                msg.show()
-            else:
-                # Create new dictionary of merged attributes
-                newAtts = self.parent.ser1obj.output()[0]
-                resolvedAtts = [ str(item.text()) for item in self.table.selectedItems() ]
-                for row in range(len(self.conflicts)):
-                    att = self.table.verticalHeaderItem(row).text()
-                    newAtts[att] = resolvedAtts.pop(0)
-                self.parent.mergedAttributes = newAtts
-                self.parent.mergedSeries = Series(root=ET.Element('Series',newAtts),name=self.parent.serName)
-                print('Series created') #===
+#             if len(self.table.selectedItems()) != len(self.conflicts):
+#                 msg = QtGui.QMessageBox(self)
+#                 msg.setText('Please select one item per row')
+#                 msg.show()
+#             else:
+#                 # Create new dictionary of merged attributes
+#                 newAtts = self.parent.ser1obj.output()[0]
+#                 resolvedAtts = [ str(item.text()) for item in self.table.selectedItems() ]
+#                 for row in range(len(self.conflicts)):
+#                     att = self.table.verticalHeaderItem(row).text()
+#                     newAtts[att] = resolvedAtts.pop(0)
+#                 self.parent.mergedAttributes = newAtts
+#                 self.parent.mergedSeries = Series(root=ET.Element('Series',newAtts),name=self.parent.serName)
+#                 print('Series created') #===
                 
                 # Disconnect buttons and load next window
                 self.parent.nextButton.clicked.disconnect( self.next )
@@ -456,8 +456,8 @@ class mainFrame(QtGui.QFrame):
             self.close()
             
         def serAttHandler(self, ser1atts, ser2atts, ser3atts, conflicts): #=== put in actual data/details
-            self.table1 = singleColumnTable(len(ser1atts)-len(conflicts), parent=self)
-            self.table2 = singleColumnTable(len(ser2atts)-len(conflicts), parent=self)
+            self.table1 = singleColumnTable(len(ser1atts), parent=self)
+            self.table2 = singleColumnTable(len(ser2atts), parent=self)
             self.table3 = singleColumnTable(len(ser3atts), parent=self)
             self.conflicts = conflicts
             self.ser3atts = ser3atts
@@ -471,11 +471,11 @@ class mainFrame(QtGui.QFrame):
             for table in [self.table1, self.table2, self.table3]:
                 table.setWidth(220)
             
+            # Load items
             for conf in conflicts:
                 self.table3.addItem( self.table3.att2item(conf, background='pink') )
             for ident in ser3atts:
                 self.table3.addItem( self.table3.att2item(ident, background='lightGreen') )
-            
             for attA in ser1atts:
                 self.table1.addItem( self.table1.att2item(attA))
             for attB in ser2atts:
