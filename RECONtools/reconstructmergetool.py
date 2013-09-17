@@ -8,7 +8,7 @@
 #
 #  Date Created: 3/7/2013
 #
-#  Date Last Modified: 9/4/2013
+#  Date Last Modified: 9/17/2013
 #
 # To do:
     # File input from commandline doesnt work with ~
