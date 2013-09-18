@@ -3,6 +3,13 @@ from xlrd import open_workbook
 from xlwt import Workbook, Worksheet
 import sys, re
 
+class myWorkbook:
+    def __init__(self):
+        self.book = Workbook()
+    
+    def output(self, filename):
+        self.save(filename)
+
 class myWorksheet:
     def __init__(self, sheet):
         self.sheet = sheet
