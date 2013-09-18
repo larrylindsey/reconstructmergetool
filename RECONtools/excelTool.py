@@ -6,16 +6,13 @@ import sys, re
 class myWorkbook:
     def __init__(self):
         self.book = Workbook()
-        
-    def output(self, filename):
-        self.book.save(filename)
     
-    def addSheet(self, sheet):
-
+    def output(self, filename):
+        self.save(filename)
 
 class myWorksheet:
-    def __init__(self, name, workbook):
-        self.sheet = Worksheet(name, workbook)
+    def __init__(self, sheet):
+        self.sheet = sheet
         self.filterBank = []
         
     def buildFilterBank(self, list_of_expressions):
@@ -52,6 +49,11 @@ class myWorksheet:
         return protDict
 
     def importColumns(self, template):
-        '''Imports columns from a xlrd.Worksheet'''
+        columns = []
         for col in range( template.ncols ):
-            self.sheet.write(0, col, str(template.cell(0,col).value) )
+            columns.append( str(template.cell(0,col).value) )
+        return columns
+
+    def writeColumns(self, columns):
+        for col in range( len(columns) ):
+            self.sheet.write(0,col,columns[col])
