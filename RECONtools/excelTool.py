@@ -1,22 +1,20 @@
 #!/usr/bin/env python
-from xlrd import open_workbook
-from xlwt import Workbook, Worksheet
+import openpyxl
 import sys, re
 
-class myWorksheet:
-    def __init__(self, sheet):
-        self.sheet = sheet
-        self.filterBank = []
-        
-    def importColumns(self, template):
-        columns = []
-        for col in range( template.ncols ):
-            columns.append( str(template.cell(0,col).value) )
-        return columns
-
-    def writeColumns(self, columns):
-        for col in range( len(columns) ):
-            self.sheet.write(0,col,columns[col])
+def writeColumns(worksheet, columns):
+    for col in range( len(columns)):
+        worksheet.cell(row=0, column=col).value = str( columns[col] )
+    
+def createWorksheet(series, protList):
+    return
+    
+    
+def importColumns(template):
+    columns = []
+    for col in range( template.ncols ):
+        columns.append( str(template.cell(0,col).value) )
+    return columns
 
 def buildFilterBank(list_of_expressions):
     '''Turns a list of expression into a list of regular expressions for filtering'''
