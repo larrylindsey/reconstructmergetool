@@ -147,6 +147,26 @@ class Series:
             attributes[keys[count]] = value
             count += 1
         return attributes, self.contours
+    def getStartEndCount(self, object_name):
+        '''Returns a tuple containing the start index, end index, and count of the item in series.'''
+        object_name = object_name.lower()
+        start = 0
+        end = 0
+        count = 0
+        # Count
+        for section in self.sections:
+            for contour in section.contours:
+                if contour.name.lower() == object_name:
+                    count += 1
+            # Start/End
+            if object_name in [cont.name.lower() for cont in section.contours]:
+                # Start index
+                if start == 0:
+                    start = section.index
+                # End index
+                else:
+                    end = section.index
+        return start, end, count
     def xgetattribs(self):
         '''Returns attributes in appropriate format for xml output'''
         return (str(self.index), str(self.getviewport()), str(self.units), str(self.autoSaveSeries).lower(), \

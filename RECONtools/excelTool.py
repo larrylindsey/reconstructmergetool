@@ -58,27 +58,6 @@ def buildProtrusionDictionary(series, dendrite_list): #=== check if adding for a
                             protDict[dendrite].append(contour.name)
             protDict[dendrite].sort()
     return protDict
-
-def getStartEndCount(series, object_name):
-    '''Returns a tuple containing the start index, end index, and count of the item in series.'''
-    object_name = object_name.lower()
-    start = 0
-    end = 0
-    count = 0
-    # Count
-    for section in series.sections:
-        for contour in section.contours:
-            if contour.name.lower() == object_name:
-                count += 1
-        # Start/End
-        if object_name in [cont.name.lower() for cont in section.contours]:
-            # Start index
-            if start == 0:
-                start = section.index
-            # End index
-            else:
-                end = section.index
-    return start, end, count
             
 # Creating excel docs
 def writeColumns(worksheet, list_of_columns):
