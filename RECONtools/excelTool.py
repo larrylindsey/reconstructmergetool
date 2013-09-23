@@ -33,6 +33,8 @@ def buildFilterBank(list_of_expressions):
         bank.append( exp )
     return bank
 
+
+# Gather info from series
 def buildDendriteList(series, filterBank):
     '''Returns a list of contour names from series, specified by filterBank'''
     dendrites = []
@@ -57,8 +59,25 @@ def buildProtrusionDictionary(series, dendrite_list): #=== check if adding for a
                             protDict[dendrite].append(contour.name)
             protDict[dendrite].sort()
     return protDict
-        
 
+def getStartEndCount(series, object_name): #=== what if objects skip a section
+    '''Returns a tuple containing the start index, end index, and count of the item in series.'''
+    start = 0
+    end = 0
+    count = 0
+    for section in series.sections:
+        #=== Count 1 per section or 1 per contour in a section
+        for contour in section.contours:
+            if contour.name.lower() == object_name.lower():
+                count += 1
+        # Start index
+        if object_name in section.contours and start == 0:
+            start = section.index
+        # End index
+        if object_name not in section.contours and start > 0:
+            end = section.index-1 # previous section is last to contain object
+    return start, end, count
+            
 # Creating excel docs
 def writeColumns(worksheet, list_of_columns):
     '''Writes columns to specified worksheet.'''
