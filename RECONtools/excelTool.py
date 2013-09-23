@@ -51,10 +51,10 @@ def buildObjAttributes(series, object_name): #=== should use reg exp or no?
     object_atts['end'],
     object_atts['count'] = series.getStartEndCount(str(object_name))
     
-    object_atts['volume'] = ''
-    object_atts['surfacearea'] = ''
-    object_atts['flatarea'] = ''
-    object_atts['totalvolume'] = '' #=== what is Vol tot?
+    object_atts['volume'] = '' #=== Area x section thickness (summed over all sections)
+    object_atts['surfacearea'] = '' #=== check out in RECON code
+    object_atts['flatarea'] = '' #=== Area (summed over all sections)
+    object_atts['totalvolume'] = '' #=== what is Vol tot? excel
     object_atts['length'] = ''
 
     return object_atts 
@@ -62,7 +62,7 @@ def buildObjAttributes(series, object_name): #=== should use reg exp or no?
 def buildProtrusionDictionary(series, dendrite_list): #=== check if adding for all dendrites
     '''Returns a dictionary of a list of protrusions for each dendrite in dendrite list'''
     protDict = {}
-    dendrite_list = list(set([dendrite.lower() for dendrite in dendrite_list])) # lowercase all dendrites
+    dendrite_list = list(set([dendrite.lower() for dendrite in dendrite_list])) # uppercase = stamp, lowercase = trace
     for dendrite in dendrite_list:
         if dendrite not in protDict:
             protDict[dendrite] = []
