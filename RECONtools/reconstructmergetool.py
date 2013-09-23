@@ -13,7 +13,6 @@
 # To do:
     # File input from commandline doesnt work with ~
     # Needs to be a better way to change image contour and section.img stuff simultaneously
-        # check for multiple images is in beta (Section.py)
     # verbosity mode
     # make series object better, dictionary instead of a bunch of attributes?
     # tospace() fromspace() in transform

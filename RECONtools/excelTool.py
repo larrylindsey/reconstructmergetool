@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys, re, openpyxl
 import reconstructmergetool as rmt
-import Series
+
 # Gathering excel info
 def loadTemplate(path_to_workbook):
     '''Returns a openpyxl.sheet for the sheet named "Template" in the workbook.'''
@@ -9,24 +9,23 @@ def loadTemplate(path_to_workbook):
     template = wkbk.get_active_sheet()
     return template
 
-def importColumns(xl_template): #===
+def importColumns(xl_template):
     '''Builds/returns a list of columns found in template'''
     columns = []
-    for col in range( len(xl_template.columns) ): #=== no .ncols
-#         columns.append( str(xl_template.cell(row=0,column=col).value) )
+    for col in range( len(xl_template.columns) ):
         columns.append( xl_template.cell(row=0,column=col) )
     return columns
 
 def processExp(exp): #===
     # Need to cap at end? $
-    '''Converts filter from RECONSTRUCT format to python regexp format'''
+    '''Converts a filter string from RECONSTRUCT format to python regexp format'''
     exp = exp.replace('*', '.')
     exp = exp.replace('?', '[a-z]') #=== "? matches any single character" (numbers included?)
     exp = exp.replace('#', '[0-9]')
     return re.compile( str(exp),re.I ) # re.I (Ignore Case)
 
 def buildFilterBank(list_of_expressions):
-    '''Turns a list of expression into a list of regular expressions for filtering'''
+    '''Turns a list of expressions into a list of regular expressions for filtering'''
     bank = []
     for exp in list_of_expressions:
         exp = processExp( exp )
@@ -60,22 +59,25 @@ def buildProtrusionDictionary(series, dendrite_list): #=== check if adding for a
             protDict[dendrite].sort()
     return protDict
 
-def getStartEndCount(series, object_name): #=== what if objects skip a section
+def getStartEndCount(series, object_name):
     '''Returns a tuple containing the start index, end index, and count of the item in series.'''
+    object_name = object_name.lower()
     start = 0
     end = 0
     count = 0
+    # Count
     for section in series.sections:
-        #=== Count 1 per section or 1 per contour in a section
         for contour in section.contours:
-            if contour.name.lower() == object_name.lower():
+            if contour.name.lower() == object_name:
                 count += 1
-        # Start index
-        if object_name in section.contours and start == 0:
-            start = section.index
-        # End index
-        if object_name not in section.contours and start > 0:
-            end = section.index-1 # previous section is last to contain object
+        # Start/End
+        if object_name in [cont.name.lower() for cont in section.contours]:
+            # Start index
+            if start == 0:
+                start = section.index
+            # End index
+            else:
+                end = section.index
     return start, end, count
             
 # Creating excel docs
@@ -90,6 +92,7 @@ def writeColumns(worksheet, list_of_columns):
         worksheet.cell(row=0, column=col).style.font = style.font
         worksheet.cell(row=0, column=col).style.protection = style.protection
         worksheet.cell(row=0, column=col).style.number_format = style.number_format
+
 def addProtrusions(workbook, protDict):
     sheetNames = workbook.get_sheet_names()
     for dendrite in protDict:
@@ -134,7 +137,7 @@ def main():
     save_path = input('Enter path to save xl file: ')
     workbook.save(save_path)
 
-main()
+# main()
 
 
 
