@@ -44,6 +44,21 @@ def buildDendriteList(series, filterBank):
                     dendrites.append(contour)
     return sorted(list(set(dendrites)))
 
+def buildObjAttributes(series, object_name): #=== should use reg exp or no?
+    '''Returns a dictionary for the object with important data to be placed into the xl file'''
+    object_atts = {}
+    object_atts['start'],
+    object_atts['end'],
+    object_atts['count'] = series.getStartEndCount(str(object_name))
+    
+    object_atts['volume'] = ''
+    object_atts['surfacearea'] = ''
+    object_atts['flatarea'] = ''
+    object_atts['totalvolume'] = '' #=== what is Vol tot?
+    object_atts['length'] = ''
+
+    return object_atts 
+
 def buildProtrusionDictionary(series, dendrite_list): #=== check if adding for all dendrites
     '''Returns a dictionary of a list of protrusions for each dendrite in dendrite list'''
     protDict = {}
