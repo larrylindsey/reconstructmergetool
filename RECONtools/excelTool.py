@@ -44,35 +44,35 @@ def buildDendriteList(series, filterBank):
     return sorted(list(set(dendrites)))
 
 def buildObjAttributes(series, object_name): #=== should use reg exp or no?
+    # d##?$ -> d##[a-z]{0,3}$
     '''Returns a dictionary for the object with important data to be placed into the xl file'''
     object_atts = {}
-    object_atts['start'],
-    object_atts['end'],
-    object_atts['count'] = series.getStartEndCount(str(object_name))
-    ##### threads.cpp
-    object_atts['volume'] = series.getVolume(str(object_name)) #=== Area x section thickness (summed over all sections)
-    object_atts['surfacearea'] = series.getSurfaceArea(str(object_name)) #=== length*section.thickness (sum over all)
-    object_atts['flatarea'] = series.getFlatArea(str(object_name)) #=== Area (summed over all sections)
+    object_atts['start'],object_atts['end'],object_atts['count'] = series.getStartEndCount( object_name )
+    ##### RECONSTRUCT::threads.cpp for references into how the following attributes are calculated
+    object_atts['volume'] = series.getVolume( object_name )
+    object_atts['surfacearea'] = series.getSurfaceArea( object_name )
+    object_atts['flatarea'] = series.getFlatArea( object_name ) #=== incorrect for CFA
     object_atts['totalvolume'] = '' #=== what is Vol tot? excel
     object_atts['length'] = ''
+    return object_atts
 
-    return object_atts 
-
-def buildProtrusionDictionary(series, dendrite_list): #=== check if adding for all dendrites
-    '''Returns a dictionary of a list of protrusions for each dendrite in dendrite list'''
-    protDict = {}
-    dendrite_list = list(set([dendrite.lower() for dendrite in dendrite_list])) # uppercase = stamp, lowercase = trace
+def buildObjectHierarchy(series, dendrite_list): #=== shouldnt have to hard-code suffixes?
+    '''Gathers children of dendrite'''
+    dendrite_suffixes = ['[a-z]{1,5}[0-9]{1,5}*','endo*']
+    dendriteDict = {} # 
     for dendrite in dendrite_list:
-        if dendrite not in protDict:
-            protDict[dendrite] = []
-            for section in series.sections:
+        childDict = {}
+        for section in series.sections:
+            for suffix in dendrite_suffixes:
+                dendriteChild = dendrite+suffix
+                exp = processExp(dendriteChild)
                 for contour in section.contours:
-                    if processExp(dendrite+'p##').match(contour.name): # find all the d##p## contours
-                        if contour.name not in protDict[dendrite]:
-                            protDict[dendrite].append(contour.name)
-            protDict[dendrite].sort()
-    return protDict
-            
+                    if exp.match(contour.name) != None and contour.name not in childDict:
+                        childAtts = buildObjAttributes(series, contour.name)
+                        childDict[contour.name] = childAtts
+        dendriteDict[dendrite]=childDict
+    return dendriteDict
+
 # Creating excel docs
 def writeColumns(worksheet, list_of_columns):
     '''Writes columns to specified worksheet.'''
