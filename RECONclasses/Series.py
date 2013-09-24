@@ -147,19 +147,43 @@ class Series:
             attributes[keys[count]] = value
             count += 1
         return attributes, self.contours
-    def getStartEndCount(self, object_name):
+    def getVolume(self, object_name): #===
+        '''Returns volume of the object throughout the series. Volume calculated by summing the value obtained by
+        multiplying the area by section thickness over all sections.'''
+        vol = 0
+        for section in self.sections:
+            for contour in section.contours:
+                if contour.name == object_name:
+                    contour.popshape()
+                    vol += (contour._shape.area * section.thickness)
+        return vol
+    def getSurfaceArea(self, object_name): #===
+        '''Returns surface area of the object throughout the series.'''
+        return
+    def getFlatArea(self, object_name): #===
+        '''Returns the flat area of the object throughout the series. Flat area calculated by summing the area of
+        the object across all sections.'''
+        fArea = 0
+        for section in self.sections:
+            for contour in section.contours:
+                if contour.name == object_name:
+                    contour.popshape()
+                    fArea += contour._shape.area
+        return fArea
+    def getLength(self, object_name): #===
+        return
+    def getStartEndCount(self, object_name): #===
         '''Returns a tuple containing the start index, end index, and count of the item in series.'''
-        object_name = object_name.lower()
         start = 0
         end = 0
         count = 0
         # Count
         for section in self.sections:
             for contour in section.contours:
-                if contour.name.lower() == object_name:
+                if contour.name == object_name:
                     count += 1
             # Start/End
-            if object_name in [cont.name.lower() for cont in section.contours]:
+            if object_name in [cont.name for cont in section.contours]:
                 # Start index
                 if start == 0:
                     start = section.index

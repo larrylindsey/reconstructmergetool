@@ -32,7 +32,6 @@ def buildFilterBank(list_of_expressions):
         bank.append( exp )
     return bank
 
-
 # Gather info from series
 def buildDendriteList(series, filterBank):
     '''Returns a list of contour names from series, specified by filterBank'''
@@ -51,9 +50,9 @@ def buildObjAttributes(series, object_name): #=== should use reg exp or no?
     object_atts['end'],
     object_atts['count'] = series.getStartEndCount(str(object_name))
     
-    object_atts['volume'] = '' #=== Area x section thickness (summed over all sections)
-    object_atts['surfacearea'] = '' #=== check out in RECON code
-    object_atts['flatarea'] = '' #=== Area (summed over all sections)
+    object_atts['volume'] = series.getVolume(str(object_name)) #=== Area x section thickness (summed over all sections)
+    object_atts['surfacearea'] = series.getSurfaceArea(str(object_name)) #=== check out in RECON code
+    object_atts['flatarea'] = series.getFlatArea(str(object_name)) #=== Area (summed over all sections)
     object_atts['totalvolume'] = '' #=== what is Vol tot? excel
     object_atts['length'] = ''
 
