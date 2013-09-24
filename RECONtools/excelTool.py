@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys, re, openpyxl
 import reconstructmergetool as rmt
-
+# === implement some classes?
 # Gathering excel info
 def loadTemplate(path_to_workbook):
     '''Returns a openpyxl.sheet for the sheet named "Template" in the workbook.'''
@@ -44,7 +44,6 @@ def buildDendriteList(series, filterBank):
     return sorted(list(set(dendrites)))
 
 def buildObjAttributes(series, object_name): #=== should use reg exp or no?
-    # d##?$ -> d##[a-z]{0,3}$
     '''Returns a dictionary for the object with important data to be placed into the xl file'''
     object_atts = {}
     object_atts['start'],object_atts['end'],object_atts['count'] = series.getStartEndCount( object_name )
@@ -58,7 +57,7 @@ def buildObjAttributes(series, object_name): #=== should use reg exp or no?
 
 def buildObjectHierarchy(series, dendrite_list): #=== shouldnt have to hard-code suffixes?
     '''Gathers children of dendrite'''
-    dendrite_suffixes = ['[a-z]{1,5}[0-9]{1,5}*','endo*']
+    dendrite_suffixes = ['[a-z]{1,5}[0-9]{0,5}*','endo*'] #===
     dendriteDict = {} # 
     for dendrite in dendrite_list:
         childDict = {}
@@ -104,33 +103,7 @@ def addDendriteSheets(workbook, series_name, xl_template, dendrite_list):
     '''Adds a sheet to workbook for each dendrite of dendrite_list.'''
     for dendrite in dendrite_list:
         addDendriteSheet(workbook, series_name, xl_template, dendrite)
-        
-def main():
-#     list_of_expressions = list(input('Enter list of expressions for filter: '))
-    list_of_expressions = ['d04$', 'd05$', 'd06$']
-#     path_to_series = str(input('Enter path to series: '))
-    path_to_series = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser'
-#     path_to_workbook = str(input('Enter path to template workbook: '))
-    path_to_workbook = '/home/michaelm/Documents/Test Series/template.xlsx'
-    workbook = openpyxl.Workbook()
-    # 1) Build filter bank
-    filterBank = buildFilterBank(list_of_expressions)
-    # 2) Load series
-    series = rmt.getSeries(path_to_series)
-    # 3) Build dendrite list
-    dendriteList = buildDendriteList(series, filterBank)
-    protDict = buildProtrusionDictionary(series, dendriteList)
-    # 4) Import template columns
-    template = loadTemplate(path_to_workbook)
-    # 5) Build sheet for each dendrite
-    addDendriteSheets(workbook, series.name, template, dendriteList)
-    addProtrusions(workbook, protDict)
-    # 6) Add protrusions to dendrite sheets
-    # 7) Save
-    save_path = input('Enter path to save xl file: ')
-    workbook.save(save_path)
 
-# main()
 
 
 

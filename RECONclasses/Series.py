@@ -166,7 +166,7 @@ class Series:
                 if contour.name == object_name:
                     sArea += (contour.getLength() * section.thickness)
         return sArea
-    def getFlatArea(self, object_name): #=== incorrect for cfa traces
+    def getFlatArea(self, object_name): #===
         '''Returns the flat area of the object throughout the series. Flat area calculated by summing the area of
         the object across all sections.'''
         fArea = 0

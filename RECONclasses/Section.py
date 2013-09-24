@@ -48,6 +48,7 @@ class Section:
     def checkMultImgs(self):
         if len(self.imgs) > 1:
             print(self.name+': Multiple images found. Only last one kept.')
+            # Last img in list is the top image in the reconstruct window
             self.imgs = [self.imgs.pop()]
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building xml'''
