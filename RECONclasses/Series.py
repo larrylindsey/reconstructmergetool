@@ -158,8 +158,14 @@ class Series:
                     vol += (contour._shape.area * section.thickness)
         return vol
     def getSurfaceArea(self, object_name): #===
-        '''Returns surface area of the object throughout the series.'''
-        return
+        '''Returns surface area of the object throughout the series. Surface area calculated by summing
+        the length multiplied by section thickness across sections.'''
+        sArea = 0
+        for section in self.sections:
+            for contour in section.contours:
+                if contour.name == object_name:
+                    sArea += contour.getLength()*section.thickness
+        return sArea
     def getFlatArea(self, object_name): #===
         '''Returns the flat area of the object throughout the series. Flat area calculated by summing the area of
         the object across all sections.'''
@@ -170,8 +176,6 @@ class Series:
                     contour.popshape()
                     fArea += contour._shape.area
         return fArea
-    def getLength(self, object_name): #===
-        return
     def getStartEndCount(self, object_name): #===
         '''Returns a tuple containing the start index, end index, and count of the item in series.'''
         start = 0

@@ -209,6 +209,18 @@ class Contour:
             tupList.append(tup)
         return tupList
 # Accessors
+    def getLength(self): #===
+        '''Returns the sum of all line segments in the contour object'''
+        length = 0
+        for index in range( len(self.points) ):
+            if index+1 >= len(self.points): # stop when outside index range
+                break
+            pt = self.points[index]
+            nextPt = self.points[index+1]
+            length += (((nextPt[0]-pt[0])**2)+((nextPt[1]-pt[1])**2))**(0.5)
+        if self.closed: # If closed object, add distance between 1st and last pt too
+            length += (((self.points[0][0]-self.points[-1][0])**2)+((self.points[0][1]-self.points[-1][1])**2))**(0.5)
+        return length #=== sqrt is taxing computation; reimplement with 1 sqrt at end?
     def gettracepts(self):
         '''Returns trace space coordinates as [ (x,y), ... ]'''
         return self.points

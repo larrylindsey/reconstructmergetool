@@ -49,9 +49,9 @@ def buildObjAttributes(series, object_name): #=== should use reg exp or no?
     object_atts['start'],
     object_atts['end'],
     object_atts['count'] = series.getStartEndCount(str(object_name))
-    
+    ##### threads.cpp
     object_atts['volume'] = series.getVolume(str(object_name)) #=== Area x section thickness (summed over all sections)
-    object_atts['surfacearea'] = series.getSurfaceArea(str(object_name)) #=== check out in RECON code
+    object_atts['surfacearea'] = series.getSurfaceArea(str(object_name)) #=== length*section.thickness (sum over all)
     object_atts['flatarea'] = series.getFlatArea(str(object_name)) #=== Area (summed over all sections)
     object_atts['totalvolume'] = '' #=== what is Vol tot? excel
     object_atts['length'] = ''
