@@ -137,6 +137,35 @@ class Series:
         '''Allows use of != between multiple objects'''
         return self.output()[0] != other.output()[0] and self.output()[1] != other.output()[1]
 # Accessors
+    def getDendriteHierarchy(self): #=== takes long time?
+        dendrite_expression = 'd[0-9]{2}' # represents base dendrite name (d##)
+        dendrites = {}
+        # Base dendrites
+        for section in self.sections:
+            for contour in sorted(section.contours, key=lambda Contour: Contour.name): 
+                # If a base dendrite (d##$)...
+                if re.compile(dendrite_expression+'$').match( contour.name ):
+                    if contour.name not in dendrites:
+                        dendrites[contour.name] = self.getObjectAttributes(contour.name)
+                # If a dendrite child (d##*)...
+                elif re.compile(dendrite_expression+'.').match( contour.name ):
+                    if contour.name[0:3] in dendrites: # if already a dict for base dendrite
+                        dendrites[contour.name[0:3]][contour.name] = self.getObjectAttributes(contour.name)
+                    else: # if no base dendrite dict, make one
+                        dendrites[contour.name[0:3]] = self.getObjectAttributes(contour.name[0:3])
+                        dendrites[contour.name[0:3]][contour.name] = self.getObjectAttributes(contour.name)
+        return dendrites
+    def getObjectAttributes(self, object_name): #=== should use reg exp or no?
+        '''Returns a dictionary for the object with important data to be placed into the xl file'''
+        object_atts = {}
+        object_atts['start'],object_atts['end'],object_atts['count'] = self.getStartEndCount( object_name )
+        ##### RECONSTRUCT::threads.cpp for references into how the following attributes are calculated
+        object_atts['volume'] = self.getVolume( object_name )
+        object_atts['surfacearea'] = self.getSurfaceArea( object_name )
+        object_atts['flatarea'] = self.getFlatArea( object_name ) #=== incorrect for CFA
+        object_atts['totalvolume'] = '' #=== what is Vol tot? excel
+        object_atts['length'] = ''
+        return object_atts
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building .ser xml file'''
         attributes = {}

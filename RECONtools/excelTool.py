@@ -3,6 +3,9 @@ import sys, re, openpyxl
 import reconstructmergetool as rmt
 # === implement some classes?
 # Gathering excel info
+
+list_of_dendrite_children = ['p##', 'cfa##', 'c##']
+
 def loadTemplate(path_to_workbook):
     '''Returns a openpyxl.sheet for the sheet named "Template" in the workbook.'''
     wkbk = openpyxl.load_workbook(path_to_workbook)
@@ -37,41 +40,12 @@ def buildDendriteList(series, filterBank):
     '''Returns a list of contour names from series, specified by filterBank'''
     dendrites = []
     for section in series.sections:
-        for contour in [cont.name.lower() for cont in section.contours]:
+        for contour in [cont.name for cont in section.contours]:
             for exp in filterBank:
                 if exp.match(contour) != None:
                     dendrites.append(contour)
     return sorted(list(set(dendrites)))
-
-def buildObjAttributes(series, object_name): #=== should use reg exp or no?
-    '''Returns a dictionary for the object with important data to be placed into the xl file'''
-    object_atts = {}
-    object_atts['start'],object_atts['end'],object_atts['count'] = series.getStartEndCount( object_name )
-    ##### RECONSTRUCT::threads.cpp for references into how the following attributes are calculated
-    object_atts['volume'] = series.getVolume( object_name )
-    object_atts['surfacearea'] = series.getSurfaceArea( object_name )
-    object_atts['flatarea'] = series.getFlatArea( object_name ) #=== incorrect for CFA
-    object_atts['totalvolume'] = '' #=== what is Vol tot? excel
-    object_atts['length'] = ''
-    return object_atts
-
-def buildObjectHierarchy(series, dendrite_list): #=== shouldnt have to hard-code suffixes?
-    '''Gathers children of dendrite'''
-    dendrite_suffixes = ['[a-z]{1,5}[0-9]{0,5}*','endo*'] #===
-    dendriteDict = {} # 
-    for dendrite in dendrite_list:
-        childDict = {}
-        for section in series.sections:
-            for suffix in dendrite_suffixes:
-                dendriteChild = dendrite+suffix
-                exp = processExp(dendriteChild)
-                for contour in section.contours:
-                    if exp.match(contour.name) != None and contour.name not in childDict:
-                        childAtts = buildObjAttributes(series, contour.name)
-                        childDict[contour.name] = childAtts
-        dendriteDict[dendrite]=childDict
-    return dendriteDict
-
+      
 # Creating excel docs
 def writeColumns(worksheet, list_of_columns):
     '''Writes columns to specified worksheet.'''
@@ -104,6 +78,6 @@ def addDendriteSheets(workbook, series_name, xl_template, dendrite_list):
     for dendrite in dendrite_list:
         addDendriteSheet(workbook, series_name, xl_template, dendrite)
 
-
-
-
+def main():
+    list_of_dendrites = ['d06','d07','d14']
+    series = rmt.getSeries('/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser')
