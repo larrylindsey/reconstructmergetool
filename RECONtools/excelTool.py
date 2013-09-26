@@ -6,78 +6,110 @@ import reconstructmergetool as rmt
 
 list_of_dendrite_children = ['p##', 'cfa##', 'c##']
 
-def loadTemplate(path_to_workbook):
-    '''Returns a openpyxl.sheet for the sheet named "Template" in the workbook.'''
-    wkbk = openpyxl.load_workbook(path_to_workbook)
-    template = wkbk.get_active_sheet()
-    return template
-
-def importColumns(xl_template):
-    '''Builds/returns a list of columns found in template'''
-    columns = []
-    for col in range( len(xl_template.columns) ):
-        columns.append( xl_template.cell(row=0,column=col) )
-    return columns
-
 def processExp(exp): #===
-    # Need to cap at end? $
-    '''Converts a filter string from RECONSTRUCT format to python regexp format'''
-    exp = exp.replace('*', '.')
-    exp = exp.replace('?', '[a-z]') #=== "? matches any single character" (numbers included?)
-    exp = exp.replace('#', '[0-9]')
-    return re.compile( str(exp),re.I ) # re.I (Ignore Case)
+        # Need to cap at end? $
+        '''Converts a filter string from RECONSTRUCT format to python regexp format'''
+        exp = exp.replace('*', '.')
+        exp = exp.replace('?', '[a-z]') #=== "? matches any single character" (numbers included?)
+        exp = exp.replace('#', '[0-9]')
+        return re.compile( str(exp),re.I ) # re.I (Ignore Case)
 
-def buildFilterBank(list_of_expressions):
-    '''Turns a list of expressions into a list of regular expressions for filtering'''
-    bank = []
-    for exp in list_of_expressions:
-        exp = processExp( exp )
-        bank.append( exp )
-    return bank
-
-# Gather info from series
-def buildDendriteList(series, filterBank):
-    '''Returns a list of contour names from series, specified by filterBank'''
-    dendrites = []
-    for section in series.sections:
-        for contour in [cont.name for cont in section.contours]:
-            for exp in filterBank:
-                if exp.match(contour) != None:
-                    dendrites.append(contour)
-    return sorted(list(set(dendrites)))
-      
-# Creating excel docs
-def writeColumns(worksheet, list_of_columns):
-    '''Writes columns to specified worksheet.'''
-    for col in range( len(list_of_columns)):
-        style = list_of_columns[col].style
-        worksheet.cell(row=0, column=col).value = list_of_columns[col].value
-        worksheet.cell(row=0, column=col).style.alignment = style.alignment
-        worksheet.cell(row=0, column=col).style.borders = style.borders
-        worksheet.cell(row=0, column=col).style.fill = style.fill
-        worksheet.cell(row=0, column=col).style.font = style.font
-        worksheet.cell(row=0, column=col).style.protection = style.protection
-        worksheet.cell(row=0, column=col).style.number_format = style.number_format
-
-def addProtrusions(workbook, protDict):
-    sheetNames = workbook.get_sheet_names()
-    for dendrite in protDict:
-        sheet = workbook.get_sheet_by_name(str([sheetName for sheetName in sheetNames if dendrite in sheetName][0]))
-        row = 1
-        for protrusion in protDict[dendrite]:
-            sheet.cell(row=row, column=0).value = protrusion
-            row+=1
-            
-def addDendriteSheet(workbook, series_name, xl_template, dendrite):
-    '''Adds a worksheet to workbook for the specific dendrite. Formatted to template.'''
-    worksheet = workbook.create_sheet( title=series_name+' '+dendrite )
-    writeColumns(worksheet, importColumns(xl_template))
+class excelWorkbook(openpyxl.Workbook):
+    def __init__(self):
+        openpyxl.Workbook.__init__(self)
+        
+        self.template = None
+        
+        self.dendriteFilter = None
+        self.dendriteChildFilter = None
+        self.dendriteDict = None
+        self.protrusionChildCount = None
     
-def addDendriteSheets(workbook, series_name, xl_template, dendrite_list):
-    '''Adds a sheet to workbook for each dendrite of dendrite_list.'''
-    for dendrite in dendrite_list:
-        addDendriteSheet(workbook, series_name, xl_template, dendrite)
+    def getDendriteDict(self, series):
+        self.dendriteDict = series.getDendriteHierarchy()
+        
+    def writeProtrusions(self, series):
+        protrusionExp = re.compile('p[0-9]{2}$') 
+        # check dendriteDict for all protrusions
+        for dendrite in self.dendriteDict:
+            
+            # Add protrusions to a list
+            protrusionList = [] # build list of protrusions
+            for child in self.dendriteDict[dendrite]: #===
+                if protrusionExp.match(child) != None: # if is a protrusion
+                    protrusionList.append(child)
+            
+            # Create sheets for each dendrite containing a protrusion
+            if len(protrusionList) > 0:
+                self.create_sheet(title=str(series.name+' '+dendrite))
+                sheet = self.get_sheet_by_name(series.name+' '+dendrite)
+                
+            # Sort protrusions and determine number of spaces to add after
+            row = 1 # row in current excel sheet
+            for protrusion in sorted(protrusionList):    
+                spaces = 0
+                if protrusion in self.protrusionChildCount[dendrite]:
+                    spaces = int(self.protrusionChildCount[dendrite][protrusion])-1
+                # add protrusion to sheet
+                sheet.cell(row=row, column=0).value = str(dendrite+protrusion)
+                row+=1
+                # add spaces if needed
+                while spaces != 0:
+                    sheet.cell(row=row, column=0).value = ''
+                    spaces-=1
+                    row+=1
+    
+    def importTemplateFromWorkbook(self, path_to_workbook):
+        '''Returns the active sheet from workbook to serve as a template for the columns'''
+        workbook = openpyxl.load_workbook(path_to_workbook)
+        self.template = workbook.get_active_sheet()
+        
+    def importColumns(self, worksheet):
+        '''Writes columns to sheet as per template'''
+        for col in range( len(self.template.columns) ):
+            style = self.template.columns[col].style
+            worksheet.cell(row=0, column=col).value = self.template.columns[col].value
+            worksheet.cell(row=0, column=col).style.alignment = style.alignment
+            worksheet.cell(row=0, column=col).style.borders = style.borders
+            worksheet.cell(row=0, column=col).style.fill = style.fill
+            worksheet.cell(row=0, column=col).style.font = style.font
+            worksheet.cell(row=0, column=col).style.protection = style.protection
+            worksheet.cell(row=0, column=col).style.number_format = style.number_format
+            worksheet.cell(row=0, column=col).value = self.columns[col]
 
-def main():
-    list_of_dendrites = ['d06','d07','d14']
-    series = rmt.getSeries('/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser')
+    def buildFilterBank(self, list_of_expressions):
+        '''Turns a list of expressions into a list of regular expressions for filtering'''
+        bank = []
+        for exp in list_of_expressions:
+            exp = processExp( exp )
+            bank.append( exp )
+        self.dendriteFilter = bank
+            
+#     def addDendriteSheet(self, series_name, xl_template, dendrite):
+#         '''Adds a worksheet to workbook for the specific dendrite. Formatted to template.'''
+#         worksheet = self.create_sheet( title=series_name+' '+dendrite )
+#         self.writeColumns(worksheet, self.importColumns(xl_template))
+#         
+#     def addDendriteSheets(self, series_name, xl_template, dendrite_list):
+#         '''Adds a sheet to workbook for each dendrite of dendrite_list.'''
+#         for dendrite in dendrite_list:
+#             self.addDendriteSheet(self, series_name, xl_template, dendrite)
+            
+    def getProtrusionChildCount(self, dendrite_hierarchy_dictionary): #=== need another sub dictionary
+        #=== dendrite[protrusion]
+        denDict = dendrite_hierarchy_dictionary
+        childExp = re.compile('[a-z]{1,5}[0-9]{2}[a-z]$')
+        outDict = {}
+        for dendrite in denDict:
+            outDict[dendrite[0:3]] = {}
+            highestSubChild = '' # determines how many excel rows this protrusion requires
+            for child in denDict[dendrite]:
+                if childExp.match( child ) != None: # if child has a sub child (i.e. d07c16a, d07c16b)
+                    protrusionNo = child[-3:len(child)-1]
+                    if child[-1] > highestSubChild:
+                        highestSubChild = child[-1]
+            if highestSubChild != '':
+                outDict[dendrite[0:3]]['p'+protrusionNo] = ord(highestSubChild)-96 # position in alphabet = number of row required
+        self.protrusionChildCount = outDict
+            
+        

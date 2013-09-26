@@ -140,6 +140,7 @@ class Series:
     def getDendriteHierarchy(self): #=== takes long time?
         dendrite_expression = 'd[0-9]{2}' # represents base dendrite name (d##)
         dendrites = {}
+        count = 0
         # Base dendrites
         for section in self.sections:
             for contour in sorted(section.contours, key=lambda Contour: Contour.name): 
@@ -147,13 +148,16 @@ class Series:
                 if re.compile(dendrite_expression+'$').match( contour.name ):
                     if contour.name not in dendrites:
                         dendrites[contour.name] = self.getObjectAttributes(contour.name)
+                        count+=1
                 # If a dendrite child (d##*)...
                 elif re.compile(dendrite_expression+'.').match( contour.name ):
                     if contour.name[0:3] in dendrites: # if already a dict for base dendrite
-                        dendrites[contour.name[0:3]][contour.name] = self.getObjectAttributes(contour.name)
+                        dendrites[contour.name[0:3]][contour.name[3:len(contour.name)]] = self.getObjectAttributes(contour.name)
                     else: # if no base dendrite dict, make one
                         dendrites[contour.name[0:3]] = self.getObjectAttributes(contour.name[0:3])
-                        dendrites[contour.name[0:3]][contour.name] = self.getObjectAttributes(contour.name)
+                        dendrites[contour.name[0:3]][contour.name[3:len(contour.name)]] = self.getObjectAttributes(contour.name)
+                    count+=1
+        print(str(count)+' objects added to dictionary')
         return dendrites
     def getObjectAttributes(self, object_name): #=== should use reg exp or no?
         '''Returns a dictionary for the object with important data to be placed into the xl file'''
@@ -224,8 +228,7 @@ class Series:
                 if start == 0:
                     start = section.index
                 # End index
-                else:
-                    end = section.index
+                end = section.index
         return start, end, count
     def xgetattribs(self):
         '''Returns attributes in appropriate format for xml output'''
