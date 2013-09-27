@@ -776,7 +776,9 @@ class mainFrame(QtGui.QFrame):
             self.show()
             
         def buttons(self):
-            #=== Contour info windows (eventually pictures)
+            #=== Contour info windows (eventually pictures; skimage)
+            # skimage.
+            # skimage.draw.polygon for traces
             self.contAInfo = QtGui.QWidget(self)
             self.contAInfo.setAutoFillBackground(True) #===
             self.contBInfo = QtGui.QWidget(self)

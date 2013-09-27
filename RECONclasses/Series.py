@@ -405,7 +405,7 @@ class Series:
             for elem in section.contours:
                 curT = ET.Element('Transform', elem.transform.output())
                 
-                # Image/Image contour transform === outputs first image in section.imgs list
+                # Image/Image contour transform
                 if elem.img != None: # Make transform from image
                     if elem.img.transform.output() == section.imgs[0].transform.output():
                         subelem = ET.Element('Image', section.imgs[0].output())

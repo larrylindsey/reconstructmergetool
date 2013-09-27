@@ -221,14 +221,14 @@ class Contour:
         if self.closed: # If closed object, add distance between 1st and last pt too
             length += (((self.points[0][0]-self.points[-1][0])**2)+((self.points[0][1]-self.points[-1][1])**2))**(0.5)
         return length #=== sqrt is taxing computation; reimplement with 1 sqrt at end?
-    def getStartEndCount(self, series): #===
+    def getStartEndCount(self, series):
         '''Returns the start, end, and count values for this contour in given series. Determined by self.name only'''
         return series.getStartEndCount(self.name)
-    def getVolume(self, series): #===
+    def getVolume(self, series):
         return series.getVolume(self.name)
-    def getSurfaceArea(self, series): #===
+    def getSurfaceArea(self, series):
         return series.getSurfaceArea(self.name)
-    def getFlatArea(self, series): #===
+    def getFlatArea(self, series):
         return series.getFlatArea(self.name)
     def gettracepts(self):
         '''Returns trace space coordinates as [ (x,y), ... ]'''
