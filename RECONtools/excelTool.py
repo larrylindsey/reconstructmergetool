@@ -85,7 +85,7 @@ class excelWorkbook(openpyxl.Workbook):
             
     def getProtrusionChildCount(self, dendrite_hierarchy_dictionary):
         denDict = dendrite_hierarchy_dictionary
-        childExp = re.compile('[a-z]{1,5}[0-9]{2}[a-z]$')
+        childExp = re.compile('[a-z]{1,5}[0-9]{2}[a-z]{0,5}$')
         outDict = {}
         for dendrite in denDict:
             outDict[dendrite[0:3]] = {}

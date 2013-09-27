@@ -137,7 +137,7 @@ class Series:
         '''Allows use of != between multiple objects'''
         return self.output()[0] != other.output()[0] and self.output()[1] != other.output()[1]
 # Accessors
-    def getDendriteHierarchy(self): #=== takes long time?
+    def getDendriteHierarchy(self):
         dendrite_expression = 'd[0-9]{2}' # represents base dendrite name (d##)
         dendrites = {}
         count = 0
@@ -159,14 +159,14 @@ class Series:
                     count+=1
         print(str(count)+' objects added to dictionary')
         return dendrites
-    def getObjectAttributes(self, object_name): #=== should use reg exp or no?
+    def getObjectAttributes(self, object_name):
         '''Returns a dictionary for the object with important data to be placed into the xl file'''
         object_atts = {}
         object_atts['start'],object_atts['end'],object_atts['count'] = self.getStartEndCount( object_name )
         ##### RECONSTRUCT::threads.cpp for references into how the following attributes are calculated
         object_atts['volume'] = self.getVolume( object_name )
         object_atts['surfacearea'] = self.getSurfaceArea( object_name )
-        object_atts['flatarea'] = self.getFlatArea( object_name ) #=== incorrect for CFA
+        object_atts['flatarea'] = self.getFlatArea( object_name )
         object_atts['totalvolume'] = '' #=== what is Vol tot? excel
         object_atts['length'] = ''
         return object_atts
@@ -180,7 +180,7 @@ class Series:
             attributes[keys[count]] = value
             count += 1
         return attributes, self.contours
-    def getVolume(self, object_name): #===
+    def getVolume(self, object_name):
         '''Returns volume of the object throughout the series. Volume calculated by summing the value obtained by
         multiplying the area by section thickness over all sections.'''
         vol = 0
@@ -190,7 +190,7 @@ class Series:
                     contour.popshape()
                     vol += (contour._shape.area * section.thickness)
         return vol
-    def getSurfaceArea(self, object_name): #===
+    def getSurfaceArea(self, object_name):
         '''Returns surface area of the object throughout the series. Surface area calculated by summing
         the length multiplied by section thickness across sections.'''
         sArea = 0
@@ -199,7 +199,7 @@ class Series:
                 if contour.name == object_name:
                     sArea += (contour.getLength() * section.thickness)
         return sArea
-    def getFlatArea(self, object_name): #===
+    def getFlatArea(self, object_name):
         '''Returns the flat area of the object throughout the series. Flat area calculated by summing the area of
         the object across all sections.'''
         fArea = 0
@@ -212,7 +212,7 @@ class Series:
                     else:
                         fArea =+ (contour.getLength() * section.thickness)
         return fArea
-    def getStartEndCount(self, object_name): #===
+    def getStartEndCount(self, object_name):
         '''Returns a tuple containing the start index, end index, and count of the item in series.'''
         start = 0
         end = 0
