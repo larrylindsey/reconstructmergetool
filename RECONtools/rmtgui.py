@@ -480,7 +480,7 @@ class mainFrame(QtGui.QFrame):
                 self.table1.addItem( self.table1.att2item(attA))
             for attB in ser2atts:
                 self.table2.addItem( self.table2.att2item(attB))
-        
+  
     class seriesContourWidget(widgetWindow):
         def __init__(self, parent=None):
             widgetWindow.__init__(self, parent)
@@ -759,7 +759,81 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
-    
+    class sectionContourConflictResolver(widgetWindow):
+        def __init__(self, parent=None):
+            widgetWindow.__init__(self, parent)
+            self.contAInfo = None
+            self.contBInfo = None
+            self.contAButton = None
+            self.contBButton = None
+            self.bothButton = None
+            self.thisTraceAllSections = None #=== Chooses this series' trace for all sections
+            self.allTracesThisSection = None #=== Chooses all of this series' traces for this section
+            self.allTracesAllSections = None #=== Chooses all of this series' traces for all sections
+            
+            self.buttons()
+            self.layout()
+            self.show()
+            
+        def buttons(self):
+            #=== Contour info windows (eventually pictures)
+            self.contAInfo = QtGui.QWidget(self)
+            self.contAInfo.setAutoFillBackground(True) #===
+            print(self.contAInfo.size())
+            self.contBInfo = QtGui.QWidget(self)
+            self.contBInfo.setAutoFillBackground(True) #===
+            
+            # A button
+            self.contAButton = QtGui.QPushButton()
+            self.contAButton.setText('Choose Series A\nTrace')
+            
+            # B button
+            self.contBButton = QtGui.QPushButton()
+            self.contBButton.setText('Choose Series B\nTrace')
+            
+            # Both button
+            self.bothButton = QtGui.QPushButton()
+            self.bothButton.setText('Choose traces\nfor both series')
+            
+            # Repetition checkboxes
+            self.thisTraceAllSections = QtGui.QCheckBox()
+            self.thisTraceAllSections.setText('Choose THIS trace for ALL sections')
+            self.allTracesThisSection = QtGui.QCheckBox()
+            self.allTracesThisSection.setText('Choose ALL of this series\' traces for THIS section')
+            self.allTracesAllSections = QtGui.QCheckBox()
+            self.allTracesAllSections.setText('Choose ALL of this series\' traces for ALL sections')
+            
+        def layout(self):
+            vbox = QtGui.QVBoxLayout()
+            hbox1 = QtGui.QHBoxLayout()
+            hbox1.addWidget(self.contAInfo)
+            hbox1.addWidget(self.contBInfo)
+            hbox2 = QtGui.QHBoxLayout()
+            hbox2.insertSpacing(0,50)
+            hbox2.addWidget(self.contAButton)
+            hbox2.insertSpacing(2,100)
+            hbox2.addWidget(self.contBButton)
+            hbox2.insertSpacing(4,50)
+            hbox3 = QtGui.QHBoxLayout()
+            hbox3.insertSpacing(0,250)
+            hbox3.addWidget(self.bothButton)
+            hbox3.insertSpacing(2,250)
+            hbox4 = QtGui.QHBoxLayout()
+            hbox4.addWidget(self.thisTraceAllSections, alignment = QtCore.Qt.AlignHCenter)
+            hbox5 = QtGui.QHBoxLayout()
+            hbox5.addWidget(self.allTracesThisSection, alignment = QtCore.Qt.AlignHCenter)
+            hbox6 = QtGui.QHBoxLayout()
+            hbox6.addWidget(self.allTracesAllSections, alignment = QtCore.Qt.AlignHCenter)
+            vbox.addLayout(hbox1)
+            vbox.addLayout(hbox2)
+            vbox.addLayout(hbox3)
+            vbox.addLayout(hbox4)
+            vbox.addLayout(hbox5)
+            vbox.addLayout(hbox6)
+            self.setLayout(vbox)
+            
+            
+            
     class sectionContourWidget(widgetWindow):
         def __init__(self, parent=None, section=None):
             widgetWindow.__init__(self, parent)
@@ -1188,8 +1262,8 @@ class mainFrame(QtGui.QFrame):
 def main():
     app = QtGui.QApplication(sys.argv)
     rmtFrame = mainFrame()
-    mainFrame.serLoadWidget(rmtFrame)
-
+#     mainFrame.serLoadWidget(rmtFrame)
+    mainFrame.sectionContourConflictResolver(rmtFrame)
     sys.exit( app.exec_() )
 main()
 

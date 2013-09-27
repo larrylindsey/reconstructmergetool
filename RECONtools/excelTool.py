@@ -4,8 +4,6 @@ import reconstructmergetool as rmt
 # === implement some classes?
 # Gathering excel info
 
-list_of_dendrite_children = ['p##', 'cfa##', 'c##']
-
 def processExp(exp): #===
         # Need to cap at end? $
         '''Converts a filter string from RECONSTRUCT format to python regexp format'''
@@ -20,8 +18,8 @@ class excelWorkbook(openpyxl.Workbook):
         
         self.template = None
         
-        self.dendriteFilter = None
-        self.dendriteChildFilter = None
+        self.dendriteFilter = None #===
+        self.dendriteChildFilter = None #===
         self.dendriteDict = None
         self.protrusionChildCount = None
     
@@ -63,7 +61,7 @@ class excelWorkbook(openpyxl.Workbook):
         '''Returns the active sheet from workbook to serve as a template for the columns'''
         workbook = openpyxl.load_workbook(path_to_workbook)
         self.template = workbook.get_active_sheet()
-        
+           
     def importColumns(self, worksheet):
         '''Writes columns to sheet as per template'''
         for col in range( len(self.template.columns) ):
@@ -85,18 +83,7 @@ class excelWorkbook(openpyxl.Workbook):
             bank.append( exp )
         self.dendriteFilter = bank
             
-#     def addDendriteSheet(self, series_name, xl_template, dendrite):
-#         '''Adds a worksheet to workbook for the specific dendrite. Formatted to template.'''
-#         worksheet = self.create_sheet( title=series_name+' '+dendrite )
-#         self.writeColumns(worksheet, self.importColumns(xl_template))
-#         
-#     def addDendriteSheets(self, series_name, xl_template, dendrite_list):
-#         '''Adds a sheet to workbook for each dendrite of dendrite_list.'''
-#         for dendrite in dendrite_list:
-#             self.addDendriteSheet(self, series_name, xl_template, dendrite)
-            
-    def getProtrusionChildCount(self, dendrite_hierarchy_dictionary): #=== need another sub dictionary
-        #=== dendrite[protrusion]
+    def getProtrusionChildCount(self, dendrite_hierarchy_dictionary):
         denDict = dendrite_hierarchy_dictionary
         childExp = re.compile('[a-z]{1,5}[0-9]{2}[a-z]$')
         outDict = {}
