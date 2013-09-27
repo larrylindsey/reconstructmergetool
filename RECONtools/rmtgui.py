@@ -779,7 +779,6 @@ class mainFrame(QtGui.QFrame):
             #=== Contour info windows (eventually pictures)
             self.contAInfo = QtGui.QWidget(self)
             self.contAInfo.setAutoFillBackground(True) #===
-            print(self.contAInfo.size())
             self.contBInfo = QtGui.QWidget(self)
             self.contBInfo.setAutoFillBackground(True) #===
             
