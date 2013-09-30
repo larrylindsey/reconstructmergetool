@@ -123,6 +123,7 @@ class singleColumnTable(QtGui.QTableWidget):
     def addItem(self, item):
         self.setItem(self.currentRow, 0, item)
         self.currentRow+=1
+        
 class mainFrame(QtGui.QFrame):
     '''The mainFrame() class holds all the contents of the reconstructmergetool (RMT) gui. It is the one
     RMTgui class that is open throughout the entire program.
@@ -759,17 +760,12 @@ class mainFrame(QtGui.QFrame):
             self.parent.backButton.clicked.disconnect( self.back )
             mainFrame.sectionAttributeWidget( self.parent )
             self.close()
+            
     class sectionContourConflictResolver(widgetWindow):
-        def __init__(self, parent=None):
+        def __init__(self, parent=None, contA=None, contB=None):
             widgetWindow.__init__(self, parent)
-            self.contAInfo = None
-            self.contBInfo = None
-            self.contAButton = None
-            self.contBButton = None
-            self.bothButton = None
-            self.thisTraceAllSections = None #=== Chooses this series' trace for all sections
-            self.allTracesThisSection = None #=== Chooses all of this series' traces for this section
-            self.allTracesAllSections = None #=== Chooses all of this series' traces for all sections
+            self.contA = contA
+            self.contB = contB
             
             self.buttons()
             self.layout()
@@ -798,17 +794,22 @@ class mainFrame(QtGui.QFrame):
             
             # Repetition checkboxes
             self.thisTraceAllSections = QtGui.QCheckBox()
-            self.thisTraceAllSections.setText('Choose THIS trace for ALL sections')
+            self.thisTraceAllSections.setText('Choose THIS particular trace in THIS series for ALL sections')
+            self.thisTraceAllSections.stateChanged.connect(self.checkedBox)
             self.allTracesThisSection = QtGui.QCheckBox()
             self.allTracesThisSection.setText('Choose ALL of this series\' traces for THIS section')
+            self.allTracesThisSection.stateChanged.connect(self.checkedBox)
             self.allTracesAllSections = QtGui.QCheckBox()
             self.allTracesAllSections.setText('Choose ALL of this series\' traces for ALL sections')
+            self.allTracesAllSections.stateChanged.connect(self.checkedBox)
             
         def layout(self):
-            vbox = QtGui.QVBoxLayout()
+            # Trace info
             hbox1 = QtGui.QHBoxLayout()
             hbox1.addWidget(self.contAInfo)
             hbox1.addWidget(self.contBInfo)
+            
+            # Trace selection buttons
             hbox2 = QtGui.QHBoxLayout()
             hbox2.insertSpacing(0,50)
             hbox2.addWidget(self.contAButton)
@@ -819,12 +820,17 @@ class mainFrame(QtGui.QFrame):
             hbox3.insertSpacing(0,250)
             hbox3.addWidget(self.bothButton)
             hbox3.insertSpacing(2,250)
+            
+            # Action-repetition options
             hbox4 = QtGui.QHBoxLayout()
             hbox4.addWidget(self.thisTraceAllSections, alignment = QtCore.Qt.AlignHCenter)
             hbox5 = QtGui.QHBoxLayout()
             hbox5.addWidget(self.allTracesThisSection, alignment = QtCore.Qt.AlignHCenter)
             hbox6 = QtGui.QHBoxLayout()
             hbox6.addWidget(self.allTracesAllSections, alignment = QtCore.Qt.AlignHCenter)
+            
+            # Main Layout
+            vbox = QtGui.QVBoxLayout()
             vbox.addLayout(hbox1)
             vbox.addLayout(hbox2)
             vbox.addLayout(hbox3)
@@ -832,7 +838,18 @@ class mainFrame(QtGui.QFrame):
             vbox.addLayout(hbox5)
             vbox.addLayout(hbox6)
             self.setLayout(vbox)
-            
+        
+        def checkedBox(self):
+            '''Maintains an exclusive implementation of checkboxes (i.e. unchecks others when one is checked)'''
+            if self.sender() == self.thisTraceAllSections and self.thisTraceAllSections.checkState() == QtCore.Qt.Checked:
+                self.allTracesThisSection.setCheckState(QtCore.Qt.Unchecked)
+                self.allTracesAllSections.setCheckState(QtCore.Qt.Unchecked)
+            elif self.sender() == self.allTracesThisSection and self.allTracesThisSection.checkState() == QtCore.Qt.Checked:
+                self.thisTraceAllSections.setCheckState(QtCore.Qt.Unchecked)
+                self.allTracesAllSections.setCheckState(QtCore.Qt.Unchecked)
+            elif self.sender() == self.allTracesAllSections and self.allTracesAllSections.checkState() == QtCore.Qt.Checked:
+                self.thisTraceAllSections.setCheckState(QtCore.Qt.Unchecked)
+                self.allTracesThisSection.setCheckState(QtCore.Qt.Unchecked)
             
             
     class sectionContourWidget(widgetWindow):
