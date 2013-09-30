@@ -19,8 +19,8 @@ class excelWorkbook(openpyxl.Workbook):
         self.columns = ['p', 'sp', 'sph', 'cfa']
         self.objectDetails = ['object name','start', 'end', 'count', 'surface area', 'flat area', 'volume']
         
-        self.dendriteFilter = None #===
-        self.dendriteChildFilter = None #===
+        self.dendriteFilter = [] #===
+        self.dendriteChildFilter = [] #===
         self.dendriteDict = None
         self.protrusionChildCount = None # determines spacing for excel output
     
@@ -28,7 +28,7 @@ class excelWorkbook(openpyxl.Workbook):
         self.childExp = re.compile('[a-z]{1,5}[0-9]{2}[a-z]{0,5}$')
         
     def getDendriteDict(self, series):
-        self.dendriteDict = series.getDendriteHierarchy()
+        self.dendriteDict = series.getObjectHierarchy(*series.getObjectLists())
     
     def writeColumns(self, sheet): #===
         columnNo = 0
@@ -36,37 +36,42 @@ class excelWorkbook(openpyxl.Workbook):
             sheet.cell(row=0, column=columnNo).value = str(detail)
             columnNo+=1
             
-    def writeProtrusions(self, series_name):
-        # check dendriteDict for all protrusions
+    def writeSheets(self, series_name):
         for dendrite in self.dendriteDict:
-            
-            # Add protrusions to a list
-            protrusionDict = {} # build list of protrusions
-            for child in self.dendriteDict[dendrite]: #===
-                if self.protrusionExp.match(child) != None: # if is a protrusion
-                    protrusionDict[child] = self.dendriteDict[dendrite][child]['count']
-            
-            # Create sheets for each dendrite that contains a protrusion
-            if len(protrusionDict) > 0:
-                self.create_sheet(title=str(series_name+' '+dendrite))
-                sheet = self.get_sheet_by_name(series_name+' '+dendrite)
-                
-            # Sort protrusions and determine number of spaces to add after
-            row = 1 # row in current excel sheet
-
-            for protrusion in sorted(protrusionDict.items(), key=lambda x: (x[1],x[0])):  # sort by value then key   
-                spaces = 0
-                if protrusion in self.protrusionChildCount[dendrite]:
-                    spaces = int(self.protrusionChildCount[dendrite][protrusion])-1
-                # add protrusion to sheet
-                sheet.cell(row=row, column=0).value = str(dendrite+protrusion[0])
-                
-                row+=1
-                # add spaces if needed
-                while spaces != 0:
-                    sheet.cell(row=row, column=0).value = ''
-                    spaces-=1
-                    row+=1
+            if dendrite not in self.dendriteFilter and len(self.dendriteDict[dendrite]) > 0:
+                self.create_sheet(title=series_name+' '+dendrite)
+    
+#     def writeProtrusions(self, series_name):
+#         # check dendriteDict for all protrusions
+#         for dendrite in self.dendriteDict:
+#             
+#             # Add protrusions to a list
+#             protrusionDict = {} # build list of protrusions
+#             for child in self.dendriteDict[dendrite]: #===
+#                 if self.protrusionExp.match(child) != None: # if is a protrusion
+#                     protrusionDict[child] = self.dendriteDict[dendrite][child]['count']
+#             
+#             # Create sheets for each dendrite that contains a protrusion
+#             if len(protrusionDict) > 0:
+#                 self.create_sheet(title=str(series_name+' '+dendrite))
+#                 sheet = self.get_sheet_by_name(series_name+' '+dendrite)
+#                 
+#             # Sort protrusions and determine number of spaces to add after
+#             row = 1 # row in current excel sheet
+# 
+#             for protrusion in sorted(protrusionDict.items(), key=lambda x: (x[1],x[0])):  # sort by value then key   
+#                 spaces = 0
+#                 if protrusion in self.protrusionChildCount[dendrite]:
+#                     spaces = int(self.protrusionChildCount[dendrite][protrusion])-1
+#                 # add protrusion to sheet
+#                 sheet.cell(row=row, column=0).value = str(dendrite+protrusion[0])
+#                 
+#                 row+=1
+#                 # add spaces if needed
+#                 while spaces != 0:
+#                     sheet.cell(row=row, column=0).value = ''
+#                     spaces-=1
+#                     row+=1
     
 #     def importTemplateFromWorkbook(self, path_to_workbook):
 #         '''Returns the active sheet from workbook to serve as a template for the columns'''

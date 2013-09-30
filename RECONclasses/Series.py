@@ -164,7 +164,7 @@ class Series:
         protrusion_expression = 'd[0-9]{2}p[0-9]{2}$' # represents base protrusion name (d##p##)
         trace_expression = 'd[0-9]{2}[a-z]{1,6}' # represents trace name (d##
         
-        # Convert expressions to useable regular expressions
+        # Convert expressions to usable regular expressions
         dendrite_expression = re.compile(dendrite_expression)
         protrusion_expression = re.compile(protrusion_expression, re.I)
         trace_expression = re.compile(trace_expression, re.I)
@@ -188,7 +188,6 @@ class Series:
                 # Everything else
                 else:
                     others.append(contour.name)
-        
         return sorted(set(dendrites)), sorted(set(protrusions)), sorted(set(traces)), sorted(set(others))
 
     def getObjectAttributes(self, object_name):
@@ -199,7 +198,7 @@ class Series:
         object_atts['volume'] = self.getVolume( object_name )
         object_atts['surfacearea'] = self.getSurfaceArea( object_name )
         object_atts['flatarea'] = self.getFlatArea( object_name )
-        object_atts['totalvolume'] = '' #=== what is Vol tot? excel
+        object_atts['totalvolume'] = '' #=== what is Vol tot? combinations of cfa##a and cfa##b, etc?
         object_atts['length'] = ''
         return object_atts
     def output(self):
