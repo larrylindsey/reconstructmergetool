@@ -140,25 +140,32 @@ class Series:
 # Accessors
     def getObjectHierarchy(self, dendrites, protrusions, traces, others): #=== others not implemented
         '''Returns a single hierarchical dictionary with data for each object not in others list'''
-#=== reimplement with rObject classes!!!!!!!!!!!!!!!!!!!!!1
         hierarchy = {}
         # Combine lists into a hierarchical dictionary
         for dendrite in dendrites:
             # 1) Create rObject for dendrite
-            rObj = rObject(name=dendrite, series=self)
-            # 2) Load protrusions into dendrite entry
-#             protrusions = [prot for prot in protrusions if prot[0:3] == dendrite]
-#             
-#             for prot in protrusions:
-#                 # 1) Create entry for protrusions
-#                 hierarchy[dendrite][prot] = self.getObjectAttributes(prot)
-#                 # 2) Load traces into protrusion entry
-#                 traced = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
-#                 
-#                 for trace in traced:
-#                     # 1) Create entry for traces
-#                     hierarchy[dendrite][prot][trace] = self.getObjectAttributes(trace)           
-#         return hierarchy
+            denObj = rObject(name=dendrite, series=self, tag='dendrite')
+
+            # 2) Load protrusions into dendrite rObjs
+            protList = [prot for prot in protrusions if prot[0:3] == dendrite]
+            print(protList)
+            for prot in protList:
+                # 1) Create rObject for protrusions
+                protObj = rObject(name=prot, series=self, tag='protrusion')
+                
+                # 2) Load traces into protrusion rObjs
+                traceList = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
+                print(traceList)
+                for trace in traceList:
+                    # 1) Create rObject for traces
+                    traceObj = rObject(name=trace, series=self, tag='trace')
+                    
+                    # Add children to parent rObjs
+                    protObj.children.append(traceObj)
+                denObj.children.append(protObj)
+            hierarchy[dendrite] = denObj
+            
+        return hierarchy
     
     def getObjectLists(self):
         '''Returns lists of dendrite names, protrusion names, trace names, and a list of other objects'''
