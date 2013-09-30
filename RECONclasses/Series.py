@@ -137,28 +137,60 @@ class Series:
         '''Allows use of != between multiple objects'''
         return self.output()[0] != other.output()[0] and self.output()[1] != other.output()[1]
 # Accessors
-    def getDendriteHierarchy(self):
-        dendrite_expression = 'd[0-9]{2}' # represents base dendrite name (d##)
-        dendrites = {}
-        count = 0
-        # Base dendrites
+    def getObjectHierarchy(self, dendrites, protrusions, traces, others): #=== others not implemented
+        '''Returns a single hierarchical dictionary with data for each object not in others list'''
+        hierarchy = {}
+        # Combine lists into a hierarchical dictionary
+        for dendrite in dendrites:
+            # 1) Create entry for dendrite
+            hierarchy[dendrite] = self.getObjectAttributes(dendrite)
+            # 2) Load protrusions into dendrite entry
+            protrusions = [prot for prot in protrusions if prot[0:3] == dendrite]
+            
+            for prot in protrusions:
+                # 1) Create entry for protrusions
+                hierarchy[dendrite][prot] = self.getObjectAttributes(prot)
+                # 2) Load traces into protrusion entry
+                traced = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
+                
+                for trace in traced:
+                    # 1) Create entry for traces
+                    hierarchy[dendrite][prot][trace] = self.getObjectAttributes(trace)           
+        return hierarchy
+    
+    def getObjectLists(self):
+        '''Returns lists of dendrite names, protrusion names, trace names, and a list of other objects'''
+        dendrite_expression = 'd[0-9]{2}$' # represents base dendrite name (d##)
+        protrusion_expression = 'd[0-9]{2}p[0-9]{2}$' # represents base protrusion name (d##p##)
+        trace_expression = 'd[0-9]{2}[a-z]{1,6}' # represents trace name (d##
+        
+        # Convert expressions to useable regular expressions
+        dendrite_expression = re.compile(dendrite_expression)
+        protrusion_expression = re.compile(protrusion_expression, re.I)
+        trace_expression = re.compile(trace_expression, re.I)
+        
+        # Create lists for dendrites, protrusions, traces, and everything else
+        dendrites = []
+        protrusions = []
+        traces = []
+        others = []
         for section in self.sections:
-            for contour in sorted(section.contours, key=lambda Contour: Contour.name): 
-                # If a base dendrite (d##$)...
-                if re.compile(dendrite_expression+'$').match( contour.name ):
-                    if contour.name not in dendrites:
-                        dendrites[contour.name] = self.getObjectAttributes(contour.name)
-                        count+=1
-                # If a dendrite child (d##*)...
-                elif re.compile(dendrite_expression+'.').match( contour.name ):
-                    if contour.name[0:3] in dendrites: # if already a dict for base dendrite
-                        dendrites[contour.name[0:3]][contour.name[3:len(contour.name)]] = self.getObjectAttributes(contour.name)
-                    else: # if no base dendrite dict, make one
-                        dendrites[contour.name[0:3]] = self.getObjectAttributes(contour.name[0:3])
-                        dendrites[contour.name[0:3]][contour.name[3:len(contour.name)]] = self.getObjectAttributes(contour.name)
-                    count+=1
-        print(str(count)+' objects added to dictionary')
-        return dendrites
+            for contour in section.contours:
+                # Dendrite
+                if dendrite_expression.match(contour.name) != None:
+                    dendrites.append(contour.name)
+                # Protrusion
+                elif protrusion_expression.match(contour.name) != None:
+                    protrusions.append(contour.name)
+                # Trace
+                elif trace_expression.match(contour.name) != None:
+                    traces.append(contour.name)
+                # Everything else
+                else:
+                    others.append(contour.name)
+        
+        return sorted(set(dendrites)), sorted(set(protrusions)), sorted(set(traces)), sorted(set(others))
+
     def getObjectAttributes(self, object_name):
         '''Returns a dictionary for the object with important data to be placed into the xl file'''
         object_atts = {}

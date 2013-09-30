@@ -108,5 +108,3 @@ class excelWorkbook(openpyxl.Workbook):
             if highestSubChild != '':
                 outDict[dendrite[0:3]]['p'+protrusionNo] = ord(highestSubChild)-96 # position in alphabet = number of row required
         self.protrusionChildCount = outDict
-            
-        
