@@ -40,11 +40,20 @@ class excelWorkbook(openpyxl.Workbook):
         for dendrite in self.dendriteDict:
             if dendrite not in self.dendriteFilter and len(self.dendriteDict[dendrite]) > 0:
                 self.create_sheet(title=series_name+' '+dendrite)
-    
-#     def writeProtrusions(self, series_name):
-#         # check dendriteDict for all protrusions
-#         for dendrite in self.dendriteDict:
-#             
+                sheet = self.get_sheet_by_name(series_name+' '+dendrite)
+                row = 0
+                column = 0
+            
+                # Write protrusions and data
+                #=== 1) make list of protrusions names (sorted by start index)
+                protrusions = [prot for prot in self.dendriteDict[dendrite] if dendrite in prot]
+                # 2) write protrusions and data to cells
+                sheet.cell(row=row, column=column).value = 'Object Name'
+                row+=1
+                for prot in protrusions:
+                    sheet.cell(row=row, column=column).value = prot
+                    row+=1
+                     
 #             # Add protrusions to a list
 #             protrusionDict = {} # build list of protrusions
 #             for child in self.dendriteDict[dendrite]: #===

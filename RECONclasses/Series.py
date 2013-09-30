@@ -1,6 +1,7 @@
 from Contour import *
 from ZContour import *
 from Section import *
+from rObject import *
 from lxml import etree as ET
 import numpy as np
 import os, re
@@ -139,24 +140,25 @@ class Series:
 # Accessors
     def getObjectHierarchy(self, dendrites, protrusions, traces, others): #=== others not implemented
         '''Returns a single hierarchical dictionary with data for each object not in others list'''
+#=== reimplement with rObject classes!!!!!!!!!!!!!!!!!!!!!1
         hierarchy = {}
         # Combine lists into a hierarchical dictionary
         for dendrite in dendrites:
-            # 1) Create entry for dendrite
-            hierarchy[dendrite] = self.getObjectAttributes(dendrite)
+            # 1) Create rObject for dendrite
+            rObj = rObject(name=dendrite, series=self)
             # 2) Load protrusions into dendrite entry
-            protrusions = [prot for prot in protrusions if prot[0:3] == dendrite]
-            
-            for prot in protrusions:
-                # 1) Create entry for protrusions
-                hierarchy[dendrite][prot] = self.getObjectAttributes(prot)
-                # 2) Load traces into protrusion entry
-                traced = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
-                
-                for trace in traced:
-                    # 1) Create entry for traces
-                    hierarchy[dendrite][prot][trace] = self.getObjectAttributes(trace)           
-        return hierarchy
+#             protrusions = [prot for prot in protrusions if prot[0:3] == dendrite]
+#             
+#             for prot in protrusions:
+#                 # 1) Create entry for protrusions
+#                 hierarchy[dendrite][prot] = self.getObjectAttributes(prot)
+#                 # 2) Load traces into protrusion entry
+#                 traced = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
+#                 
+#                 for trace in traced:
+#                     # 1) Create entry for traces
+#                     hierarchy[dendrite][prot][trace] = self.getObjectAttributes(trace)           
+#         return hierarchy
     
     def getObjectLists(self):
         '''Returns lists of dendrite names, protrusion names, trace names, and a list of other objects'''
@@ -169,7 +171,7 @@ class Series:
         protrusion_expression = re.compile(protrusion_expression, re.I)
         trace_expression = re.compile(trace_expression, re.I)
         
-        # Create lists for dendrites, protrusions, traces, and everything else
+        # Create lists for names of dendrites, protrusions, traces, and other objects
         dendrites = []
         protrusions = []
         traces = []
@@ -188,7 +190,7 @@ class Series:
                 # Everything else
                 else:
                     others.append(contour.name)
-        return sorted(set(dendrites)), sorted(set(protrusions)), sorted(set(traces)), sorted(set(others))
+        return list(set(dendrites)), list(set(protrusions)), list(set(traces)), list(set(others))
 
     def getObjectAttributes(self, object_name):
         '''Returns a dictionary for the object with important data to be placed into the xl file'''
