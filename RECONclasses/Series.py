@@ -148,14 +148,12 @@ class Series:
 
             # 2) Load protrusions into dendrite rObjs
             protList = [prot for prot in protrusions if prot[0:3] == dendrite]
-#             print(protList)
             for prot in protList:
                 # 1) Create rObject for protrusions
                 protObj = rObject(name=prot, series=self, tag='protrusion')
                 
                 # 2) Load traces into protrusion rObjs
                 traceList = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
-#                 print(traceList)
                 for trace in traceList:
                     # 1) Create rObject for traces
                     traceObj = rObject(name=trace, series=self, tag='trace')
@@ -168,7 +166,7 @@ class Series:
         return hierarchy
     
     def getObjectLists(self):
-        '''Returns lists of dendrite names, protrusion names, trace names, and a list of other objects'''
+        '''Returns lists of dendrite names, protrusion names, trace names, and a list of other objects in series'''
         dendrite_expression = 'd[0-9]{2}$' # represents base dendrite name (d##)
         protrusion_expression = 'd[0-9]{2}p[0-9]{2}$' # represents base protrusion name (d##p##)
         trace_expression = 'd[0-9]{2}[a-z]{1,6}' # represents trace name (d##
