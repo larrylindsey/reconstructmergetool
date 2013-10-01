@@ -5,6 +5,7 @@ class rObject:
         self.name = name
         self.series = series
         self.tag = tag
+        self.type = self.name[3:] #=== trace type
         self.start, self.end, self.count = self.popStartendCount()
         self.volume = self.popVolume()
         self.surfacearea = self.popSurfaceArea()
