@@ -148,14 +148,14 @@ class Series:
 
             # 2) Load protrusions into dendrite rObjs
             protList = [prot for prot in protrusions if prot[0:3] == dendrite]
-            print(protList)
+#             print(protList)
             for prot in protList:
                 # 1) Create rObject for protrusions
                 protObj = rObject(name=prot, series=self, tag='protrusion')
                 
                 # 2) Load traces into protrusion rObjs
                 traceList = [trace for trace in traces if prot[-2:len(prot)] in trace[3:] and prot[0:3] in trace[0:3]]
-                print(traceList)
+#                 print(traceList)
                 for trace in traceList:
                     # 1) Create rObject for traces
                     traceObj = rObject(name=trace, series=self, tag='trace')
