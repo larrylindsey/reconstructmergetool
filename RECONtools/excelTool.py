@@ -22,146 +22,111 @@ class excelWorkbook(openpyxl.Workbook):
         
     def getDendriteDict(self, series):
         self.dendriteDict = series.getObjectHierarchy(*series.getObjectLists())
+    
+    # return a dictionary of protrusions and their require spacing for given dendrite rObject
+    def getProtrusionSpacing( dendrite_rObject ):
+        prot_spacing = {}
+        for protrusion in dendrite_rObject.children:
+            spacing = 0
+            for child in protrusion:
+                # If child has subchildren, adjust spacing
+                if child.name[-1].isalpha() and ord(child.name[-1]) - 97 > spacing:
+                    spacing = ord(child.name[-1])-97
+            prot_spacing[protrusion.name] = spacing
+        return prot_spacing
+    
+    # write protrusions and their data to a sheet
+    def writeProtrusions(dendrite_rObj, sheet):
+        prot_spacing = getProtrusionSpacing(wkbk.dendriteDict[dendrite_rObj.name])
+        prot_by_start = sorted([prot for prot in wkbk.dendriteDict[dendrite_rObj.name].children], key=lambda rObject: rObject.start)
+        
+        row=0
+        column=0
+        # Write protrusion column headers
+        sheet.cell(row=row, column=column).value = 'Protrusion Name'
+        sheet.cell(row=row, column=column+1).value = 'Start'
+        sheet.cell(row=row, column=column+2).value = 'End'
+        sheet.cell(row=row, column=column+3).value = 'Count'
+        sheet.cell(row=row, column=column+4).value = 'Surface Area'
+        sheet.cell(row=row, column=column+5).value = 'Flat Area'
+        sheet.cell(row=row, column=column+6).value = 'Volume'
+        
+        # Write protrusions and data
+        for prot in prot_by_start:
+            row += 1
+            sheet.cell(row=row, column=column).value = prot.name
+            sheet.cell(row=row, column=column+1).value = prot.start
+            sheet.cell(row=row, column=column+2).value = prot.end
+            sheet.cell(row=row, column=column+3).value = prot.count
+            sheet.cell(row=row, column=column+4).value = prot.surfacearea
+            sheet.cell(row=row, column=column+5).value = prot.flatarea
+            sheet.cell(row=row, column=column+6).value = prot.volume
+            row += prot_spacing[prot.name]
+        
+    # get all trace types in a dendrite hierarchy
+    def getTraceTypes(dendrite_rObj):
+        trace_types = []
+        for protrusion in dendrite_rObj.children:
+            for trace in protrusion.children:
+                # convert trace name to regular expression
+                trace_expression = ''
+                for character in trace.name:
+                    if character.isdigit():
+                        character = '[0-9]'
+                    trace_expression+=character
+                if trace_expression[-1].isalpha():
+                    trace_expression = trace_expression[:-1]
+                # append to trace_types list
+                trace_types.append(trace_expression)
+        # return a set of all trace_types in a dendrite
+        return sorted(list(set(trace_types)))
+    
+    def writeWorkbook():
+        # for each dendrite in the dictionary, create a sheet and fill with data
+        for dendrite in wkbk.dendriteDict:
+            # Create sheet
+            sheet_name = 'BBCHZ '+wkbk.dendriteDict[dendrite].name
+            wkbk.create_sheet(title=sheet_name)
+            sheet = wkbk.get_sheet_by_name(sheet_name)
             
-    def writeWorkbook(self, series_name):
-        for dendrite in self.dendriteDict:
-            # Create sheet if not in filter and has protrusions
-            if dendrite not in self.dendriteFilter and len(self.dendriteDict[dendrite].children) > 0:
-                self.create_sheet(title=series_name+' '+dendrite)
-                sheet = self.get_sheet_by_name(series_name+' '+dendrite)
-                
-                row = 0
-                column = 0
+            # Protrusion spacing
+            prot_spacing = getProtrusionSpacing(wkbk.dendriteDict[dendrite])
             
-                # PROTRUSIONS
-                # ---1) make list of protrusions names (sorted by start index)
-                sorted_prots = sorted([prot for prot in self.dendriteDict[dendrite]], key=lambda rObject: rObject.start)
-                prot_spacing = self.getProtrusionSpacesCount()
-                # ---2) write protrusions and data to cells
-                sheet.cell(row=row, column=column).value = 'Protrusion Name'
-                sheet.cell(row=row, column=column+1).value = 'Start'
-                sheet.cell(row=row, column=column+2).value = 'End'
-                sheet.cell(row=row, column=column+3).value = 'Count'
-                sheet.cell(row=row, column=column+4).value = 'Surface Area'
-                sheet.cell(row=row, column=column+5).value = 'Flat Area'
-                sheet.cell(row=row, column=column+6).value = 'Volume'
-                
-                row+=1
-                for prot in sorted_prots:
-                    sheet.cell(row=row, column=column).value = prot.name
-                    sheet.cell(row=row, column=column+1).value = prot.start
-                    sheet.cell(row=row, column=column+2).value = prot.end
-                    sheet.cell(row=row, column=column+3).value = prot.count
-                    sheet.cell(row=row, column=column+4).value = prot.surfacearea
-                    sheet.cell(row=row, column=column+5).value = prot.flatarea
-                    sheet.cell(row=row, column=column+6).value = prot.volume
-                    
-                    if prot_spacing[prot.name] > 0:
-                        row+=prot_spacing[prot.name]
-                    row+=1
-                #=== Insert thick line down column? subchildren appear 8 columns right than supposed to
-                #=== protrusion children not consistent down the columns
-                
-#                 # PROTRUSION CHILDREN
-#                 column = 8
-#                 list_of_types = []
-#                 for row in range(len(sheet.rows)):
-#                     check = sheet.cell(row=row,column=0).value # check protrusion column cell value
-#                     if check != None and re.compile('d[0-9]{2}p[0-9]{2}').match(str(check)): # if no subchildren
-#                         pNo = check
-#                         #print('=============='+str(pNo)+'=============')
-#                         # for each protrusion child
-#                         for child in self.dendriteDict[dendrite][str(pNo)].children:
-#                             
-#                             # Get a reg exp for this protrusion child
-#                             childExp = ''
-#                             for character in child.name:
-#                                 if character.isdigit():
-#                                     character = '[0-9]'
-#                                 childExp+=character
-#                             list_of_types.append(childExp)
-#                             
-#                             # write trace data for this trace on all protrusions
-#                             row += 1
-#                             check2 = sheet.cell(row=row,column=0).value
-#                             if check2 != None and re.compile('d[0-9]{2}p[0-9]{2}').match(str(check2)):
-#                                 for child2 in self.dendriteDict[dendrite][str(check2)]:
-#                                     if re.compile(childExp).match(child2.name) != None:
-#                                         pass
-#                                         #print(child2.name)
-#                 
-#                 list_of_types = list(set(list_of_types)) #=== still need to distinguish multiple subchildren
-#                 print(list_of_types)
-                            
-                            
-                
-                            #sheet.cell(row=0,column=column).value = 'Name'
-                            #sheet.cell(row=0,column=column+1).value = 'Start'
-                            #sheet.cell(row=0,column=column+2).value = 'End'
-                            #sheet.cell(row=0,column=column+3).value = 'Count'
-                            #sheet.cell(row=0,column=column+4).value = 'Surface Area'
-                            #sheet.cell(row=0,column=column+5).value = 'Flat Area'
-                            #sheet.cell(row=0,column=column+6).value = 'Volume'
-                            #sheet.cell(row=row,column=column).value = child.name
-                            #sheet.cell(row=row,column=column+1).value = child.start
-                            #sheet.cell(row=row,column=column+2).value = child.end
-                            #sheet.cell(row=row,column=column+3).value = child.count
-                            #sheet.cell(row=row,column=column+4).value = child.surfacearea
-                            #sheet.cell(row=row,column=column+5).value = child.flatarea
-                            #sheet.cell(row=row,column=column+6).value = child.volume
-                        #column+=8
-                    #else: # contains subchildren
-                        #pass
-                        
-                
-                
-                
-                
-                
-                
-                # PROTRUSION CHILDREN
-#                 column = 8 # start at 8th column
-#                 row = 1
-#                 child_columns = ['sp', 'sph', 'cfa']
-#                 for row in range(len(sheet.rows)):
-#                     if re.compile('d[0-9]{2}p[0-9]{2}').match(str(sheet.cell(row=row, column=0)).value):
-#                         protrusionNum = sheet.cell(row=row,column=0).value[-2:]
-#                         print(protrusionNum)
-#                     
-#                 
-                
-#                 # PROTRUSION CHILDREN ====
-#                 for row in range(len(sheet.rows)+1):
-#                     column=8
-#                     cell = sheet.cell(row=row, column=0)
-#                     if cell.value != None and re.compile('d[0-9]{2}p[0-9]{2}').match(cell.value) != None:
-#                         for child in self.dendriteDict[dendrite][str(cell.value)].children:
-#                             sheet.cell(row=0,column=column).value = 'Name'
-#                             sheet.cell(row=0,column=column+1).value = 'Start'
-#                             sheet.cell(row=0,column=column+2).value = 'End'
-#                             sheet.cell(row=0,column=column+3).value = 'Count'
-#                             sheet.cell(row=0,column=column+4).value = 'Surface Area'
-#                             sheet.cell(row=0,column=column+5).value = 'Flat Area'
-#                             sheet.cell(row=0,column=column+6).value = 'Volume'
-#                             if prot_spacing[prot.name] < 1:
-#                                 sheet.cell(row=row,column=column).value = child.name
-#                                 sheet.cell(row=row,column=column+1).value = child.start
-#                                 sheet.cell(row=row,column=column+2).value = child.end
-#                                 sheet.cell(row=row,column=column+3).value = child.count
-#                                 sheet.cell(row=row,column=column+4).value = child.surfacearea
-#                                 sheet.cell(row=row,column=column+5).value = child.flatarea
-#                                 sheet.cell(row=row,column=column+6).value = child.volume
-#                                 column+=8
-#                             else:
-#                                 sRow = row + ord(prot.name[-1])-97 #increment row by subchild order number
-#                                 sheet.cell(row=sRow,column=column).value = child.name
-#                                 sheet.cell(row=sRow,column=column+1).value = child.start
-#                                 sheet.cell(row=sRow,column=column+2).value = child.end
-#                                 sheet.cell(row=sRow,column=column+3).value = child.count
-#                                 sheet.cell(row=sRow,column=column+4).value = child.surfacearea
-#                                 sheet.cell(row=sRow,column=column+5).value = child.flatarea
-#                                 sheet.cell(row=sRow,column=column+6).value = child.volume
-# #                                 column+=8 # spacing for next child               
+            # Write protrusion data and column headers
+            writeProtrusions( wkbk.dendriteDict[dendrite], sheet )
+            types = getTraceTypes( wkbk.dendriteDict[dendrite] )
+            
+            sorted_prots = sorted([prot for prot in wkbk.dendriteDict[dendrite]], key=lambda rObject: rObject.start)
+            
+            # Write traces
+            column = 8
+            # Each trace type
+            for tType in types:
+                # Column headers
+                sheet.cell(row=0, column=column).value = 'Object Name'
+                sheet.cell(row=0, column=column+1).value = 'Start'
+                sheet.cell(row=0, column=column+2).value = 'End'
+                sheet.cell(row=0, column=column+3).value = 'Count'
+                sheet.cell(row=0, column=column+4).value = 'Surface Area'
+                sheet.cell(row=0, column=column+5).value = 'Flat Area'
+                sheet.cell(row=0, column=column+6).value = 'Volume'
+                row = 1 # reset row for each trace type
+                for protrusion in sorted_prots:
+                    protrusionChildren = sorted([child for child in protrusion if re.compile(tType).match(child.name)])
+                    if len(protrusionChildren) == 0: # protrusion has no children, increment to next prot
+                        row+=1
+                        row+=prot_spacing[protrusion.name]
+                    for child in protrusionChildren:
+                        sheet.cell(row=row,column=column).value = child.name
+                        sheet.cell(row=row,column=column+1).value = child.start
+                        sheet.cell(row=row,column=column+2).value = child.end
+                        sheet.cell(row=row,column=column+3).value = child.count
+                        sheet.cell(row=row,column=column+4).value = child.surfacearea
+                        sheet.cell(row=row,column=column+5).value = child.flatarea
+                        sheet.cell(row=row,column=column+6).value = child.volume
+                        row+=1
+                column+=8
+
 
     def buildFilterBank(self, list_of_expressions):
         '''Turns a list of expressions into a list of regular expressions for filtering'''
