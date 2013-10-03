@@ -226,14 +226,10 @@ class Series:
                 for contour in section.contours:
                     if object_name in contour.name:
                         related_objects.append(contour.name)
-        print('related_objects: '+str(related_objects))
         # Find total volume by summing volume for all related objects
         totVol = 0
-        for obj in related_objects:
-            print(obj)
+        for obj in list(set(related_objects)):
             totVol+=self.getVolume(obj)
-            print(totVol)
-        print('tot_vol: '+str(totVol))
         return totVol
     def getSurfaceArea(self, object_name):
         '''Returns surface area of the object throughout the series. Surface area calculated by summing
