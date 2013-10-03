@@ -5,9 +5,10 @@ class rObject:
         self.name = name
         self.series = series
         self.tag = tag
-        self.type = self.name[3:] #=== trace type
+        self.type = self.popTraceType()
         self.start, self.end, self.count = self.popStartendCount()
         self.volume = self.popVolume()
+        self.totalvolume = self.popTotalVolume()
         self.surfacearea = self.popSurfaceArea()
         self.flatarea =  self.popFlatArea()
         self.children = [] # actual children rObjects
@@ -25,25 +26,35 @@ class rObject:
     
     def childrenNames(self):
         return [child.name for child in self.children]
-    
+
     def returnAtts(self):
         return self.name, self.start, self.end, self.count, self.volume, self.surfacearea, self.flatarea
     
     def returnChildren(self):
         return self.children
     
+    def popTraceType(self):
+        '''Returns the base trace type (e.g. 'd[0-9][0-9]cfa[0-9][0-9]' to be used for regexp)'''
+        trace_expression = ''
+        for character in self.name:
+            if character.isdigit():
+                character = '[0-9]'
+            trace_expression+=character
+        if trace_expression[-1].isalpha():
+            trace_expression = trace_expression[:-1]
+        return trace_expression
+    
     def popStartendCount(self):
-        try: return self.series.getStartEndCount( self.name )
-        except: return None
+        return self.series.getStartEndCount( self.name )
     
     def popVolume(self):
-        try: return self.series.getVolume( self.name )
-        except: return None
-        
+        return self.series.getVolume( self.name )
+
+    def popTotalVolume(self):
+        return int(self.series.getTotalVolume( self.name ))
+
     def popSurfaceArea(self):
-        try: return self.series.getSurfaceArea( self.name )
-        except: return None
+        return self.series.getSurfaceArea( self.name )
         
     def popFlatArea(self):
-        try: return self.series.getFlatArea( self.name )
-        except: return None
+        return self.series.getFlatArea( self.name )

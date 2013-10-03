@@ -197,17 +197,6 @@ class Series:
                     others.append(contour.name)
         return list(set(dendrites)), list(set(protrusions)), list(set(traces)), list(set(others))
 
-    def getObjectAttributes(self, object_name):
-        '''Returns a dictionary for the object with important data to be placed into the xl file'''
-        object_atts = {}
-        object_atts['start'],object_atts['end'],object_atts['count'] = self.getStartEndCount( object_name )
-        ##### RECONSTRUCT::threads.cpp for references into how the following attributes are calculated
-        object_atts['volume'] = self.getVolume( object_name )
-        object_atts['surfacearea'] = self.getSurfaceArea( object_name )
-        object_atts['flatarea'] = self.getFlatArea( object_name )
-        object_atts['totalvolume'] = '' #=== what is Vol tot? combinations of cfa##a and cfa##b, etc?
-        object_atts['length'] = ''
-        return object_atts
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building .ser xml file'''
         attributes = {}
@@ -228,6 +217,28 @@ class Series:
                     contour.popshape()
                     vol += (contour._shape.area * section.thickness)
         return vol
+    
+    def getTotalVolume(self, object_name):
+        related_objects = []
+        if object_name[-1].isalpha():
+            object_name = object_name[:-1]
+            # Get all related objects by base object name
+            for section in self.sections:
+                for contour in section.contours:
+                    if object_name in contour.name:
+                        related_objects.append(contour.name)
+        print('related_objects: '+str(related_objects))
+        
+        # Find total volume by summing volume for all related objects
+        totVol = 0
+        for obj in related_objects:
+            print(obj)
+            totVol+=self.getVolume(obj)
+            print(totVol)
+        print('tot_vol: '+str(totVol))
+        
+        return totVol
+        
     def getSurfaceArea(self, object_name):
         '''Returns surface area of the object throughout the series. Surface area calculated by summing
         the length multiplied by section thickness across sections.'''

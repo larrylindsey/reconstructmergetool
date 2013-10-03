@@ -12,33 +12,42 @@ def processExp(exp): #===
         exp = exp.replace('#', '[0-9]')
         return re.compile( str(exp),re.I ) # re.I (Ignore Case)
 
+def getTraceTypes(dendrite_rObj):
+    '''Returns a list of all the trace types in a dendrite rObject (alphabetical order)'''
+    trace_types = []
+    for protrusion in dendrite_rObj.children:
+        for trace in protrusion.children:
+            trace_types.append(trace.type)
+    return sorted(list(set(trace_types)))
+
+def getProtrusionSpacing( dendrite_rObject ):
+    '''Returns a dictionary of protrusion keys and values representing how much extra spacing is needed in the sheet'''
+    prot_spacing = {}
+    for protrusion in dendrite_rObject.children:
+        spacing = 0
+        for child in protrusion:
+            # If child has subchildren, adjust spacing
+            if child.name[-1].isalpha() and ord(child.name[-1]) - 97 > spacing:
+                spacing = ord(child.name[-1])-97
+        prot_spacing[protrusion.name] = spacing
+    return prot_spacing
+
+
 class excelWorkbook(openpyxl.Workbook):
     def __init__(self):
         openpyxl.Workbook.__init__(self)
         
         self.dendriteFilter = []
-        self.dendriteChildFilter = []
+        self.traceTypeFilter = ['d[0-9][0-9]c[0-9][0-9]']
         self.dendriteDict = None
         
     def getDendriteDict(self, series):
         self.dendriteDict = series.getObjectHierarchy(*series.getObjectLists())
-    
-    # return a dictionary of protrusions and their require spacing for given dendrite rObject
-    def getProtrusionSpacing( dendrite_rObject ):
-        prot_spacing = {}
-        for protrusion in dendrite_rObject.children:
-            spacing = 0
-            for child in protrusion:
-                # If child has subchildren, adjust spacing
-                if child.name[-1].isalpha() and ord(child.name[-1]) - 97 > spacing:
-                    spacing = ord(child.name[-1])-97
-            prot_spacing[protrusion.name] = spacing
-        return prot_spacing
-    
+
     # write protrusions and their data to a sheet
-    def writeProtrusions(dendrite_rObj, sheet):
-        prot_spacing = getProtrusionSpacing(wkbk.dendriteDict[dendrite_rObj.name])
-        prot_by_start = sorted([prot for prot in wkbk.dendriteDict[dendrite_rObj.name].children], key=lambda rObject: rObject.start)
+    def writeProtrusions(self, dendrite_rObj, sheet):
+        prot_spacing = getProtrusionSpacing(self.dendriteDict[dendrite_rObj.name])
+        prot_by_start = sorted([prot for prot in self.dendriteDict[dendrite_rObj.name].children], key=lambda rObject: rObject.start)
         
         row=0
         column=0
@@ -62,41 +71,23 @@ class excelWorkbook(openpyxl.Workbook):
             sheet.cell(row=row, column=column+5).value = prot.flatarea
             sheet.cell(row=row, column=column+6).value = prot.volume
             row += prot_spacing[prot.name]
-        
-    # get all trace types in a dendrite hierarchy
-    def getTraceTypes(dendrite_rObj):
-        trace_types = []
-        for protrusion in dendrite_rObj.children:
-            for trace in protrusion.children:
-                # convert trace name to regular expression
-                trace_expression = ''
-                for character in trace.name:
-                    if character.isdigit():
-                        character = '[0-9]'
-                    trace_expression+=character
-                if trace_expression[-1].isalpha():
-                    trace_expression = trace_expression[:-1]
-                # append to trace_types list
-                trace_types.append(trace_expression)
-        # return a set of all trace_types in a dendrite
-        return sorted(list(set(trace_types)))
     
-    def writeWorkbook():
+    def writeWorkbook(self):
         # for each dendrite in the dictionary, create a sheet and fill with data
-        for dendrite in wkbk.dendriteDict:
+        for dendrite in self.dendriteDict:
             # Create sheet
-            sheet_name = 'BBCHZ '+wkbk.dendriteDict[dendrite].name
-            wkbk.create_sheet(title=sheet_name)
-            sheet = wkbk.get_sheet_by_name(sheet_name)
+            sheet_name = 'BBCHZ '+self.dendriteDict[dendrite].name
+            self.create_sheet(title=sheet_name)
+            sheet = self.get_sheet_by_name(sheet_name)
             
             # Protrusion spacing
-            prot_spacing = getProtrusionSpacing(wkbk.dendriteDict[dendrite])
+            prot_spacing = self.getProtrusionSpacing(self.dendriteDict[dendrite])
             
             # Write protrusion data and column headers
-            writeProtrusions( wkbk.dendriteDict[dendrite], sheet )
-            types = getTraceTypes( wkbk.dendriteDict[dendrite] )
+            self.writeProtrusions( self.dendriteDict[dendrite], sheet )
+            types = self.getTraceTypes( self.dendriteDict[dendrite] )
             
-            sorted_prots = sorted([prot for prot in wkbk.dendriteDict[dendrite]], key=lambda rObject: rObject.start)
+            sorted_prots = sorted([prot for prot in self.dendriteDict[dendrite]], key=lambda rObject: rObject.start)
             
             # Write traces
             column = 8
@@ -126,7 +117,6 @@ class excelWorkbook(openpyxl.Workbook):
                         sheet.cell(row=row,column=column+6).value = child.volume
                         row+=1
                 column+=8
-
 
     def buildFilterBank(self, list_of_expressions):
         '''Turns a list of expressions into a list of regular expressions for filtering'''
