@@ -251,7 +251,7 @@ class Series:
                     if contour.closed:
                         fArea += contour._shape.area
                     else:
-                        fArea =+ (contour.getLength() * section.thickness)
+                        fArea += (contour.getLength() * section.thickness)
         return fArea
     def getStartEndCount(self, object_name):
         '''Returns a tuple containing the start index, end index, and count of the item in series.'''
