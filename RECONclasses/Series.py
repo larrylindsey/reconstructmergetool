@@ -217,7 +217,6 @@ class Series:
                     contour.popshape()
                     vol += (contour._shape.area * section.thickness)
         return vol
-    
     def getTotalVolume(self, object_name):
         related_objects = []
         if object_name[-1].isalpha():
@@ -228,7 +227,6 @@ class Series:
                     if object_name in contour.name:
                         related_objects.append(contour.name)
         print('related_objects: '+str(related_objects))
-        
         # Find total volume by summing volume for all related objects
         totVol = 0
         for obj in related_objects:
@@ -236,9 +234,7 @@ class Series:
             totVol+=self.getVolume(obj)
             print(totVol)
         print('tot_vol: '+str(totVol))
-        
         return totVol
-        
     def getSurfaceArea(self, object_name):
         '''Returns surface area of the object throughout the series. Surface area calculated by summing
         the length multiplied by section thickness across sections.'''

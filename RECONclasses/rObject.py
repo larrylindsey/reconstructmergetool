@@ -51,7 +51,7 @@ class rObject:
         return self.series.getVolume( self.name )
 
     def popTotalVolume(self):
-        return int(self.series.getTotalVolume( self.name ))
+        return self.series.getTotalVolume( self.name )
 
     def popSurfaceArea(self):
         return self.series.getSurfaceArea( self.name )
