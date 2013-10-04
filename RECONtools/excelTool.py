@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 import sys, re, openpyxl
 import reconstructmergetool as rmt
-# === implement some classes?
-# Gathering excel info
 
-def processExp(exp): #===
-        # Need to cap at end? $
-        '''Converts a filter string from RECONSTRUCT format to python regexp format'''
-        exp = exp.replace('*', '.')
-        exp = exp.replace('?', '[a-z]') #=== "? matches any single character" (numbers included?)
-        exp = exp.replace('#', '[0-9]')
-        return re.compile( str(exp),re.I ) # re.I (Ignore Case)
+def main():
+    path_to_series = input('Please enter path to series: ')
+    series = rmt.getSeries(path_to_series)
+    wkbk = excelWorkbook()
+    wkbk.getDendriteDict(series)
+    wkbk.writeWorkbook()
+    path_to_save_excel = input('Please enter path to store excel workbook: ')
+    wkbk.save(path_to_save_excel)
 
 def getTraceTypes(dendrite_rObj):
     '''Returns a list of all the trace types in a dendrite rObject (alphabetical order)'''
@@ -37,12 +36,11 @@ class excelWorkbook(openpyxl.Workbook):
         openpyxl.Workbook.__init__(self)
         
         self.dendriteFilter = []
-        self.traceTypeFilter = ['d[0-9][0-9]c[0-9][0-9]']
+        self.traceTypeFilter = ['d[0-9][0-9]c[0-9][0-9]'] # traces to ignore
         self.dendriteDict = None
         
     def getDendriteDict(self, series):
         self.dendriteDict = series.getObjectHierarchy(*series.getObjectLists())
-
 
     def writeProtrusions(self, dendrite_rObj, sheet):
         '''Writes data and headers for protrusions with correct with spacing'''
@@ -120,20 +118,13 @@ class excelWorkbook(openpyxl.Workbook):
                         if 'cfa' in tType:
                             sheet.cell(row=row,column=column+7).value = child.totalvolume
                         row+=1
+                    # Add appropriate spacing
                     if len(protrusionChildren) != prot_spacing[protrusion.name]+1:
                         row+=prot_spacing[protrusion.name]+1-len(protrusionChildren)
                 column+=8
                 if 'cfa' in tType: # one more column shift for the totalvolume attribute
                     column+=1
 
-    def buildFilterBank(self, list_of_expressions):
-        '''Turns a list of expressions into a list of regular expressions for filtering'''
-        bank = []
-        for exp in list_of_expressions:
-            exp = processExp( exp )
-            bank.append( exp )
-        self.dendriteFilter = bank
-            
     def getProtrusionSpacesCount(self):
         '''Protrusions with more than 1 subtrace require extra spacing in the excel sheet. This function
         determines how much spacing is required for that protrusion'''
