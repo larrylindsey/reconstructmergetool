@@ -32,7 +32,6 @@ def getProtrusionSpacing( dendrite_rObject ):
         prot_spacing[protrusion.name] = spacing
     return prot_spacing
 
-
 class excelWorkbook(openpyxl.Workbook):
     def __init__(self):
         openpyxl.Workbook.__init__(self)
@@ -44,8 +43,9 @@ class excelWorkbook(openpyxl.Workbook):
     def getDendriteDict(self, series):
         self.dendriteDict = series.getObjectHierarchy(*series.getObjectLists())
 
-    # write protrusions and their data to a sheet
+
     def writeProtrusions(self, dendrite_rObj, sheet):
+        '''Writes data and headers for protrusions with correct with spacing'''
         prot_spacing = getProtrusionSpacing(self.dendriteDict[dendrite_rObj.name])
         prot_by_start = sorted([prot for prot in self.dendriteDict[dendrite_rObj.name].children], key=lambda rObject: rObject.start)
         
@@ -73,25 +73,27 @@ class excelWorkbook(openpyxl.Workbook):
             row += prot_spacing[prot.name]
     
     def writeWorkbook(self):
+        '''Writes data from a loaded dendrite dictionary to a worksheet'''
         # for each dendrite in the dictionary, create a sheet and fill with data
         for dendrite in self.dendriteDict:
             # Create sheet
-            sheet_name = 'BBCHZ '+self.dendriteDict[dendrite].name
+            sheet_name = self.dendriteDict[dendrite].series.name+' '+self.dendriteDict[dendrite].name
             self.create_sheet(title=sheet_name)
             sheet = self.get_sheet_by_name(sheet_name)
             
             # Protrusion spacing
-            prot_spacing = self.getProtrusionSpacing(self.dendriteDict[dendrite])
+            prot_spacing = getProtrusionSpacing(self.dendriteDict[dendrite])
             
             # Write protrusion data and column headers
             self.writeProtrusions( self.dendriteDict[dendrite], sheet )
-            types = self.getTraceTypes( self.dendriteDict[dendrite] )
+            types = getTraceTypes( self.dendriteDict[dendrite] )
             
             sorted_prots = sorted([prot for prot in self.dendriteDict[dendrite]], key=lambda rObject: rObject.start)
             
             # Write traces
             column = 8
             # Each trace type
+            types = [tType for tType in types if tType not in self.traceTypeFilter]
             for tType in types:
                 # Column headers
                 sheet.cell(row=0, column=column).value = 'Object Name'
@@ -101,13 +103,13 @@ class excelWorkbook(openpyxl.Workbook):
                 sheet.cell(row=0, column=column+4).value = 'Surface Area'
                 sheet.cell(row=0, column=column+5).value = 'Flat Area'
                 sheet.cell(row=0, column=column+6).value = 'Volume'
+                if 'cfa' in tType:
+                    sheet.cell(row=0,column=column+7).value = 'Total Volume'
+                    
                 row = 1 # reset row for each trace type
                 for protrusion in sorted_prots:
-                    protrusionChildren = sorted([child for child in protrusion if re.compile(tType).match(child.name)])
-                    if len(protrusionChildren) == 0: # protrusion has no children, increment to next prot
-                        row+=1
-                        row+=prot_spacing[protrusion.name]
-                    for child in protrusionChildren:
+                    protrusionChildren = [child for child in protrusion if re.compile(tType).match(child.name)]
+                    for child in sorted(protrusionChildren, key=lambda rObject: rObject.name):
                         sheet.cell(row=row,column=column).value = child.name
                         sheet.cell(row=row,column=column+1).value = child.start
                         sheet.cell(row=row,column=column+2).value = child.end
@@ -115,8 +117,14 @@ class excelWorkbook(openpyxl.Workbook):
                         sheet.cell(row=row,column=column+4).value = child.surfacearea
                         sheet.cell(row=row,column=column+5).value = child.flatarea
                         sheet.cell(row=row,column=column+6).value = child.volume
+                        if 'cfa' in tType:
+                            sheet.cell(row=row,column=column+7).value = child.totalvolume
                         row+=1
+                    if len(protrusionChildren) != prot_spacing[protrusion.name]+1:
+                        row+=prot_spacing[protrusion.name]+1-len(protrusionChildren)
                 column+=8
+                if 'cfa' in tType: # one more column shift for the totalvolume attribute
+                    column+=1
 
     def buildFilterBank(self, list_of_expressions):
         '''Turns a list of expressions into a list of regular expressions for filtering'''
