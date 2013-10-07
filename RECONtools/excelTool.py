@@ -2,14 +2,14 @@
 import sys, re, openpyxl
 import reconstructmergetool as rmt
 
-def main():
-    path_to_series = input('Please enter path to series: ')
+print('sys.argv: '+str(sys.argv)) #===
+
+def main( path_to_series, save_path ):
     series = rmt.getSeries(path_to_series)
     wkbk = excelWorkbook()
     wkbk.getDendriteDict(series)
     wkbk.writeWorkbook()
-    path_to_save_excel = input('Please enter path to store excel workbook: ')
-    wkbk.save(path_to_save_excel)
+    wkbk.save(save_path)
 
 def getTraceTypes(dendrite_rObj):
     '''Returns a list of all the trace types in a dendrite rObject (alphabetical order)'''
