@@ -102,6 +102,7 @@ class excelToolWindow(QtGui.QWidget):
             print(self.seriesPath)
             print(self.savePath)
             excelTool.main(self.seriesPath, self.savePath)
+            self.close()
             
 def main():
     app = QtGui.QApplication(sys.argv)

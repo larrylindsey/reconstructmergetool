@@ -2,26 +2,24 @@
 import sys, re, openpyxl
 import reconstructmergetool as rmt
 import argparse
-parser = argparse.ArgumentParser(description='Rescales a <series> to a new <magnitude>')
-parser.add_argument('series', nargs=1, type=str, help='Path to the series/sections that needs to be re-scaled')
-parser.add_argument('savepath', nargs=1, help='Path where the excel workbook will be saved')
-args = vars(parser.parse_args())
-# Assign argparse things to their variables
-path_to_series = str(args['series'][0])
-save_path = str(args['savepath'][0])
 
 def main( path_to_series, save_path ):
     # Check that variables are correct
     if save_path[-1] != '/':
         save_path += '/'
     if '.xlsx' not in save_path:
-        save_path += save_path.replace('.ser','').split('/')[-1]
+        save_path += path_to_series.replace('.ser','').split('/')[-1]
         save_path += '.xlsx'
     series = rmt.getSeries(path_to_series)
     wkbk = excelWorkbook()
+    print('Preparing dendrite hierarchy...'),
     wkbk.getDendriteDict(series)
+    print('DONE')
+    print('Saving workbook...'),
     wkbk.writeWorkbook()
     wkbk.save(save_path)
+    print('DONE')
+    print('ALL DONE!\nSaved workbook: %s')%save_path
 
 def getTraceTypes(dendrite_rObj):
     '''Returns a list of all the trace types in a dendrite rObject (alphabetical order)'''
@@ -152,4 +150,12 @@ class excelWorkbook(openpyxl.Workbook):
                 protrusionSpacing[protrusion.name] = extraSpaces
         return protrusionSpacing
     
-main(path_to_series, save_path)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Creates an excel workbook containing protrusions and data, YAY!')
+    parser.add_argument('series', nargs=1, type=str, help='Path to the series/sections that needs to be re-scaled')
+    parser.add_argument('savepath', nargs=1, help='Directory where the excel workbook will be saved')
+    args = vars(parser.parse_args())
+    # Assign argparse things to their variables
+    path_to_series = str(args['series'][0])
+    save_path = str(args['savepath'][0])
+    main(path_to_series, save_path)
