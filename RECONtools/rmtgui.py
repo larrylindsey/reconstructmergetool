@@ -855,7 +855,6 @@ class mainFrame(QtGui.QFrame):
                     button.setFlat(False)
                     button.setAutoFillBackground(False)
 
-    
     class sectionContourWidget(widgetWindow):
         def __init__(self, parent=None, section=None):
             widgetWindow.__init__(self, parent)
@@ -1286,6 +1285,13 @@ def main():
     rmtFrame = mainFrame()
 #     mainFrame.serLoadWidget(rmtFrame)
     mainFrame.sectionContourConflictResolver(rmtFrame)
+
+#     image = QtGui.QImageReader()
+#     image.setFileName('/home/michaelm/Documents/Test Series/rmtgTest/ser1/001____z0.0.tif')
+#     image.setClipRect(QtCore.QRect(500,500,500,500))
+#     actualImage = image.read()
+#     actualImage.show()
+    
     sys.exit( app.exec_() )
 main()
 
