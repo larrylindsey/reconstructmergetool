@@ -146,21 +146,13 @@ class mainFrame(QtGui.QFrame):
         self.label = QtGui.QLabel(self)
         
         # Main Data
-#         self.ser1path = '/home/wtrdrnkr/Downloads/BBCHZ/BBCHZ.ser' #===
-#         self.ser2path = '/home/wtrdrnkr/Downloads/SRQHN/SRQHN.ser' #===
-#         self.ser1path = '/home/michaelm/Documents/Test Series/BBCHZ/BBCHZ.ser' #===
-#         self.ser2path = '/home/michaelm/Documents/Test Series/BBCHZ2/BBCHZ.ser' #===
-        self.ser1path = '/home/michaelm/Documents/Test Series/bb/FPNCT_BB/FPNCT.ser'
-        self.ser2path = '/home/michaelm/Documents/Test Series/bb/FPNCT_JNB/FPNCT.ser'
-#        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
-#        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
 #         self.ser1path = 'Enter path or browse for Series 1'
 #         self.ser2path = 'Enter path or browse for Series 2'
 
         self.serName = 'rmtg' #===
 #        self.serName = 'Enter name of new series'
-#         self.ser1obj = rmt.getSeries(self.ser1path) #===
-#         self.ser2obj = rmt.getSeries(self.ser2path) #===
         self.ser1obj = None
         self.ser2obj = None
 
@@ -783,14 +775,17 @@ class mainFrame(QtGui.QFrame):
             # A button
             self.contAButton = QtGui.QPushButton()
             self.contAButton.setText('Choose Series A\nTrace')
+            self.contAButton.clicked.connect( self.buttonClicked )
             
             # B button
             self.contBButton = QtGui.QPushButton()
             self.contBButton.setText('Choose Series B\nTrace')
+            self.contBButton.clicked.connect( self.buttonClicked )
             
             # Both button
             self.bothButton = QtGui.QPushButton()
             self.bothButton.setText('Choose traces\nfor both series')
+            self.bothButton.clicked.connect( self.buttonClicked )
             
             # Repetition checkboxes
             self.thisTraceAllSections = QtGui.QCheckBox()
@@ -850,8 +845,17 @@ class mainFrame(QtGui.QFrame):
             elif self.sender() == self.allTracesAllSections and self.allTracesAllSections.checkState() == QtCore.Qt.Checked:
                 self.thisTraceAllSections.setCheckState(QtCore.Qt.Unchecked)
                 self.allTracesThisSection.setCheckState(QtCore.Qt.Unchecked)
-            
-            
+
+        def buttonClicked(self): #===
+            for button in [self.contAButton, self.contBButton, self.bothButton]:
+                if button == self.sender():
+                    button.setFlat(True) #=== change color
+                    button.setAutoFillBackground(True)
+                else:
+                    button.setFlat(False)
+                    button.setAutoFillBackground(False)
+
+    
     class sectionContourWidget(widgetWindow):
         def __init__(self, parent=None, section=None):
             widgetWindow.__init__(self, parent)
