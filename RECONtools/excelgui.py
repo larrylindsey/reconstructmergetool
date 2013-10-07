@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import excelTool
 import sys, os
 from PySide import QtGui, QtCore
@@ -97,11 +98,6 @@ class excelToolWindow(QtGui.QWidget):
             msg.setText('Invalid save path!')
             msg.show()
         else:
-            if self.savePath[-1] != '/':
-                self.savePath += '/'
-            if '.xlsx' not in self.savePath:
-                self.savePath += self.seriesPath.replace('.ser','').split('/')[-1]
-                self.savePath += '.xlsx'
             print('Continuing...')
             print(self.seriesPath)
             print(self.savePath)

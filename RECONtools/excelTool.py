@@ -1,10 +1,22 @@
 #!/usr/bin/env python
 import sys, re, openpyxl
 import reconstructmergetool as rmt
-
-print('sys.argv: '+str(sys.argv)) #===
+import argparse
+parser = argparse.ArgumentParser(description='Rescales a <series> to a new <magnitude>')
+parser.add_argument('series', nargs=1, type=str, help='Path to the series/sections that needs to be re-scaled')
+parser.add_argument('savepath', nargs=1, help='Path where the excel workbook will be saved')
+args = vars(parser.parse_args())
+# Assign argparse things to their variables
+path_to_series = str(args['series'][0])
+save_path = str(args['savepath'][0])
 
 def main( path_to_series, save_path ):
+    # Check that variables are correct
+    if save_path[-1] != '/':
+        save_path += '/'
+    if '.xlsx' not in save_path:
+        save_path += save_path.replace('.ser','').split('/')[-1]
+        save_path += '.xlsx'
     series = rmt.getSeries(path_to_series)
     wkbk = excelWorkbook()
     wkbk.getDendriteDict(series)
@@ -139,3 +151,5 @@ class excelWorkbook(openpyxl.Workbook):
                         extraSpaces = ord(child.name[-1])-97
                 protrusionSpacing[protrusion.name] = extraSpaces
         return protrusionSpacing
+    
+main(path_to_series, save_path)
