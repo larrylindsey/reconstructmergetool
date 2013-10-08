@@ -134,7 +134,7 @@ class mainFrame(QtGui.QFrame):
         QtGui.QFrame.__init__(self, parent)
         # Window Dimensions and Attributes
         self.setGeometry(0,0,800,600)
-        self.setWindowTitle('Reconstructmergetool v.DEV')
+        self.setWindowTitle('Reconstructmergetool v.DEV') #=== Change for deploy
         self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Plain)
         self.setLineWidth(2)
         self.setMidLineWidth(3)
@@ -146,12 +146,12 @@ class mainFrame(QtGui.QFrame):
         self.label = QtGui.QLabel(self)
         
         # Main Data
-        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #===
-        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #===
+        self.ser1path = '/home/michaelm/Documents/Test Series/rmtgTest/ser1/BBCHZ.ser' #=== Remove for deploy
+        self.ser2path = '/home/michaelm/Documents/Test Series/rmtgTest/ser2/BBCHZ.ser' #=== Remove for deploy
 #         self.ser1path = 'Enter path or browse for Series 1'
 #         self.ser2path = 'Enter path or browse for Series 2'
 
-        self.serName = 'rmtg' #===
+        self.serName = 'rmtg' #=== Remove for deploy
 #        self.serName = 'Enter name of new series'
         self.ser1obj = None
         self.ser2obj = None
@@ -209,7 +209,7 @@ class mainFrame(QtGui.QFrame):
         self.backButton.setText('Back')
           
     def prepSlider(self): #===
-        #=== doesnt properly respond to clicking on ticks
+        #=== doesnt properly respond to clicking on ticks far from the "slider knob"
         # Slider
         if type(self.ser1obj) != None and type(self.ser2obj) != None:
             minTick = int(self.ser1obj.sections[0].name[-1]) # section no. of first section in section list
@@ -232,20 +232,20 @@ class mainFrame(QtGui.QFrame):
         
     def changeSection(self):
         '''Loads appropriate section when the slider is released on a new position'''
-        print('Switched to section: '+str(self.slider.value()))
         self.currentWidget.hide()
-        print('section '+str(self.currentWidget.section)+' hidden')
+        
+        # for already existing contourWidgets
         for sec in self.contourWidgets:
             if sec.section == self.slider.value():      
                 self.currentWidget = sec
-                print('section '+str(self.currentWidget.section)+' showing')
                 self.currentWidget.show()
                 self.sortContWidgList() #===
                 return
+        
+        # for those that dont yet exist
         sec = mainFrame.sectionContourWidget( self, self.slider.value() )
         self.contourWidgets.append(sec)
         self.sortContWidgList() #===
-        print('appended widget for section '+str(sec.section))
         self.slider.show()
         self.label.show()
         self.currentWidget = sec
@@ -253,10 +253,10 @@ class mainFrame(QtGui.QFrame):
    
     def changeSectionLabel(self):
         '''Updates the section label while the slider is being moved'''
-        print('Hovering: '+str(self.slider.sliderPosition()))
-        print('Previously Hovered: '+str(self.slider.value()))
+        print('Hovering: '+str(self.slider.sliderPosition())) #=== Remove for deploy
+        print('Previously Hovered: '+str(self.slider.value())) #=== Remove for deploy
         newPos = self.slider.sliderPosition()
-        self.label.setText('Section '+str(newPos))
+        self.label.setText('Section '+str(newPos)) #=== Remove for deploy
 
     def dispContourWidget(self):
         '''Shows the current secContWidget(), creates one if none exist'''
@@ -1031,7 +1031,7 @@ class mainFrame(QtGui.QFrame):
                 item.setText('-------------> '+confA.name+' <-------------') #=== confA.name?
                 item.setTextAlignment(QtCore.Qt.AlignCenter)
                 self.itemToYellow(item) #===
-                res.close()
+                res.close()#=== Remove for deploy
                 
             # Conflict Resolution window
             res = QtGui.QWidget(self)
@@ -1128,7 +1128,7 @@ class mainFrame(QtGui.QFrame):
                     for resConf in self.confOvlpout:
                         if resConf == self.confOvlp[row][0]:
                             self.allOutContours.append(resConf)
-                        if resConf == self.confOvlp[row][1]:
+                        if resConf == self.confOvlp[row][1]:#=== Remove for deploy
                             self.allOutContours.append(resConf)
                         
             # Unique B
@@ -1290,7 +1290,6 @@ def main():
 #     image.setFileName('/home/michaelm/Documents/Test Series/rmtgTest/ser1/001____z0.0.tif')
 #     image.setClipRect(QtCore.QRect(500,500,500,500))
 #     actualImage = image.read()
-#     actualImage.show()
     
     sys.exit( app.exec_() )
 main()
