@@ -769,6 +769,11 @@ class mainFrame(QtGui.QFrame):
             # skimage.draw.polygon for traces
             self.contAInfo = QtGui.QWidget(self)
             self.contAInfo.setAutoFillBackground(True) #===
+            
+            image = QtGui.QPixmap(parent=self.contAInfo) #=== TESTING IMAGES
+            image.load('/home/michaelm/Documents/Test Series/rmtgTest/ser1/001____z0.0.tif')
+            image = image.copy(QtCore.QRect(500,500,100,30))
+            
             self.contBInfo = QtGui.QWidget(self)
             self.contBInfo.setAutoFillBackground(True) #===
             
@@ -1285,12 +1290,6 @@ def main():
     rmtFrame = mainFrame()
 #     mainFrame.serLoadWidget(rmtFrame)
     mainFrame.sectionContourConflictResolver(rmtFrame)
-
-#     image = QtGui.QImageReader()
-#     image.setFileName('/home/michaelm/Documents/Test Series/rmtgTest/ser1/001____z0.0.tif')
-#     image.setClipRect(QtCore.QRect(500,500,500,500))
-#     actualImage = image.read()
-    
     sys.exit( app.exec_() )
 main()
 
