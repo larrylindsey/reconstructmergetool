@@ -41,6 +41,8 @@ class mainContainer(QtGui.QFrame):
     def loadFunctionality(self):
         self.seriesPath1.setText('Please enter or browse for path to primary series')
         self.seriesPath2.setText('Please enter or browse for path to secondary series')
+        self.seriesPath1.setText('/home/michaelm/Documents/Test Series/test/ser1/BBCHZ.ser') #===
+        self.seriesPath2.setText('/home/michaelm/Documents/Test Series/test/ser2/BBCHZ.ser') #===
         
         self.seriesPath1.setAlignment(QtCore.Qt.AlignCenter)
         self.seriesPath2.setAlignment(QtCore.Qt.AlignCenter)
@@ -70,7 +72,11 @@ class mainContainer(QtGui.QFrame):
             self.seriesPath1.setText(path)
         elif self.sender() == self.browseSeriesFile2:
             self.seriesPath2.setText(path)
-        
+    
+    def browseOutpath(self):
+        path = QtGui.QFileDialog.getExistingDirectory(self)
+        self.outpathLine.setText(path)
+            
     def loadLayout(self):
         mainBox = QtGui.QVBoxLayout()
         
@@ -166,15 +172,18 @@ class mainContainer(QtGui.QFrame):
         hbox = QtGui.QHBoxLayout() # Holds output directory line/browse
         self.outpathLine = QtGui.QLineEdit(self)
         self.outpathLine.setText('Enter directory to save merged series')
+        self.outpathLine.setText('/home/michaelm/Documents/Test Series/test/merged') #===
         self.outpathLine.setAlignment(QtCore.Qt.AlignCenter)
         hbox.addWidget(self.outpathLine)
         outpathBrowse = QtGui.QPushButton(self)
         outpathBrowse.setText('Browse')
+        outpathBrowse.clicked.connect( self.browseOutpath )
         hbox.addWidget(outpathBrowse)
         
         hbox2 = QtGui.QHBoxLayout()
         self.newNameLine = QtGui.QLineEdit(self)
         self.newNameLine.setText('(Optional) Enter a new name for the series')
+        self.newNameLine.setText('testout') #===
         self.newNameLine.setAlignment(QtCore.Qt.AlignCenter)
         hbox2.addWidget(self.newNameLine)
         
@@ -215,13 +224,17 @@ class mainContainer(QtGui.QFrame):
             name = self.series1.name
          
         #===== SERIES FILE MERGE =====
-        # Create new .ser file
+        # Create new .ser file w/ attributes
         try: mergedSeries = classes.Series( root=ET.Element('Series',self.serWin.mergedAttributes), name=name )
         except: mergedSeries = classes.Series( root=ET.Element('Series',self.series1.output()[0]), name=name)
             
-        # Append contours/zcontours to .ser file
-        try: mergedSeries.contours = list(self.serWin.mergedContours+self.serWin.mergedZContours)
-        except: mergedSeries.contours = self.series1.contours
+        # Append contours
+        try: mergedSeries.contours = list(self.serWin.mergedContours)
+        except: mergedSeries.contours = [cont for cont in self.series1.contours if cont.tag == 'Contour']
+        
+        # Append zcontours
+        try: mergedSeries.contours.extend(list(self.serWin.mergedZContours))
+        except: mergedSeries.contours.extend([cont for cont in self.series1.contours if cont.tag == 'ZContour'])
         
         #===== SECTION FILES MERGE =====
         # For each section, make a section object
@@ -246,9 +259,9 @@ class mainContainer(QtGui.QFrame):
             except: sec.contours = self.series1.sections[secNum].contours
                 
             mergedSeries.sections.append(sec)
-
-        mergedSeries.writeseries(self.outpathLine.text())
-        mergedSeries.writesections(self.outpathLine.text())
+        
+        mergedSeries.writeseries( self.outpathLine.text() )
+        mergedSeries.writesections( self.outpathLine.text() )
         
         compMsg = QtGui.QMessageBox(self)
         compMsg.setText('ALL DONE! Everything output to:\n'+str(self.outpathLine.text()))
@@ -257,6 +270,8 @@ class mainContainer(QtGui.QFrame):
             self.close()
     
     def finish(self):
+        if self.check1 != True or self.check2 != True:
+            return
         # Let user know what things were defaulted, choose to continue
         defaultedThings = []
         if self.serWin.mergedAttributes == None:

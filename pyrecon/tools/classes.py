@@ -1008,6 +1008,8 @@ class Series:
         else:
             return string.lower() in ('true')
     def writeseries(self, outpath):
+        if outpath[-1] != '/':
+            outpath += '/'
         print('Creating output directory...'),
         if not os.path.exists(outpath):
             os.makedirs(outpath)
@@ -1015,6 +1017,9 @@ class Series:
         print('\tCreated: '+outpath)
         print('Writing series file...'),
         seriesoutpath = outpath+self.name+'.ser'
+        if os.path.exists(seriesoutpath):
+            print('Filename %s already exists, please delete to avoid overwrite')%seriesoutpath
+            return
         #Build series root element
         attdict, contours = self.output()
         root = ET.Element(self.tag, attdict)
@@ -1070,10 +1075,15 @@ class Series:
         print('DONE')
         print('\tSeries output to: '+str(outpath+self.name+'.ser'))
     def writesections(self, outpath):
+        if outpath[-1] != '/':
+            outpath += '/'
         print('Writing section file(s)...'),
         count = 0
         for section in self.sections:
             sectionoutpath = outpath+section.name
+            if os.path.exists(sectionoutpath):
+                print('Filename %s already exists, please delete to avoid overwrite')%sectionoutpath
+                return
             count += 1
             #Build section root element
             attdict = section.output()
