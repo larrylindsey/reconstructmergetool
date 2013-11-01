@@ -6,7 +6,7 @@ from skimage import transform as tf
 
 def loadSeries(path_to_series):
     '''Create a series object, fully populated.'''
-    if path_to_series.find(os.sep) < 0:
+    if path_to_series.find('/') < 0:
         path_to_series = './' + path_to_series
     series = loadSeriesXML(path_to_series)
     series.getSectionsXML(path_to_series)
@@ -25,6 +25,18 @@ def loadSeriesXML(path_to_series):
     print('DONE')
     print('\tSeries: '+series.name)
     return series
+
+def rObjectsFromSeries(series):
+    allConts = []
+    for section in series.sections:
+        for contour in section.contours:
+            allConts.append(contour.name)
+    allConts = set(allConts)
+
+    rObjects = []
+    for contName in allConts:
+        rObjects.append( rObject(name=contName,series=series) )
+    return rObjects
 
 class Contour:
 # Python Functions
@@ -305,7 +317,7 @@ class Contour:
         for elem in self.fill:
             fill += str(elem)+' '
         return str(fill).rstrip()
-    def getxpoints(self): #===
+    def getxpoints(self):
         '''Returns Points attribute (list of strings, each consisting of two numbers \
 separated by a single space)'''
         ret = ''
@@ -488,7 +500,6 @@ class rObject:
         self.surfacearea = self.popSurfaceArea()
         self.flatarea =  self.popFlatArea()
         self.children = [] # actual children rObjects
-           
     def __getitem__(self, index):
         if type(index) == str:
             return self.children[operator.indexOf(self.childrenNames(),index)]
@@ -496,19 +507,14 @@ class rObject:
             return self.children[index]
         else:
             return None
-        
     def __str__(self):
         return 'rObject, from series '+self.series.name+', with the name '+str(self.name)
-    
     def childrenNames(self):
         return [child.name for child in self.children]
-
     def returnAtts(self):
         return self.name, self.start, self.end, self.count, self.volume, self.surfacearea, self.flatarea
-    
     def returnChildren(self):
         return self.children
-    
     def popTraceType(self):
         '''Returns the base trace type (e.g. 'd[0-9][0-9]cfa[0-9][0-9]' to be used for regexp)'''
         trace_expression = ''
@@ -519,19 +525,14 @@ class rObject:
         if trace_expression[-1].isalpha():
             trace_expression = trace_expression[:-1]
         return trace_expression
-    
     def popStartendCount(self):
         return self.series.getStartEndCount( self.name )
-    
     def popVolume(self):
         return self.series.getVolume( self.name )
-
     def popTotalVolume(self):
         return self.series.getTotalVolume( self.name )
-
     def popSurfaceArea(self):
-        return self.series.getSurfaceArea( self.name )
-        
+        return self.series.getSurfaceArea( self.name ) 
     def popFlatArea(self):
         return self.series.getFlatArea( self.name )
 
@@ -628,7 +629,6 @@ class Section:
                     imgflag = None     
         
         return contours, images
-    
     def popindex(self, root):
         if root == None:
             return None
@@ -650,7 +650,7 @@ class Series:
         self.tag = 'Series'
         
         self.contours = self.popcontours(root)
-        self.sections = [] #Sorted in reconstructmergetool.getsections()
+        self.sections = [] #Sorted in self.getSectionsXML()
         
         self.index = self.popindex(root)
         self.viewport = self.popviewport(root)
@@ -774,10 +774,16 @@ class Series:
         '''Allows use of != between multiple objects'''
         return self.output()[0] != other.output()[0] and self.output()[1] != other.output()[1]
 # Accessors
-    def getObjectHierarchy(self, dendrites, protrusions, traces, others): #=== others not implemented
+    def getObjectHierarchy(self, dendrites, protrusions, traces, others):
         '''Returns a single hierarchical dictionary with data for each object not in others list'''
+        
+        # Print out objects in 'others' list; these are not included in the resulting hierarcy dict
+        print('The following objects were not classified and thus ignored:')
+        for thing in others:
+            print('\t'+str(thing))
+        
+        # Combine lists (except 'others') into a hierarchical dictionary
         hierarchy = {}
-        # Combine lists into a hierarchical dictionary
         for dendrite in dendrites:
             # 1) Create rObject for dendrite
             denObj = rObject(name=dendrite, series=self, tag='dendrite')
@@ -800,10 +806,9 @@ class Series:
             hierarchy[dendrite] = denObj
             
         return hierarchy
-    
     def getObjectLists(self):
         '''Returns lists of dendrite names, protrusion names, trace names, and a list of other objects in series'''
-        dendrite_expression = 'd[0-9]{2}$' # represents base dendrite name (d##)
+        dendrite_expression = 'd[0-9]{2}' # represents base dendrite name (d##)
         protrusion_expression = 'd[0-9]{2}p[0-9]{2}$' # represents base protrusion name (d##p##)
         trace_expression = 'd[0-9]{2}[a-z]{1,6}' # represents trace name (d##
         
@@ -821,18 +826,20 @@ class Series:
             for contour in section.contours:
                 # Dendrite
                 if dendrite_expression.match(contour.name) != None:
-                    dendrites.append(contour.name)
+                    dendrites.append(contour.name[0:3])
                 # Protrusion
-                elif protrusion_expression.match(contour.name) != None:
+                if protrusion_expression.match(contour.name) != None:
                     protrusions.append(contour.name)
                 # Trace
-                elif trace_expression.match(contour.name) != None:
+                if (trace_expression.match(contour.name) != None and
+                    protrusion_expression.match(contour.name) == None):
                     traces.append(contour.name)
                 # Everything else
-                else:
+                if (dendrite_expression.match(contour.name) == None and
+                    protrusion_expression.match(contour.name) == None and
+                    trace_expression.match(contour.name) == None):
                     others.append(contour.name)
         return list(set(dendrites)), list(set(protrusions)), list(set(traces)), list(set(others))
-
     def output(self):
         '''Returns a dictionary of attributes and a list of contours for building .ser xml file'''
         attributes = {}
@@ -999,7 +1006,6 @@ class Series:
                 tmp += str(flt)+' '
             ret += tmp.rstrip()+', '   
         return ret.rstrip()
-
 # Helper functions
     def s2b(self, string):
         '''Converts string to bool'''
@@ -1008,6 +1014,8 @@ class Series:
         else:
             return string.lower() in ('true')
     def writeseries(self, outpath):
+        if outpath[-1] != '/':
+            outpath += '/'
         print('Creating output directory...'),
         if not os.path.exists(outpath):
             os.makedirs(outpath)
@@ -1015,6 +1023,8 @@ class Series:
         print('\tCreated: '+outpath)
         print('Writing series file...'),
         seriesoutpath = outpath+self.name+'.ser'
+        if os.path.exists(seriesoutpath):
+            raise IOError('\nFilename %s already exists.\nPlease delete to avoid overwrite'%seriesoutpath)
         #Build series root element
         attdict, contours = self.output()
         root = ET.Element(self.tag, attdict)
@@ -1070,10 +1080,14 @@ class Series:
         print('DONE')
         print('\tSeries output to: '+str(outpath+self.name+'.ser'))
     def writesections(self, outpath):
+        if outpath[-1] != '/':
+            outpath += '/'
         print('Writing section file(s)...'),
         count = 0
         for section in self.sections:
             sectionoutpath = outpath+section.name
+            if os.path.exists(sectionoutpath):
+                raise IOError('\nFilename %s already exists.\nPlease delete to avoid overwrite'%sectionoutpath)
             count += 1
             #Build section root element
             attdict = section.output()
@@ -1138,7 +1152,6 @@ class Series:
                     c.transform.xcoef = [0,1,0,0,0,0]
                     c._tform = c.transform.poptform()
         print('DONE')
-
     def addsection(self, section):
         '''Adds a <Section> object to <Series> object'''
         self.sections.append(section)
@@ -1688,7 +1701,6 @@ class Transform:
             tforward.inverse = getrevt
             
             return tforward
-            
     def popyxcoef(self, node):
         '''Populates self.ycoef and self.xcoef'''
         if node == None:
@@ -1735,9 +1747,9 @@ class ZContour:
         '''Allows use of != between multiple objects'''
         return self.output() != other.output()
 # Accessors
-    def overlaps(self, other): #===
+    def overlaps(self, other):
         threshold = (1+2**(-17))
-        
+    
         def distance(pt0, pt1):
             return math.sqrt( (pt0[0] - pt1[0])**2 + (pt0[1] - pt1[1])**2 )
         
@@ -1760,8 +1772,7 @@ class ZContour:
         for elem in distlist:
             if elem > threshold: # no matching point
                 return 0
-        return 1
-                    
+        return 1        
     def getpoints(self):
         return self.points
     def getxbord(self):
@@ -1787,7 +1798,7 @@ class ZContour:
         '''Returns all zcontour attributes, xml formatting (strings)'''
         return str(self.name), str(self.closed).lower(), self.getxbord(), self.getxfill(), \
             str(self.mode), str(self.getxpoints())
-    def output(self): #===
+    def output(self):
         '''Returns a dictionary of attributes'''
         attributes = {}
         keys = self._attribs
@@ -1849,8 +1860,7 @@ class ZContour:
             elsplit = elem.split(' ')
             tup = ( float(elsplit[0]), float(elsplit[1]), int(elsplit[2]) )
             finalList.append(tup)
-        return finalList
-            
+        return finalList   
     def popname(self, node):
         if node == None:
             return None

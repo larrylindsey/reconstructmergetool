@@ -34,7 +34,7 @@ def getTraceTypes(dendrite_rObj):
             trace_types.append(trace.type)
     return sorted(list(set(trace_types)))
 
-def getProtrusionSpacing( dendrite_rObject ):
+def getProtrusionSpacing( dendrite_rObject ): #*** subchildren finding sucks, fix this (cant just go off of last character)
     '''Returns a dictionary of protrusion keys and values representing how much extra spacing is needed in the sheet'''
     prot_spacing = {}
     for protrusion in dendrite_rObject.children:
@@ -43,6 +43,10 @@ def getProtrusionSpacing( dendrite_rObject ):
             # If child has subchildren, adjust spacing
             if child.name[-1].isalpha() and ord(child.name[-1]) - 97 > spacing:
                 spacing = ord(child.name[-1])-97
+                if child.name[0:3] in ['d17', 'd23','d24']: #***
+                    print child.name
+                    print spacing
+                    pause = raw_input('pause2')
         prot_spacing[protrusion.name] = spacing
     return prot_spacing
 
@@ -50,13 +54,49 @@ class excelWorkbook(openpyxl.Workbook):
     def __init__(self):
         openpyxl.Workbook.__init__(self)
         
-        self.template = None #===
         self.dendriteFilter = []
-        self.traceTypeFilter = ['d[0-9][0-9]c[0-9][0-9]'] # traces to ignore
+        self.filter = ['d[0-9][0-9]c[0-9][0-9]',
+                       '.{0,} .{0,}'] # traces to ignore in self.getDendriteDict()
         self.dendriteDict = None
         
-    def getDendriteDict(self, series):
-        self.dendriteDict = series.getObjectHierarchy(*series.getObjectLists())
+    def getDendriteDict(self, series): #*** added filter
+        def shouldBeFiltered(child):
+            for filt in self.filter:
+                if re.compile(filt).match(child.name) != None:
+                    return True
+            return False
+            
+        # Need to filter out objects in self.filter, make copy of dict 1st
+        preDendriteDict = series.getObjectHierarchy(*series.getObjectLists())
+        dendrites = [preDendriteDict[dendrite] for dendrite in preDendriteDict]
+        
+        # Make new dict for after filter
+        dendriteDict = {}
+        for dendrite in dendrites:
+            prots = [prot for prot in dendrite.children] # list of protrusion rObjects
+            newProts = []
+            for prot in prots:
+                children = [child for child in prot] # list of children rObjects
+                
+                # check each child.name, if matches a filter -> remove for children list
+                newChildren = []
+                for child in children:
+                    if shouldBeFiltered(child): continue
+                    else: newChildren.append(child)
+                    
+                prot.children = newChildren
+                newProts.append(prot)
+            dendrite.children = newProts
+            dendriteDict[dendrite.name] = dendrite
+
+        for dendrite in dendriteDict:
+            prots = [prot for prot in dendriteDict[dendrite].children]
+            for prot in prots:
+                children = [child for child in prot.children]
+                print [child.name for child in children]
+                
+        self.dendriteDict = dendriteDict
+                
 
     def writeProtrusions(self, dendrite_rObj, sheet):
         '''Writes data and headers for protrusions with correct with spacing'''
@@ -107,7 +147,7 @@ class excelWorkbook(openpyxl.Workbook):
             # Write traces
             column = 8
             # Each trace type
-            types = [tType for tType in types if tType not in self.traceTypeFilter]
+            types = [tType for tType in types if tType not in self.filter]
             for tType in types:
                 # Column headers
                 sheet.cell(row=0, column=column).value = 'Object Name'
@@ -140,21 +180,6 @@ class excelWorkbook(openpyxl.Workbook):
                 column+=8
                 if 'cfa' in tType: # one more column shift for the totalvolume attribute
                     column+=1
-
-    def getProtrusionSpacesCount(self):
-        '''Protrusions with more than 1 subtrace require extra spacing in the excel sheet. This function
-        determines how much spacing is required for that protrusion'''
-        indicator = re.compile('[0-9]{2}[a-z]{1}') # Indicates that there are multiple subchildren
-        protrusionSpacing = {}
-        denDict = self.dendriteDict
-        for dendrite in denDict:
-            for protrusion in denDict[dendrite]:
-                extraSpaces = 0
-                for child in protrusion:
-                    if indicator.match(child.name[-3:]) and ord(child.name[-1])-97 > extraSpaces:
-                        extraSpaces = ord(child.name[-1])-97
-                protrusionSpacing[protrusion.name] = extraSpaces
-        return protrusionSpacing
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Creates an excel workbook containing protrusions and data, YAY!')
